@@ -5,12 +5,19 @@ import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
+import { BarlowCondensed_400Regular, BarlowCondensed_900Black_Italic, useFonts } from '@expo-google-fonts/barlow-condensed';
+
 export const unstable_settings = {
   anchor: '(tabs)',
 };
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+
+  const [loaded] = useFonts({ 
+    BarlowCondensed_400Regular, 
+    BarlowCondensed_900Black_Italic
+  })
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
