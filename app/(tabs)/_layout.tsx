@@ -53,8 +53,23 @@ export default function TabLayout() {
         name="scan"
         options={{
           tabBarButton: ({ onPress, accessibilityState }) => (
-            <Pressable onPress={onPress} style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-              <View style={{
+            /*
+            <Shadow
+              distance={moderateScale(10)}
+              startColor={'#eb9066d8'}
+              endColor={'#ff00ff10'}
+              offset={[0, 0]}
+              style={{ 
+                borderRadius: moderateScale(10),
+              }}
+            >
+            */
+            <Pressable
+              onPress={onPress}
+              style={{ flex: 1, justifyContent: 'center', alignItems: 'center', zIndex: -1 }}
+            >
+              <View
+                style={{
                 width: moderateScale(50),
                 height: moderateScale(50),
                 //backgroundColor: accessibilityState?.selected ? '#000' : '#eee',
@@ -72,9 +87,12 @@ export default function TabLayout() {
                   fontSize: moderateScale(10),
                   fontWeight: "bold",
                 }}
-                >스캔</Text>
+                >스 캔</Text>
               </View>
             </Pressable>
+            /*
+            </Shadow>
+            */
           ),
         }}
         /*

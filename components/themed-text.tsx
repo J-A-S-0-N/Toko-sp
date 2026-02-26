@@ -5,7 +5,7 @@ import { useThemeColor } from '@/hooks/use-theme-color';
 export type ThemedTextProps = TextProps & {
   lightColor?: string;
   darkColor?: string;
-  type?: 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link' | 'barlowHard';
+  type?: 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link' | 'barlowHard' | 'barlowLight';
 };
 
 export function ThemedText({
@@ -27,6 +27,7 @@ export function ThemedText({
         type === 'subtitle' ? styles.subtitle : undefined,
         type === 'link' ? styles.link : undefined,
         type === "barlowHard" ? styles.barlowCondensedHard : undefined,
+        type === "barlowLight" ? styles.barlowCondensedLight : undefined,
         style,
       ]}
       {...rest}
@@ -60,5 +61,8 @@ const styles = StyleSheet.create({
   },
   barlowCondensedHard: {
     fontFamily: 'BarlowCondensed_900Black_Italic',
-  }
+  },
+  barlowCondensedLight: {
+    fontFamily: 'BarlowCondensed_400Regular',
+  },
 });

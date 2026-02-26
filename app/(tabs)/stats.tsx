@@ -1,5 +1,5 @@
 import { ThemedText as Text } from '@/components/themed-text';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { moderateScale } from 'react-native-size-matters';
 
@@ -10,9 +10,7 @@ export default function StatsScreen() {
       <ScrollView
         style={styles.container}
       >
-        <View>
-          <Text type="barlowHard" style={{fontSize: moderateScale(30)}}>90</Text>
-        </View>
+        <Text type="barlowHard" style={{fontSize: moderateScale(30)}}>90</Text>
       </ScrollView>
     </SafeAreaView>
   );
@@ -25,6 +23,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    paddingHorizontal: moderateScale(10),
   },
   titleContainer: {
     flexDirection: 'row',

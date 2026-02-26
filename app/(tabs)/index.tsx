@@ -1,4 +1,7 @@
-import { ThemedText as Text } from '@/components/themed-text';
+import HomeFeedHeader from '@/components/HomeFeedComponents/homeFeedHeader';
+import RecentRoundComponent from '@/components/HomeFeedComponents/recentRoundComponent';
+import UserStatComponent from '@/components/HomeFeedComponents/userStatComponent';
+import UsernameHeader from '@/components/HomeFeedComponents/usernameHeader';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { moderateScale } from 'react-native-size-matters';
@@ -10,9 +13,23 @@ export default function HomeScreen() {
       <ScrollView
         style={styles.container}
       >
-        <View>
-          <Text type="barlowHard" style={{fontSize: moderateScale(30)}}>90</Text>
+
+        <View style={{marginBottom: moderateScale(20)}}>
+          <HomeFeedHeader/>
         </View>
+
+        <View style={{marginBottom: moderateScale(20)}}>
+          <UsernameHeader/>
+        </View>
+
+        <View style={{marginBottom: moderateScale(15)}}>
+          <UserStatComponent/>
+        </View>
+
+        <View style={{marginBottom: moderateScale(10)}}>
+          <RecentRoundComponent/>
+        </View>
+
       </ScrollView>
     </SafeAreaView>
   );
@@ -25,6 +42,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    paddingHorizontal: moderateScale(10),
   },
   titleContainer: {
     flexDirection: 'row',
