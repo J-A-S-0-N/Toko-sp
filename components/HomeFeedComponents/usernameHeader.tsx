@@ -42,7 +42,7 @@ const UsernameHeader = () => {
         </ThemedText>
       </View>
       <View>
-        <ThemedText type="barlowHard" style={{fontSize: moderateScale(15), color: "white"}}>{username}</ThemedText>
+        <ThemedText type="barlowHard" style={{fontSize: moderateScale(20), color: "white"}}>{username}</ThemedText>
         {/*Stats View*/}
         <View style={{flexDirection: 'row', alignItems: 'center', gap: moderateScale(5)}}>
           <Text

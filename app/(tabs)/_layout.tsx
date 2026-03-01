@@ -3,6 +3,8 @@ import { Tabs } from 'expo-router';
 import React from 'react';
 import { Pressable, View } from 'react-native';
 
+import { Shadow } from 'react-native-shadow-2';
+
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -35,66 +37,62 @@ export default function TabLayout() {
             paddingTop: moderateScale(10),
           },
         }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: '피드',
-          tabBarIcon: ({ color }) => <Octicons name="home" size={20} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="stats"
-        options={{
-          title: '통계',
-          tabBarIcon: ({ color }) => <Fontisto name="heartbeat-alt" size={20} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="scan"
-        options={{
-          tabBarButton: ({ onPress, accessibilityState }) => (
-            /*
-            <Shadow
-              distance={moderateScale(10)}
-              startColor={'#eb9066d8'}
-              endColor={'#ff00ff10'}
-              offset={[0, 0]}
-              style={{ 
-                borderRadius: moderateScale(10),
-              }}
-            >
-            */
-            <Pressable
-              onPress={onPress}
-              style={{ flex: 1, justifyContent: 'center', alignItems: 'center', zIndex: -1 }}
-            >
-              <View
-                style={{
-                width: moderateScale(50),
-                height: moderateScale(50),
-                //backgroundColor: accessibilityState?.selected ? '#000' : '#eee',
-                backgroundColor: "#4CAE82",
-                paddingTop: moderateScale(2),
-                borderRadius: moderateScale(10),
-                justifyContent: 'center',
-                alignItems: 'center',
-                //marginTop: moderateScale(5),
-              }}>
-                <Ionicons name="scan" size={moderateScale(20)} color="white" />
-                <Text
-                style={{
-                  color: "white",
-                  fontSize: moderateScale(10),
-                  fontWeight: "bold",
-                }}
-                >스 캔</Text>
+        <Tabs.Screen
+          name="index"
+          options={{
+            title: '피드',
+            tabBarIcon: ({ color }) => <Octicons name="home" size={20} color={color} />,
+          }}
+        />
+        <Tabs.Screen
+          name="stats"
+          options={{
+            title: '통계',
+            tabBarIcon: ({ color }) => <Fontisto name="heartbeat-alt" size={20} color={color} />,
+          }}
+        />
+        <Tabs.Screen
+          name="scan"
+          options={{
+            tabBarButton: (props) => (
+              <View style={[props.style, { justifyContent: 'center', alignItems: 'center' }]}>
+                <Pressable
+                  onPress={props.onPress}
+                  style={{ justifyContent: 'center', alignItems: 'center' }}
+                >
+                  <Shadow
+                    distance={moderateScale(10)}
+                    startColor={'#9DE0C038'}
+                    endColor={TAB_BAR_BG}
+                    offset={[0, 0]}
+                    style={{ borderRadius: moderateScale(15) }}
+                  >
+                    <View
+                      style={{
+                        width: moderateScale(50),
+                        height: moderateScale(50),
+                        backgroundColor: '#4CAE82',
+                        paddingTop: moderateScale(5),
+                        borderRadius: moderateScale(15),
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <Ionicons name="scan" size={moderateScale(20)} color="white" />
+                      <Text
+                        style={{
+                          color: 'white',
+                          fontSize: moderateScale(10),
+                        }}
+                      >
+                        스 캔
+                      </Text>
+                    </View>
+                  </Shadow>
+                </Pressable>
               </View>
-            </Pressable>
-            /*
-            </Shadow>
-            */
-          ),
-        }}
+            ),
+          }}
         /*
         options={{
           title: '스캔',
@@ -106,15 +104,15 @@ export default function TabLayout() {
           }
         }}
         */
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: '내 정보',
-          tabBarIcon: ({ color }) => <Feather name="users" size={20} color={color} />,
-        }}
-      />
-    </Tabs>
+        />
+        <Tabs.Screen
+          name="profile"
+          options={{
+            title: '내 정보',
+            tabBarIcon: ({ color }) => <Feather name="users" size={20} color={color} />,
+          }}
+        />
+      </Tabs>
     </View>
   );
 }

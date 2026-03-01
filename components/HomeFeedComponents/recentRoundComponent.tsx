@@ -1,7 +1,17 @@
 import { ThemedText } from "@/components/themed-text";
 import { useEffect, useState } from "react";
-import { FlatList, StyleSheet, Text, View } from "react-native";
+import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
+
+/*
+- impliment placeholder component for empty state [not loaded]
+-
+
+FIXES:
+- fix gap between user score and score delta
+-
+
+*/
 
 interface Round {
   id: string;
@@ -31,7 +41,31 @@ export default function RecentRoundComponent() {
         courseName: "나인브릿지",
         location: "제주, 한국",
         birdiesCnt: 3,
-        parsCnt: 3,
+        parsCnt: 6,
+        bogeyCnt: 3,
+        holeCnt: 18,
+      },
+      {
+        id: "2",
+        date: "2026-02-26",
+        score: 60,
+        coursePar: 72,
+        courseName: "나인브릿지",
+        location: "제주, 한국",
+        birdiesCnt: 3,
+        parsCnt: 6,
+        bogeyCnt: 3,
+        holeCnt: 18,
+      },
+      {
+        id: "3",
+        date: "2026-02-26",
+        score: 60,
+        coursePar: 72,
+        courseName: "나인브릿지",
+        location: "제주, 한국",
+        birdiesCnt: 3,
+        parsCnt: 6,
         bogeyCnt: 3,
         holeCnt: 18,
       },
@@ -53,41 +87,77 @@ export default function RecentRoundComponent() {
 
   const renderRecentRound = (round: Round) => {
     return (
-      <View
+      <TouchableOpacity
+        activeOpacity={1}
+        onPress={() => {
+          console.log("round pressed");
+        }}
         style={styles.roundContainer}
       >
-        {/*height 1*/}
-        <View style={{flexDirection: "row", justifyContent: "space-between", alignItems: "center"}}>
-          {/*left side*/}
+        {/* Height 1 */}
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+          {/* Left Side */}
           <View>
-            <ThemedText type="barlowHard" style={{fontSize: moderateScale(18), color: "white"}}>{round.courseName}</ThemedText>
+            <ThemedText type="barlowHard" style={{ fontSize: moderateScale(18), color: "white" }}>{round.courseName}</ThemedText>
             <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: moderateScale(6),
-            }}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: moderateScale(6),
+              }}
             >
-              <ThemedText type="barlowLight" style={{fontSize: moderateScale(11), color: "#6E7171"}}>{round.location}</ThemedText>
+              {/* <ThemedText type="barlowLight" style={{ fontSize: moderateScale(11), color: "#6E7171" }}>{round.location}</ThemedText> */}
+              <Text style={{ fontSize: moderateScale(11), color: "#6E7171" }}>{round.location}</Text>
               <View
-              style={{width: moderateScale(3), height: moderateScale(3), borderRadius: moderateScale(5), backgroundColor: "#6E7171"}}
+                style={{ width: moderateScale(3), height: moderateScale(3), borderRadius: moderateScale(5), backgroundColor: "#6E7171" }}
               />
-              <Text style={{fontSize: moderateScale(11), color: "#6E7171"}}>{formatDate(round.date)}</Text>
+              <Text style={{ fontSize: moderateScale(11), color: "#6E7171" }}>{formatDate(round.date)}</Text>
             </View>
           </View>
 
-          {/*right side*/}
-          <View
-            style={{alignItems: "flex-end"}}
-          >
-            <ThemedText type="barlowHard" style={{fontSize: moderateScale(50), color: "#E83F40"}}>{round.score}</ThemedText>
-          </View>
+          {/* Right Side */}
+          <ThemedText type="barlowHard" style={{ fontSize: moderateScale(50), lineHeight: moderateScale(50), color: "#E83F40" }}>{round.score}</ThemedText>
         </View>
-        {/*height 2*/}
-        <View style={{alignItems: "flex-end"}}>
-          <ThemedText type="barlowLight" style={{fontSize: moderateScale(11), color: "#E83F40"}}>{getScoreDelta(round.score, round.coursePar) > 0 ? "+" : ""}{getScoreDelta(round.score, round.coursePar)}</ThemedText>
+        {/* Height 2 */}
+        {/* Score Delta */}
+        <View style={{ alignItems: "flex-end" }}>
+          <ThemedText type="barlowLight" style={{ fontSize: moderateScale(11), color: "#E83F40" }}>{getScoreDelta(round.score, round.coursePar) > 0 ? "+" : ""}{getScoreDelta(round.score, round.coursePar)}</ThemedText>
         </View>
-      </View>
+        {/* Separator */}
+        <View
+          style={{ width: "100%", height: moderateScale(1), backgroundColor: "#353838", marginVertical: moderateScale(10) }}
+        />
+        {/* Stats */}
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+          {[
+            { value: round.birdiesCnt, label: "버디" },
+            { value: round.parsCnt, label: "파" },
+            { value: round.bogeyCnt, label: "보기" },
+            { value: round.holeCnt, label: "총홀수" },
+          ].map((stat, index) => (
+            <View key={stat.label} style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
+              {index > 0 && (
+                <View
+                  style={{
+                    width: moderateScale(0.5),
+                    height: moderateScale(30),
+                    backgroundColor: "#353838",
+                    marginHorizontal: moderateScale(4),
+                  }}
+                />
+              )}
+              <View style={{ flex: 1, alignItems: "center" }}>
+                <ThemedText type="barlowHard" style={{ fontSize: moderateScale(25), color: "white" }}>
+                  {stat.value}
+                </ThemedText>
+                <Text style={{ fontSize: moderateScale(12), color: "#6E7171", marginTop: moderateScale(2) }}>
+                  {stat.label}
+                </Text>
+              </View>
+            </View>
+          ))}
+        </View>
+      </TouchableOpacity>
     );
   };
 
@@ -95,8 +165,10 @@ export default function RecentRoundComponent() {
     <View style={styles.container}>
       <ThemedText type="barlowLight" style={styles.title}>최근 라운드</ThemedText>
       <FlatList
+        scrollEnabled={false}
+        showsVerticalScrollIndicator={false}
         data={recentRounds}
-        renderItem={({item}) => renderRecentRound(item)}
+        renderItem={({ item }) => renderRecentRound(item)}
         keyExtractor={(item) => item.id}
       />
     </View>
@@ -111,7 +183,7 @@ const styles = StyleSheet.create({
     paddingVertical: moderateScale(10),
     paddingHorizontal: moderateScale(10),
     borderRadius: moderateScale(10),
-    marginBottom: moderateScale(10),
+    marginBottom: moderateScale(15),
     borderWidth: moderateScale(0.5),
     borderColor: "#353838",
     //alignItems: "center",

@@ -2,6 +2,36 @@ import { StyleSheet, Text, View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
 import { ThemedText } from "../themed-text";
 
+const UserStatComponent = () => {
+  return (
+    <View style={styles.container}>
+      {/*best*/}
+      <View style={styles.statBlock}>
+        <ThemedText type="barlowHard" style={styles.valueBest}>
+          23
+        </ThemedText>
+        <Text style={styles.label}>BEST</Text>
+      </View>
+      <View style={styles.separator} />
+      {/*avg*/}
+      <View style={styles.statBlock}>
+        <ThemedText type="barlowHard" style={styles.valueAvg}>
+          80.2
+        </ThemedText>
+        <Text style={styles.label}>BEST</Text>
+      </View>
+      <View style={styles.separator} />
+      {/*monthly round count*/}
+      <View style={styles.statBlock}>
+        <ThemedText type="barlowHard" style={styles.valueMonthly}>
+          +23.5
+        </ThemedText>
+        <Text style={styles.label}>BEST</Text>
+      </View>
+    </View>
+  );
+};
+
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#1F2222",
@@ -39,35 +69,5 @@ const styles = StyleSheet.create({
     backgroundColor: "#2A2D2D",
   },
 });
-
-const UserStatComponent = () => {
-  return (
-    <View style={styles.container}>
-      {/*best*/}
-      <View style={styles.statBlock}>
-        <ThemedText type="barlowHard" style={styles.valueBest}>
-          23
-        </ThemedText>
-        <Text style={styles.label}>BEST</Text>
-      </View>
-      <View style={styles.separator} />
-      {/*avg*/}
-      <View style={styles.statBlock}>
-        <ThemedText type="barlowHard" style={styles.valueAvg}>
-          80.2
-        </ThemedText>
-        <Text style={styles.label}>BEST</Text>
-      </View>
-      <View style={styles.separator} />
-      {/*monthly round count*/}
-      <View style={styles.statBlock}>
-        <ThemedText type="barlowHard" style={styles.valueMonthly}>
-          +23.5
-        </ThemedText>
-        <Text style={styles.label}>BEST</Text>
-      </View>
-    </View>
-  );
-};
 
 export default UserStatComponent;

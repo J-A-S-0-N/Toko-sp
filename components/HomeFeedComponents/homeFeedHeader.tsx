@@ -7,7 +7,7 @@ const HomeFeedHeader = () => {
     <View
       style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}
     >
-      <ThemedText type="barlowHard" style={{fontSize: moderateScale(20), color: "white"}}>CADDIE</ThemedText>
+      <ThemedText type="barlowHard" style={{fontSize: moderateScale(20), color: "white"}}>이름 아직 미정임</ThemedText>
       <View
         style={{
           paddingHorizontal: moderateScale(15),
@@ -20,7 +20,7 @@ const HomeFeedHeader = () => {
       >
         <Text
           style={{fontSize: moderateScale(11), color: "#6E7171"}}
-        >Feed</Text>
+        >내 피드</Text>
       </View>
     </View>
   );
