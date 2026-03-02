@@ -10,7 +10,7 @@ const UserStatComponent = () => {
         <ThemedText type="barlowHard" style={styles.valueBest}>
           23
         </ThemedText>
-        <Text style={styles.label}>BEST</Text>
+        <Text style={styles.label}>최저 (18홀 기준)</Text>
       </View>
       <View style={styles.separator} />
       {/*avg*/}
@@ -18,7 +18,7 @@ const UserStatComponent = () => {
         <ThemedText type="barlowHard" style={styles.valueAvg}>
           80.2
         </ThemedText>
-        <Text style={styles.label}>BEST</Text>
+        <Text style={styles.label}>AVG (평균)</Text>
       </View>
       <View style={styles.separator} />
       {/*monthly round count*/}
@@ -26,7 +26,7 @@ const UserStatComponent = () => {
         <ThemedText type="barlowHard" style={styles.valueMonthly}>
           +23.5
         </ThemedText>
-        <Text style={styles.label}>BEST</Text>
+        <Text style={styles.label}>저번달 대비 -/+</Text>
       </View>
     </View>
   );
@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: moderateScale(40),
+    paddingHorizontal: moderateScale(20),
     paddingVertical: moderateScale(10),
     borderRadius: moderateScale(20),
     borderWidth: moderateScale(0.5),

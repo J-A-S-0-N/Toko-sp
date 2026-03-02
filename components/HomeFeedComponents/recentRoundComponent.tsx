@@ -1,7 +1,9 @@
 import { ThemedText } from "@/components/themed-text";
+import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
+
 
 /*
 - impliment placeholder component for empty state [not loaded]
@@ -90,7 +92,7 @@ export default function RecentRoundComponent() {
       <TouchableOpacity
         activeOpacity={1}
         onPress={() => {
-          console.log("round pressed");
+          router.push("/activityModal");
         }}
         style={styles.roundContainer}
       >
@@ -103,15 +105,15 @@ export default function RecentRoundComponent() {
               style={{
                 flexDirection: "row",
                 alignItems: "center",
-                gap: moderateScale(6),
+                gap: moderateScale(5),
               }}
             >
               {/* <ThemedText type="barlowLight" style={{ fontSize: moderateScale(11), color: "#6E7171" }}>{round.location}</ThemedText> */}
-              <Text style={{ fontSize: moderateScale(11), color: "#6E7171" }}>{round.location}</Text>
+              <Text style={{ fontSize: moderateScale(10.5), color: "#6E7171" }}>{round.location}</Text>
               <View
-                style={{ width: moderateScale(3), height: moderateScale(3), borderRadius: moderateScale(5), backgroundColor: "#6E7171" }}
+                style={{ width: moderateScale(2), height: moderateScale(2), borderRadius: moderateScale(5), backgroundColor: "#6E7171" }}
               />
-              <Text style={{ fontSize: moderateScale(11), color: "#6E7171" }}>{formatDate(round.date)}</Text>
+              <Text style={{ fontSize: moderateScale(10.5), color: "#6E7171" }}>{formatDate(round.date)}</Text>
             </View>
           </View>
 
@@ -189,7 +191,7 @@ const styles = StyleSheet.create({
     //alignItems: "center",
   },
   title: {
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(13),
     color: "#6E7171",
     marginBottom: moderateScale(10),
   },
