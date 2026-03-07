@@ -1,6 +1,7 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { SplashScreen, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -46,20 +47,27 @@ export default function RootLayout() {
   if (!loadedBarlow && !errorBarlow && !loadedPretendard && !errorPretendard) return null;
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-        <Stack.Screen name="(modals)/activityModal" 
-          options={{ 
-            presentation: 'modal', 
-            animation: 'fade', 
-            title: 'Activity', 
-            headerShown: false, 
-          }} 
-        />
-      </Stack>
+    <ThemeProvider value={DarkTheme}>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <Stack
+          screenOptions={{
+            contentStyle: { backgroundColor: '#0F0F0F' }
+          }}
+        >
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+          <Stack.Screen name="(modals)/activityModal" 
+            options={{ 
+              presentation: 'modal', 
+              animation: 'fade',
+              //animation: 'fade', 
+              title: 'Activity', 
+              headerShown: false, 
+            }} 
+          />
+        </Stack>
       <StatusBar style="auto" />
+      </GestureHandlerRootView>
     </ThemeProvider>
   );
 }

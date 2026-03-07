@@ -91,9 +91,7 @@ export default function RecentRoundComponent() {
     return (
       <TouchableOpacity
         activeOpacity={1}
-        onPress={() => {
-          router.push("/activityModal");
-        }}
+        onPress={() => router.push(`/activityModal?id=${round.id}`)}
         style={styles.roundContainer}
       >
         {/* Height 1 */}
@@ -179,6 +177,7 @@ export default function RecentRoundComponent() {
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: "#0F0F0F",
   },
   roundContainer: {
     backgroundColor: "#1F2222",
