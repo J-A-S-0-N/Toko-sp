@@ -1,18 +1,26 @@
-import { ThemedText as Text } from '@/components/themed-text';
-import { ScrollView, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { moderateScale } from 'react-native-size-matters';
-
+import {
+  RecentScansSection,
+  ScanFrameSection,
+  ScanGuideSection,
+  ScanHeader,
+} from "@/components/ScanPageComponent";
+import React from "react";
+import { ScrollView, StyleSheet } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { moderateScale } from "react-native-size-matters";
 
 export default function ScanScreen() {
   return (
-    <SafeAreaView edges={['top']} style={styles.safeArea}>
+    <SafeAreaView edges={["top"]} style={styles.safeArea}>
       <ScrollView
         style={styles.container}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
       >
-        <View>
-          <Text type="barlowHard" style={{fontSize: moderateScale(30)}}>90</Text>
-        </View>
+        <ScanHeader />
+        <RecentScansSection />
+        <ScanFrameSection />
+        <ScanGuideSection />
       </ScrollView>
     </SafeAreaView>
   );
@@ -21,27 +29,14 @@ export default function ScanScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#0F0F0F',
+    backgroundColor: "#0A0C0D",
   },
   container: {
     flex: 1,
-    paddingHorizontal: moderateScale(10),
-    backgroundColor: '#0F0F0F',
+    backgroundColor: "#0A0C0D",
   },
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  content: {
+    paddingBottom: moderateScale(30),
+    gap: moderateScale(14),
   },
 });
