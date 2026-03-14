@@ -1,8 +1,14 @@
+import GraphStat from "@/components/StatPageComponents/graphStat";
+import HandiCapGraph from "@/components/StatPageComponents/handiCapGraph";
+import HitProgressBar from "@/components/StatPageComponents/hitProgressBar";
+import LatestPool from "@/components/StatPageComponents/LatestPoll";
+import ParAnalysis from "@/components/StatPageComponents/parAnalysis";
+import StreakCard from "@/components/StatPageComponents/StreakCard";
 import { ThemedText as Text } from "@/components/themed-text";
-import { ScrollView, StyleSheet, View, useWindowDimensions } from "react-native";
+import React from "react";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
-import { CartesianChart, Line } from "victory-native";
 
 const TREND = [
   { month: "8월", value: 85 },
@@ -21,22 +27,24 @@ const ROUND_STATS = [
   { label: "라운드당 더블보기+", value: 1.0, max: 5, color: "#FF4F5F" },
 ];
 
+/*
 const data = TREND.map((point, index) => ({
   x: index + 1,
   y: point.value,
 }));
+*/
+const data = [
+  { value: 0.032 },
+  { value: 0.055 },
+  { value: 0.048 },
+  { value: 0.064 },
+  { value: 0.038 },
+  { value: 0.030 },
+  { value: 0.017 },
+  { value: 0.025 },
+];
 
 export default function StatsScreen() {
-  const { width } = useWindowDimensions();
-
-  const screenPadding = moderateScale(10);
-  const cardPadding = moderateScale(16);
-  const chartWidth = width - screenPadding * 2 - cardPadding * 2;
-
-  //const chartWidth = Math.max(290, width - moderateScale(0));
-
-  const chartHeight = moderateScale(180);
-  const trendValues = TREND.map((point) => point.value);
   const trendLabels = TREND.map((point) => point.month);
 
   const firstScore = TREND[0]?.value ?? 0;
@@ -52,87 +60,30 @@ export default function StatsScreen() {
         contentContainerStyle={styles.content}
       >
         <View style={styles.header}>
-          {/*
-          <View style={styles.brandRow}>
-            <Ionicons name="flag-outline" size={moderateScale(18)} color="#49D39A" />
-            <Text type="barlowHard" style={styles.brandText}>
-              CADDIE
-            </Text>
-          </View>
-          */}
           <View style={styles.pill}>
             <Text style={styles.pillText}>내 통계</Text>
           </View>
         </View>
 
-        <Text type="barlowLight" style={styles.sectionLabel}>
-          스코어 변화
-        </Text>
+        <StreakCard />
 
-        <View style={styles.trendCard}>
-          <Text type="barlowLight" style={styles.trendMeta}>
-            7개월 추이
-          </Text>
-          <Text type="barlowHard" style={styles.trendHeadline}>
-            {headlineDelta}
-          </Text>
-          <Text style={styles.trendSub}>2025년 8월 이후</Text>
-          <View style={styles.chartContainer}>
-            <CartesianChart 
-              data={data} 
-              xKey="x" 
-              yKeys={["y"]}
-            >
-            {({ points }) => (
-              <>
-                <Line points={points.y} color="rgba(69,208,127,0.28)" strokeWidth={8} />
-                <Line points={points.y} color="#45D07F" strokeWidth={3} />
-              </>
-            )}
-          </CartesianChart>
+        <GraphStat headlineDelta={headlineDelta} trendLabels={trendLabels} />
 
-          </View>
-          <View style={styles.chartLabelsRow}>
-            {trendLabels.map((label) => (
-              <Text key={label} style={styles.chartLabel}>
-                {label}
-              </Text>
-            ))}
-          </View>
-          {/*
-          <View style={[styles.chartWrap, { height: chartHeight, width: chartWidth }]}>
-          </View>
-          */}
+        <View>
+          <ParAnalysis/>
         </View>
 
-        {ROUND_STATS.map((stat) => {
-          const progress = Math.max(0, Math.min(1, stat.value / stat.max));
+        <HandiCapGraph headlineDelta={headlineDelta} trendLabels={trendLabels} />
 
-          return (
-            <View
-              key={stat.label}
-              style={styles.metricCard}
-            >
-              <View style={styles.metricHeader}>
-                <Text style={styles.metricLabel}>{stat.label}</Text>
-                <Text type="barlowHard" style={[styles.metricValue, { color: stat.color }]}>
-                  {stat.value.toFixed(1)}
-                </Text>
-              </View>
-              <View style={styles.track}>
-                <View
-                  style={[
-                    styles.fill,
-                    {
-                      width: `${progress * 100}%`,
-                      backgroundColor: stat.color,
-                    },
-                  ]}
-                />
-              </View>
-            </View>
-          );
-        })}
+        <View
+          style={{
+            marginBottom: moderateScale(15),
+          }}
+        >
+          <LatestPool />
+        </View>
+
+        <HitProgressBar roundStats={ROUND_STATS} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -141,11 +92,11 @@ export default function StatsScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#07090A",
+    backgroundColor: "#0F0F0F",
   },
   container: {
     flex: 1,
-    backgroundColor: "#07090A",
+    backgroundColor: "#0F0F0F",
   },
   content: {
     paddingHorizontal: moderateScale(10),
@@ -186,47 +137,15 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(20),
     letterSpacing: 1.3,
   },
-  trendCard: {
-    backgroundColor: "#1E2222",
-    borderRadius: moderateScale(18),
-    borderWidth: 1,
-    borderColor: "#2B3230",
-    padding: moderateScale(16),
-    overflow: "hidden",
-  },
-  trendMeta: {
-    color: "#7A8380",
-    letterSpacing: 1.2,
-    fontSize: moderateScale(15),
-  },
-  trendHeadline: {
-    color: "#45D07F",
-    fontSize: moderateScale(35),
-  },
-  trendSub: {
-    color: "#7E8784",
-    fontSize: moderateScale(12),
-    marginTop: moderateScale(2),
-    marginBottom: moderateScale(8),
-  },
   chartContainer: {
-    height: moderateScale(130),
+    height: moderateScale(110),
+    paddingBottom: 10,
     borderRadius: moderateScale(14),
-    backgroundColor: "#151919",
-    borderWidth: 1,
-    borderColor: "#28302E",
+    //backgroundColor: "#151919",
+    //borderWidth: 1,
+    //borderColor: "#28302E",
     paddingHorizontal: moderateScale(8),
     paddingTop: moderateScale(4),
-  },
-  chartLabelsRow: {
-    marginTop: moderateScale(8),
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: moderateScale(2),
-  },
-  chartLabel: {
-    color: "#6F7775",
-    fontSize: moderateScale(10),
   },
   chartWrap: {
     alignSelf: "center",
@@ -239,36 +158,5 @@ const styles = StyleSheet.create({
   valueLabel: {
     color: "#8C9492",
     fontSize: moderateScale(12),
-  },
-  metricCard: {
-    backgroundColor: "#1E2222",
-    borderRadius: moderateScale(18),
-    borderWidth: 1,
-    borderColor: "#2B3230",
-    paddingHorizontal: moderateScale(16),
-    paddingVertical: moderateScale(14),
-  },
-  metricHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: moderateScale(10),
-  },
-  metricLabel: {
-    color: "#8A9290",
-    fontSize: moderateScale(14),
-  },
-  metricValue: {
-    fontSize: moderateScale(18),
-  },
-  track: {
-    height: 5,
-    borderRadius: 99,
-    backgroundColor: "#313735",
-    overflow: "hidden",
-  },
-  fill: {
-    height: "100%",
-    borderRadius: 99,
   },
 });

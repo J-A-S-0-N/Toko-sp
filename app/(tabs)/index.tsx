@@ -1,7 +1,11 @@
+import DailyTipComponent from '@/components/HomeFeedComponents/dailyTipComponent';
+import GoalSetupPromptComponent from '@/components/HomeFeedComponents/goalSetupPromptComponent';
 import HomeFeedHeader from '@/components/HomeFeedComponents/homeFeedHeader';
 import RecentRoundComponent from '@/components/HomeFeedComponents/recentRoundComponent';
-import UserStatComponent from '@/components/HomeFeedComponents/userStatComponent';
 import UsernameHeader from '@/components/HomeFeedComponents/usernameHeader';
+import UserStatComponent from '@/components/HomeFeedComponents/userStatComponent';
+import WeatherSummaryComponent from '@/components/HomeFeedComponents/weatherSummaryComponent';
+import WeeklySummaryComponent from '@/components/HomeFeedComponents/weeklySummaryComponent';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { moderateScale } from 'react-native-size-matters';
@@ -14,20 +18,36 @@ export default function HomeScreen() {
         style={styles.container}
       >
 
-        <View style={{marginBottom: moderateScale(20)}}>
+        <View style={{marginBottom: moderateScale(30)}}>
           <HomeFeedHeader/>
         </View>
 
-        <View style={{marginBottom: moderateScale(20)}}>
+        <View style={{marginBottom: moderateScale(30)}}>
           <UsernameHeader/>
         </View>
 
-        <View style={{marginBottom: moderateScale(15)}}>
+        <View style={{marginBottom: moderateScale(25)}}>
           <UserStatComponent/>
         </View>
 
-        <View style={{marginBottom: moderateScale(10)}}>
+        <View style={{marginBottom: moderateScale(25)}}>
+          <WeeklySummaryComponent/>
+        </View>
+
+        <View style={{marginBottom: moderateScale(35)}}>
+          <WeatherSummaryComponent/>
+        </View>
+
+        <View style={{marginBottom: moderateScale(35)}}>
           <RecentRoundComponent/>
+        </View>
+
+        <View style={{marginBottom: moderateScale(20)}}>
+          <DailyTipComponent/>
+        </View>
+
+        <View style={{marginBottom: moderateScale(20)}}>
+          <GoalSetupPromptComponent/>
         </View>
 
       </ScrollView>

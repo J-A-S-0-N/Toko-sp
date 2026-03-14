@@ -65,6 +65,15 @@ export default function RootLayout() {
               headerShown: false, 
             }} 
           />
+          <Stack.Screen name="(modals)/setGoalModal" 
+            options={{ 
+              presentation: 'modal', 
+              animation: 'fade',
+              //animation: 'fade', 
+              title: 'Activity', 
+              headerShown: false, 
+            }} 
+          />
         </Stack>
       <StatusBar style="auto" />
       </GestureHandlerRootView>

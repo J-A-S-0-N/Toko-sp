@@ -98,7 +98,7 @@ export default function RecentRoundComponent() {
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
           {/* Left Side */}
           <View>
-            <ThemedText type="barlowHard" style={{ fontSize: moderateScale(18), color: "white" }}>{round.courseName}</ThemedText>
+            <ThemedText type="barlowHard" style={{ fontSize: moderateScale(20), color: "white" }}>{round.courseName}</ThemedText>
             <View
               style={{
                 flexDirection: "row",
@@ -107,11 +107,11 @@ export default function RecentRoundComponent() {
               }}
             >
               {/* <ThemedText type="barlowLight" style={{ fontSize: moderateScale(11), color: "#6E7171" }}>{round.location}</ThemedText> */}
-              <Text style={{ fontSize: moderateScale(10.5), color: "#6E7171" }}>{round.location}</Text>
+              <Text style={{ fontSize: moderateScale(11), color: "#6E7171" }}>{round.location}</Text>
               <View
                 style={{ width: moderateScale(2), height: moderateScale(2), borderRadius: moderateScale(5), backgroundColor: "#6E7171" }}
               />
-              <Text style={{ fontSize: moderateScale(10.5), color: "#6E7171" }}>{formatDate(round.date)}</Text>
+              <Text style={{ fontSize: moderateScale(11), color: "#6E7171" }}>{formatDate(round.date)}</Text>
             </View>
           </View>
 
@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
   },
   roundContainer: {
     backgroundColor: "#1F2222",
-    paddingVertical: moderateScale(10),
+    paddingVertical: moderateScale(15),
     paddingHorizontal: moderateScale(10),
     borderRadius: moderateScale(10),
     marginBottom: moderateScale(15),
