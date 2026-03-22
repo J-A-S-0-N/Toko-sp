@@ -50,12 +50,12 @@ const styles = StyleSheet.create({
     color: "#6F7775",
     fontSize: moderateScale(13),
     letterSpacing: 1,
+    marginBottom: moderateScale(12),
   },
   cardsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     gap: moderateScale(8),
-    paddingTop: moderateScale(12),
   },
   card: {
     flex: 1,

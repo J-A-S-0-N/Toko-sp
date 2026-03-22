@@ -177,7 +177,6 @@ export default function RecentRoundComponent() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#0F0F0F",
   },
   roundContainer: {
     backgroundColor: "#1F2222",

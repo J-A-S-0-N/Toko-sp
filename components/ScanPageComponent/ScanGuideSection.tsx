@@ -22,7 +22,7 @@ type ScanGuideSectionProps = {
 const ScanGuideSection = ({ steps = GUIDE_STEPS }: ScanGuideSectionProps) => {
   return (
     <>
-      <Text type="barlowLight" style={styles.howToTitle}>
+      <Text type="barlowHard" style={styles.howToTitle}>
         이렇게 사용해요
       </Text>
 
@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
   howToTitle: {
     paddingHorizontal: moderateScale(10),
     color: "#636A6E",
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(14),
   },
   guideList: {
     paddingHorizontal: moderateScale(10),
@@ -60,8 +60,8 @@ const styles = StyleSheet.create({
   guideCard: {
     borderRadius: moderateScale(16),
     borderWidth: 1,
-    borderColor: "#292D30",
-    backgroundColor: "#161B1E",
+    borderColor: "#292E31",
+    backgroundColor: "#1F2222",
     paddingHorizontal: moderateScale(14),
     paddingVertical: moderateScale(13),
     flexDirection: "row",
@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
   },
   guideTitle: {
     color: "#EDF1EE",
-    fontSize: moderateScale(18),
+    fontSize: moderateScale(16.5),
     lineHeight: moderateScale(20),
   },
   guideDesc: {

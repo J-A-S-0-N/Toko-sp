@@ -1,8 +1,7 @@
 import {
   RecentScansSection,
   ScanFrameSection,
-  ScanGuideSection,
-  ScanHeader,
+  ScanGuideSection
 } from "@/components/ScanPageComponent";
 import React from "react";
 import { ScrollView, StyleSheet } from "react-native";
@@ -17,7 +16,9 @@ export default function ScanScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
+        {/*
         <ScanHeader />
+        */}
         <RecentScansSection />
         <ScanFrameSection />
         <ScanGuideSection />
@@ -29,11 +30,11 @@ export default function ScanScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#0A0C0D",
+    backgroundColor: "#0F1010",
   },
   container: {
     flex: 1,
-    backgroundColor: "#0A0C0D",
+    backgroundColor: "#0F1010",
   },
   content: {
     paddingBottom: moderateScale(30),

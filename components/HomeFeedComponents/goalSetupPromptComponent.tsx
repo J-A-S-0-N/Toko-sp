@@ -31,7 +31,7 @@ const GoalSetupPromptComponent = () => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#1A1F1F",
+    backgroundColor: "#1F2222",
     borderRadius: moderateScale(24),
     borderWidth: 1,
     borderColor: "#2A3131",
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
   },
   actionText: {
     color: "#48C28D",
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(13),
   },
 });
 

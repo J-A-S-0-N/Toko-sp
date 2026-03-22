@@ -59,7 +59,6 @@ const styles = StyleSheet.create({
     borderColor: "#2B3230",
     paddingHorizontal: moderateScale(12),
     paddingVertical: moderateScale(12),
-    marginTop: moderateScale(4),
   },
   streakTopRow: {
     flexDirection: "row",

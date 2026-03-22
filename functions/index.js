@@ -1,33 +1,58 @@
-/**
- * Import function triggers from their respective submodules:
- *
- * const {onCall} = require("firebase-functions/v2/https");
- * const {onDocumentWritten} = require("firebase-functions/v2/firestore");
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
- */
+import { onDocumentCreated } from "firebase-functions/v2/firestore";
+import OpenAI from "openai";
+import { GoogleGenAI } from "@google/genai";
+import unwrapModule from "./unwrap.js";
 
-const { setGlobalOptions } = require("firebase-functions");
-const { onRequest } = require("firebase-functions/https");
-const { onDocumentCreated } = require("firebase-functions/firestore");
-const logger = require("firebase-functions/logger");
+const { polarUnwrap } = unwrapModule;
 
-// For cost control, you can set the maximum number of containers that can be
-// running at the same time. This helps mitigate the impact of unexpected
-// traffic spikes by instead downgrading performance. This limit is a
-// per-function limit. You can override the limit for each function using the
-// `maxInstances` option in the function's options, e.g.
-// `onRequest({ maxInstances: 5 }, (req, res) => { ... })`.
-// NOTE: setGlobalOptions does not apply to functions using the v1 API. V1
-// functions should each use functions.runWith({ maxInstances: 10 }) instead.
-// In the v1 API, each function can only serve one request per container, so
-// this will be the maximum concurrent request count.
-setGlobalOptions({ maxInstances: 10 });
+// delete when pushing github
+//API key
 
-// Create and deploy your first functions
-// https://firebase.google.com/docs/functions/get-started
+//const client = new OpenAI({ apiKey: ApiKey });
+const client = new OpenAI({
+    apiKey: ApiKey,
+    baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/"
+});
 
-exports.helloWorld = onRequest((request, response) => {
-    logger.info("Hello logs!", { structuredData: true });
-    response.send("Hello from Firebase!");
+const ai = new GoogleGenAI({apiKey : ApiKey});
+
+async function main(imageBase64) {
+  const response = await ai.models.generateContent({
+    model: "gemini-3-flash-preview",
+    contents: [
+        {
+            inlineData: {
+                mimeType: "image/jpeg",
+                data: imageBase64
+            },
+        },
+        { text: "Read the two number rows in the image. Match top and bottom numbers vertically by the same column. The bottom row is always a circular sequence of 1 to 9 but may start at any number in the image, so normalize it to horizontal order 1,2,3,4,5,6,7,8,9 and keep each top number paired with its original bottom-column match." }
+    ],
+    config: {
+        responseMimeType: "application/json",
+    },
+  });
+  console.log(response.text);
+}
+
+export const onNewDocument = onDocumentCreated("testBucket/{docId}", async (event) => {
+    const snapshot = event.data;
+    const imageLink = snapshot.get("imageLink");
+
+    //download first and then convert to base64 and throw it to response function
+    const res = await fetch(imageLink);
+    if (!res.ok) {
+        throw new Error(`Failed to fetch image (${res.status}): ${imageLink}`);
+    }
+
+    const arrayBuffer = await res.arrayBuffer();
+
+    const originalBuffer = Buffer.from(arrayBuffer);
+
+    const unwrappedBuffer = await polarUnwrap(originalBuffer);
+
+    const imageBase64 = unwrappedBuffer.toString("base64");
+
+    //await response(imageBase64);
+    await main(imageBase64);
 });

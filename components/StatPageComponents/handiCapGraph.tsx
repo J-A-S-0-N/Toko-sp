@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
     color: "#6F7775",
     fontSize: moderateScale(13),
     letterSpacing: 1.2,
-    //marginBottom: moderateScale(5),
+    marginBottom: moderateScale(5),
   },
   trendCard: {
     backgroundColor: "#1F2222",

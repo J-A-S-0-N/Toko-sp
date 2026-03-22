@@ -55,12 +55,13 @@ export default function HitProgressBar({ roundStats, headerTitle = "타수 통�
 
 const styles = StyleSheet.create({
   headerTitle: {
-    color: "#8C9492",
-    fontSize: moderateScale(14),
-    //marginTop: moderateScale(4),
+    color: "#6F7775",
+    fontSize: moderateScale(13),
+    letterSpacing: 1.2,
+    marginBottom: moderateScale(10),
   },
   metricCard: {
-    backgroundColor: "#1E2222",
+    backgroundColor: "#1F2222",
     borderRadius: moderateScale(18),
     borderWidth: 1,
     borderColor: "#2B3230",

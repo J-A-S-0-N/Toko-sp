@@ -39,7 +39,7 @@ const ScanFrameSection = ({ onFramePress, onCameraPress, onGalleryPress }: ScanF
         </Pressable>
 
         <Pressable style={[styles.actionButton, styles.secondaryAction]} onPress={onGalleryPress}>
-          <Text type="barlowHard" style={styles.secondaryActionText}>
+          <Text type="barlowLight" style={styles.secondaryActionText}>
             갤러리
           </Text>
         </Pressable>
@@ -54,8 +54,8 @@ const styles = StyleSheet.create({
     height: moderateScale(300),
     borderRadius: moderateScale(24),
     borderWidth: 1,
-    borderColor: "#22272A",
-    backgroundColor: "#111518",
+    borderColor: "#292E31",
+    backgroundColor: "#1F2222",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
   },
   secondaryActionText: {
     color: "#E5E9E6",
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(14),
   },
 });
 

@@ -65,21 +65,23 @@ export default function StatsScreen() {
           </View>
         </View>
 
+        <View style={{ marginBottom: moderateScale(15) }}>
+          <GraphStat headlineDelta={headlineDelta} trendLabels={trendLabels} />
+        </View>
+
         <StreakCard />
 
-        <GraphStat headlineDelta={headlineDelta} trendLabels={trendLabels} />
-
-        <View>
+        <View style={{ marginBottom: moderateScale(15) }}>
           <ParAnalysis/>
         </View>
 
-        <HandiCapGraph headlineDelta={headlineDelta} trendLabels={trendLabels} />
-
         <View
-          style={{
-            marginBottom: moderateScale(15),
-          }}
+          style={{marginBottom: moderateScale(15)}}
         >
+          <HandiCapGraph headlineDelta={headlineDelta} trendLabels={trendLabels} />
+        </View>
+
+        <View style={{marginBottom: moderateScale(15)}}>
           <LatestPool />
         </View>
 
@@ -92,11 +94,11 @@ export default function StatsScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#0F0F0F",
+    backgroundColor: "#0F1010",
   },
   container: {
     flex: 1,
-    backgroundColor: "#0F0F0F",
+    backgroundColor: "#0F1010",
   },
   content: {
     paddingHorizontal: moderateScale(10),
