@@ -59,12 +59,14 @@ export default function HandiCapGraph({ headlineDelta, trendLabels }: GraphStatP
         <Text type="barlowLight" style={styles.trendMeta}>
           7개월 추이
         </Text>
+        {/*
         <Text type="barlowHard" style={styles.trendHeadline}>
           {headlineDelta}
         </Text>
-        <Text style={styles.trendSub}>2025년 8월 이후</Text>
+        */}
         <View style={styles.chartWrap}>
           <LineChart
+          hideDataPoints
             data={data}
             yAxisLabelWidth={0}
             disableScroll
@@ -81,9 +83,6 @@ export default function HandiCapGraph({ headlineDelta, trendLabels }: GraphStatP
             endFillColor="#ffffff"
             startOpacity={0.4}
             endOpacity={0}
-            // Dots
-            dataPointsColor={chartAccentColor}
-            dataPointsRadius={3}
             // Y-axis (right side)
             hideYAxisText
             yAxisLabelSuffix=" mi"
@@ -106,9 +105,32 @@ export default function HandiCapGraph({ headlineDelta, trendLabels }: GraphStatP
             rulesType="solid"
             // Size
             width={chartWidth}
-            height={220}
+            height={130}
             initialSpacing={10}
           />
+        </View>
+        {/*stats*/}
+        <View
+          style={styles.statsWrap}
+        >
+          <View style={styles.statsFirstItem}>
+            <Text type="barlowHard" style={styles.statsValue}>8.5</Text>
+            <Text style={styles.statsLabel}>
+              시작
+            </Text>
+          </View>
+          <View>
+            <Text type="barlowHard" style={styles.statsValueSpecial}>6.7</Text>
+            <Text style={styles.statsLabel}>
+              현제
+            </Text>
+          </View>
+          <View>
+            <Text type="barlowHard" style={styles.statsValueSpecial}>-1.3</Text>
+            <Text style={styles.statsLabel}>
+              차이
+            </Text>
+          </View>
         </View>
         {/*
         <View style={styles.chartLabelsRow}>
@@ -142,11 +164,11 @@ const styles = StyleSheet.create({
   trendMeta: {
     color: "#ffffff",
     letterSpacing: 1.2,
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(13),
   },
   trendHeadline: {
     color: "#4DAE82",
-    fontSize: moderateScale(35),
+    fontSize: moderateScale(30),
   },
   trendSub: {
     color: "#7E8784",
@@ -157,6 +179,27 @@ const styles = StyleSheet.create({
   chartWrap: {
     alignSelf: "center",
     marginHorizontal: moderateScale(10),
+  },
+  statsWrap: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: moderateScale(8),
+    paddingHorizontal: moderateScale(2),
+  },
+  statsFirstItem: {
+    alignItems: "center",
+  },
+  statsValue: {
+    color: "#9B9C9B",
+    fontSize: moderateScale(24),
+  },
+  statsValueSpecial: {
+    color: "#3CC06E",
+    fontSize: moderateScale(24),
+  },
+  statsLabel: {
+    color: "#6E7271",
+    fontSize: moderateScale(14),
   },
   chartLabelsRow: {
     marginTop: moderateScale(8),

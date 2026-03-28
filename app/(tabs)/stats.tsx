@@ -3,6 +3,7 @@ import HandiCapGraph from "@/components/StatPageComponents/handiCapGraph";
 import HitProgressBar from "@/components/StatPageComponents/hitProgressBar";
 import LatestPool from "@/components/StatPageComponents/LatestPoll";
 import ParAnalysis from "@/components/StatPageComponents/parAnalysis";
+import ScoreDistribution from "@/components/StatPageComponents/scoreDistribution";
 import StreakCard from "@/components/StatPageComponents/StreakCard";
 import { ThemedText as Text } from "@/components/themed-text";
 import React from "react";
@@ -73,6 +74,10 @@ export default function StatsScreen() {
 
         <View style={{ marginBottom: moderateScale(15) }}>
           <ParAnalysis/>
+        </View>
+
+        <View style={{ marginBottom: moderateScale(15) }}>
+          <ScoreDistribution />
         </View>
 
         <View

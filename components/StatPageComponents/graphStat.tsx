@@ -51,7 +51,7 @@ export default function GraphStat({ headlineDelta, trendLabels }: GraphStatProps
   */
 
   return (
-    <>
+    <View style={styles.container}>
       <Text type="barlowLight" style={styles.sectionTitle}>
         스코어 트렌드
       </Text>
@@ -106,7 +106,7 @@ export default function GraphStat({ headlineDelta, trendLabels }: GraphStatProps
             rulesType="solid"
             // Size
             width={chartWidth}
-            height={220}
+            height={130}
             initialSpacing={10}
           />
         </View>
@@ -120,11 +120,14 @@ export default function GraphStat({ headlineDelta, trendLabels }: GraphStatProps
         </View>
         */}
       </View>
-    </>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    marginTop: moderateScale(8),
+  },
   sectionTitle: {
     color: "#6F7775",
     fontSize: moderateScale(13),
@@ -142,11 +145,11 @@ const styles = StyleSheet.create({
   trendMeta: {
     color: "#ffffff",
     letterSpacing: 1.2,
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(13),
   },
   trendHeadline: {
     color: "#4DAE82",
-    fontSize: moderateScale(35),
+    fontSize: moderateScale(30),
   },
   trendSub: {
     color: "#7E8784",

@@ -7,8 +7,11 @@ import React from "react";
 import { ScrollView, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
+import HoleSelectionModal from "../(scan)/holeSelectionModal";
 
 export default function ScanScreen() {
+  const [isHoleModalVisible, setIsHoleModalVisible] = React.useState(false);
+
   return (
     <SafeAreaView edges={["top"]} style={styles.safeArea}>
       <ScrollView
@@ -20,9 +23,20 @@ export default function ScanScreen() {
         <ScanHeader />
         */}
         <RecentScansSection />
-        <ScanFrameSection />
+        <ScanFrameSection 
+          onCameraPress={() => {
+            setIsHoleModalVisible(true);
+          }} 
+          onGalleryPress={() => {}} 
+          onFramePress={() => {}} 
+        />
         <ScanGuideSection />
       </ScrollView>
+
+      <HoleSelectionModal
+        visible={isHoleModalVisible}
+        onClose={() => setIsHoleModalVisible(false)}
+      />
     </SafeAreaView>
   );
 }

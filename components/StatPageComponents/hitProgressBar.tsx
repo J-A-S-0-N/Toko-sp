@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(18),
   },
   track: {
-    height: 5,
+    height: moderateScale(3),
     borderRadius: 99,
     backgroundColor: "#313735",
     overflow: "hidden",
