@@ -136,6 +136,16 @@ export default function LoadingScreen() {
     );
   }, [statusDotPulse]);
 
+  //this is testing only!!!!!!
+  useEffect(() => {
+    router.replace({
+      pathname: "./resultPreview",
+      params: {
+        holes: String(holesCount),
+      },
+    });
+  }, []);
+
   useEffect(() => {
     if (uploadStartedRef.current) return;
     if (!parsedPhotos.length) return;
