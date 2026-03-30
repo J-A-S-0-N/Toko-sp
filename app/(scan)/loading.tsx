@@ -1,8 +1,7 @@
 import { ThemedText as Text } from "@/components/themed-text";
 import Feather from "@expo/vector-icons/Feather";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { collection, doc, onSnapshot, serverTimestamp, setDoc } from "firebase/firestore";
-import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
+import { onSnapshot } from "firebase/firestore";
 import React, { useEffect, useMemo, useState } from "react";
 import { Alert, LayoutChangeEvent, StyleSheet, View } from "react-native";
 import Animated, {
@@ -19,7 +18,7 @@ import Animated, {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
 
-import { db } from "@/config/firebase";
+import { createPendingScan } from "./scanFirebase";
 
 const tips = [
   {
@@ -87,6 +86,19 @@ export default function LoadingScreen() {
   const dotsPhase = useSharedValue(0);
   const statusDotPulse = useSharedValue(0);
 
+  useEffect(() => {
+    handleRoute();
+  }, []);
+
+  const handleRoute = () => {
+    router.push({
+      pathname: "/preview",
+      params: {
+        holes: holes,
+        photos: photos,
+      },
+    });
+  };
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -136,16 +148,6 @@ export default function LoadingScreen() {
     );
   }, [statusDotPulse]);
 
-  //this is testing only!!!!!!
-  useEffect(() => {
-    router.replace({
-      pathname: "./resultPreview",
-      params: {
-        holes: String(holesCount),
-      },
-    });
-  }, []);
-
   useEffect(() => {
     if (uploadStartedRef.current) return;
     if (!parsedPhotos.length) return;
@@ -156,31 +158,7 @@ export default function LoadingScreen() {
 
     const persistScan = async () => {
       try {
-        const storage = getStorage();
-        const uploadTimestamp = Date.now();
-
-        const uploadedPhotoUrls = await Promise.all(
-          parsedPhotos.map(async (uri, index) => {
-            const response = await fetch(uri);
-            const blob = await response.blob();
-
-            const storageRef = ref(
-              storage,
-              `scans/${uploadTimestamp}-${index + 1}-${Math.random().toString(36).slice(2)}.jpg`
-            );
-
-            await uploadBytes(storageRef, blob);
-            return getDownloadURL(storageRef);
-          })
-        );
-
-        const scanDocRef = doc(collection(db, "Scans"));
-        await setDoc(scanDocRef, {
-          holes: holesCount,
-          photoUrls: uploadedPhotoUrls,
-          status: "pending",
-          createdAt: serverTimestamp(),
-        });
+        const scanDocRef = await createPendingScan(holesCount, parsedPhotos);
 
         unsubscribeStatusListener = onSnapshot(scanDocRef, (snapshot) => {
           const status = snapshot.data()?.status;

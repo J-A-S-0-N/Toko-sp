@@ -10,6 +10,7 @@ type HoleEditorModalProps = {
   initialPar: number;
   onClose: () => void;
   onConfirm: (score: number, par: number) => void;
+  editPar: boolean;
 };
 
 export default function HoleEditorModal({
@@ -19,6 +20,7 @@ export default function HoleEditorModal({
   initialPar,
   onClose,
   onConfirm,
+  editPar,
 }: HoleEditorModalProps) {
   const [score, setScore] = useState(initialScore);
   const [par, setPar] = useState(initialPar);
@@ -43,6 +45,11 @@ export default function HoleEditorModal({
     return score < par ? "#57C79A" : "#FF4D4D";
   }, [score, par]);
 
+  const onSubmit = () => {
+    
+    return 1;
+  };
+
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.modalOverlay}>
@@ -52,7 +59,12 @@ export default function HoleEditorModal({
           <View style={styles.holeEditorHandle} />
 
           <Text type="barlowHard" style={styles.holeEditorTitle}>
-            {hole}번 홀 수정
+            <Text type="barlowHard" style={styles.holeEditorTitleHole}>
+              {hole}번
+            </Text>
+            <Text type="barlowLight" style={styles.holeEditorTitleRest}>
+              {" "}홀 수정
+            </Text>
           </Text>
 
           <View style={styles.holeEditorScoreRow}>
@@ -62,9 +74,19 @@ export default function HoleEditorModal({
               </Text>
             </Pressable>
 
-            <Text type="barlowHard" style={[styles.holeEditorScoreValue, { color: scoreColor }]}>
-              {score}
-            </Text>
+            {editPar ? (
+              <>
+                <Text type="barlowHard" style={[styles.holeEditorScoreValue, { color: scoreColor }]}>
+                  {score}
+                </Text>
+              </>
+            ) : (
+              <>
+                <Text type="barlowHard" style={[styles.holeEditorScoreValue, { color: "#9CA3AF" }]}>
+                  {score}
+                </Text>
+              </>
+            )}
 
             <Pressable style={styles.holeEditorAdjustButton} onPress={() => setScore((prev) => Math.min(9, prev + 1))}>
               <Text type="barlowLight" style={[styles.holeEditorAdjustText, styles.holeEditorAdjustTextPlus]}>
@@ -73,30 +95,35 @@ export default function HoleEditorModal({
             </Pressable>
           </View>
 
-          <Text type="barlowLight" style={styles.holeEditorParCaption}>
-            이 홀의 파
-          </Text>
 
-          <View style={styles.holeEditorParRow}>
-            {[3, 4, 5].map((parValue) => {
-              const isActive = par === parValue;
+          {editPar ? (
+            <>
+              <Text type="barlowLight" style={styles.holeEditorParCaption}>
+                이 홀의 파
+              </Text>
 
-              return (
-                <Pressable
-                  key={parValue}
-                  onPress={() => setPar(parValue)}
-                  style={[styles.holeEditorParButton, isActive && styles.holeEditorParButtonActive]}
-                >
-                  <Text type="barlowHard" style={[styles.holeEditorParValue, isActive && styles.holeEditorParValueActive]}>
-                    P{parValue}
-                  </Text>
-                  <Text type="barlowLight" style={[styles.holeEditorParHint, isActive && styles.holeEditorParHintActive]}>
-                    파{parValue}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
+              <View style={styles.holeEditorParRow}>
+                {[3, 4, 5].map((parValue) => {
+                  const isActive = par === parValue;
+
+                  return (
+                    <Pressable
+                      key={parValue}
+                      onPress={() => setPar(parValue)}
+                      style={[styles.holeEditorParButton, isActive && styles.holeEditorParButtonActive]}
+                    >
+                      <Text type="barlowHard" style={[styles.holeEditorParValue, isActive && styles.holeEditorParValueActive]}>
+                        P{parValue}
+                      </Text>
+                      <Text type="barlowLight" style={[styles.holeEditorParHint, isActive && styles.holeEditorParHintActive]}>
+                        파{parValue}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </>
+          ) : null}
 
           <Pressable style={styles.holeEditorConfirmButton} onPress={() => onConfirm(score, par)}>
             <Text type="barlowHard" style={styles.holeEditorConfirmText}>
@@ -137,10 +164,15 @@ const styles = StyleSheet.create({
     marginBottom: moderateScale(14),
   },
   holeEditorTitle: {
-    color: "#A9B0B3",
-    fontSize: moderateScale(27),
+    fontSize: moderateScale(18),
     textAlign: "center",
     marginBottom: moderateScale(14),
+  },
+  holeEditorTitleHole: {
+    color: "#D5DADD",
+  },
+  holeEditorTitleRest: {
+    color: "#8A9296",
   },
   holeEditorScoreRow: {
     flexDirection: "row",
@@ -167,7 +199,7 @@ const styles = StyleSheet.create({
     color: "#57C79A",
   },
   holeEditorScoreValue: {
-    fontSize: moderateScale(76),
+    fontSize: moderateScale(70),
     lineHeight: moderateScale(80),
   },
   holeEditorParCaption: {
@@ -179,7 +211,7 @@ const styles = StyleSheet.create({
   holeEditorParRow: {
     flexDirection: "row",
     justifyContent: "center",
-    gap: moderateScale(10),
+    gap: moderateScale(20),
     marginBottom: moderateScale(18),
   },
   holeEditorParButton: {
@@ -198,7 +230,7 @@ const styles = StyleSheet.create({
   },
   holeEditorParValue: {
     color: "#D5DADD",
-    fontSize: moderateScale(29),
+    fontSize: moderateScale(24),
     lineHeight: moderateScale(31),
   },
   holeEditorParValueActive: {
@@ -215,11 +247,11 @@ const styles = StyleSheet.create({
     borderRadius: moderateScale(18),
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#4AB484",
+    backgroundColor: "#003B2D",
     minHeight: moderateScale(56),
   },
   holeEditorConfirmText: {
     color: "#ECF7F1",
-    fontSize: moderateScale(26),
+    fontSize: moderateScale(17),
   },
 });

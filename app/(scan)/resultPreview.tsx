@@ -1,4 +1,5 @@
 import HoleEditorModal from "@/components/ScanPageComponent/HoleEditorModal";
+import { submit } from "@/components/ScanPageComponent/backendLogic/submit";
 import { ThemedText as Text } from "@/components/themed-text";
 import Feather from "@expo/vector-icons/Feather";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -45,6 +46,7 @@ export default function ResultPreviewScreen() {
   const [coursePar, setCoursePar] = useState(standardCoursePar);
   const [holeScores, setHoleScores] = useState(defaultHoleScores);
   const [selectedHoleIndex, setSelectedHoleIndex] = useState<number | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const visibleHoleScores = useMemo(() => holeScores.slice(0, holesCount), [holeScores, holesCount]);
   const selectedHole = useMemo(
@@ -108,13 +110,36 @@ export default function ResultPreviewScreen() {
     });
   };
 
-  const handleSave = () => {
-    Alert.alert("저장 완료", "분석 결과를 저장했어요.", [
-      {
-        text: "확인",
-        onPress: () => router.replace("/(tabs)/scan"),
-      },
-    ]);
+  const handleSave = async () => {
+    if (isSubmitting) return;
+
+    try {
+      setIsSubmitting(true);
+
+      const result = await submit({
+        holesCount,
+        courseName: "페블 비치 골프 링크스",
+        playedAt: new Date().toISOString(),
+        parInputEnabled,
+        appliedPar: stats.appliedPar,
+        totalScore: stats.totalScore,
+        diff: stats.diff,
+        birdieCount: stats.birdieCount,
+        doubleCount: stats.doubleCount,
+        holeScores: visibleHoleScores,
+      });
+
+      Alert.alert("저장 완료", `분석 결과를 저장했어요.\nID: ${result.id}`, [
+        {
+          text: "확인",
+          onPress: () => router.replace("/(tabs)/scan"),
+        },
+      ]);
+    } catch (error) {
+      Alert.alert("저장 실패", "저장 중 오류가 발생했어요. 잠시 후 다시 시도해주세요.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleDecreaseCoursePar = () => {
@@ -135,13 +160,6 @@ export default function ResultPreviewScreen() {
             </Pressable>
             <Text type="barlowHard" style={styles.screenTitle}>
               분석 결과
-            </Text>
-          </View>
-
-          <View style={styles.aiBadge}>
-            <View style={styles.aiDot} />
-            <Text type="barlowLight" style={styles.aiBadgeText}>
-              AI 분석 완료
             </Text>
           </View>
 
@@ -297,9 +315,9 @@ export default function ResultPreviewScreen() {
                 다시 찍기
               </Text>
             </Pressable>
-            <Pressable style={styles.primaryButton} onPress={handleSave}>
+            <Pressable style={[styles.primaryButton, isSubmitting && styles.primaryButtonDisabled]} onPress={handleSave}>
               <Text type="barlowHard" style={styles.primaryButtonText}>
-                저장하기
+                {isSubmitting ? "저장 중..." : "저장하기"}
               </Text>
             </Pressable>
           </View>
@@ -314,6 +332,7 @@ export default function ResultPreviewScreen() {
           initialPar={selectedHole.par}
           onClose={handleCloseHoleEditor}
           onConfirm={handleConfirmHoleEdit}
+          editPar={parInputEnabled}
         />
       ) : null}
     </SafeAreaView>
@@ -367,7 +386,7 @@ const styles = StyleSheet.create({
   },
   screenTitle: {
     color: "#F4F6F7",
-    fontSize: moderateScale(28),
+    fontSize: moderateScale(20),
   },
   aiBadge: {
     alignSelf: "flex-start",
@@ -453,11 +472,10 @@ const styles = StyleSheet.create({
   summaryRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    gap: moderateScale(8),
     marginBottom: moderateScale(12),
   },
   summaryItem: {
-    flex: 1,
+    width: "23%",
     alignItems: "center",
     borderRadius: moderateScale(14),
     backgroundColor: "#1A1E1F",
@@ -592,6 +610,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     minHeight: moderateScale(58),
+  },
+  primaryButtonDisabled: {
+    opacity: 0.7,
   },
   primaryButtonText: {
     color: "#ECF7F1",
