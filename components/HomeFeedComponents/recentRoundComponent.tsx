@@ -1,7 +1,7 @@
-import { ThemedText } from "@/components/themed-text";
+import { ThemedText as Text } from "@/components/themed-text";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { FlatList, StyleSheet, TouchableOpacity, View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
 
 
@@ -98,7 +98,7 @@ export default function RecentRoundComponent() {
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
           {/* Left Side */}
           <View>
-            <ThemedText type="barlowHard" style={{ fontSize: moderateScale(20), color: "white" }}>{round.courseName}</ThemedText>
+            <Text type="barlowHard" style={{ fontSize: moderateScale(20), color: "white" }}>{round.courseName}</Text>
             <View
               style={{
                 flexDirection: "row",
@@ -116,12 +116,12 @@ export default function RecentRoundComponent() {
           </View>
 
           {/* Right Side */}
-          <ThemedText type="barlowHard" style={{ fontSize: moderateScale(50), lineHeight: moderateScale(50), color: "#E83F40" }}>{round.score}</ThemedText>
+          <Text type="barlowHard" style={{ fontSize: moderateScale(50), lineHeight: moderateScale(50), color: "#E83F40" }}>{round.score}</Text>
         </View>
         {/* Height 2 */}
         {/* Score Delta */}
         <View style={{ alignItems: "flex-end" }}>
-          <ThemedText type="barlowLight" style={{ fontSize: moderateScale(11), color: "#E83F40" }}>{getScoreDelta(round.score, round.coursePar) > 0 ? "+" : ""}{getScoreDelta(round.score, round.coursePar)}</ThemedText>
+          <Text type="barlowLight" style={{ fontSize: moderateScale(11), color: "#E83F40" }}>{getScoreDelta(round.score, round.coursePar) > 0 ? "+" : ""}{getScoreDelta(round.score, round.coursePar)}</Text>
         </View>
         {/* Separator */}
         <View
@@ -147,9 +147,9 @@ export default function RecentRoundComponent() {
                 />
               )}
               <View style={{ flex: 1, alignItems: "center" }}>
-                <ThemedText type="barlowHard" style={{ fontSize: moderateScale(25), color: "white" }}>
+                <Text type="barlowHard" style={{ fontSize: moderateScale(25), color: "white" }}>
                   {stat.value}
-                </ThemedText>
+                </Text>
                 <Text style={{ fontSize: moderateScale(12), color: "#6E7171", marginTop: moderateScale(2) }}>
                   {stat.label}
                 </Text>
@@ -163,7 +163,7 @@ export default function RecentRoundComponent() {
 
   return (
     <View style={styles.container}>
-      <ThemedText type="barlowLight" style={styles.title}>최근 라운드</ThemedText>
+      <Text type="barlowLight" style={styles.title}>최근 라운드</Text>
       <FlatList
         scrollEnabled={false}
         showsVerticalScrollIndicator={false}

@@ -1,5 +1,5 @@
-import { ThemedText } from "@/components/themed-text";
-import { Text, View } from "react-native";
+import { ThemedText as Text } from "@/components/themed-text";
+import { View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
 
 const HomeFeedHeader = () => {
@@ -7,7 +7,7 @@ const HomeFeedHeader = () => {
     <View
       style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}
     >
-      <ThemedText type="barlowHard" style={{fontSize: moderateScale(20), color: "white"}}>이름 아직 미정임</ThemedText>
+      <Text type="barlowHard" style={{fontSize: moderateScale(20), color: "white"}}>이름 아직 미정임</Text>
       <View
         style={{
           paddingHorizontal: moderateScale(15),

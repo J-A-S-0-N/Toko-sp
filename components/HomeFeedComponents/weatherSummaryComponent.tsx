@@ -1,7 +1,7 @@
-import { ThemedText } from "@/components/themed-text";
+import { ThemedText as Text } from "@/components/themed-text";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
 
 const WeatherSummaryComponent = () => {
@@ -17,9 +17,9 @@ const WeatherSummaryComponent = () => {
 
         <View style={styles.tempRow}>
           <Ionicons name="sunny" size={moderateScale(28)} color="#F9C94D" />
-          <ThemedText type="barlowHard" style={styles.tempValue}>
+          <Text type="barlowHard" style={styles.tempValue}>
             18°C
-          </ThemedText>
+          </Text>
         </View>
 
         <Text style={styles.detailText}>맑음 · 바람 12km/h · 습도 45%</Text>
@@ -32,9 +32,9 @@ const WeatherSummaryComponent = () => {
         style={styles.recommendationCard}
       >
         <Text style={styles.recommendationLabel}>라운드 추천</Text>
-        <ThemedText type="barlowHard" style={styles.recommendationValue}>
+        <Text type="barlowHard" style={styles.recommendationValue}>
           완벽한 날씨!
-        </ThemedText>
+        </Text>
       </LinearGradient>
     </LinearGradient>
   );

@@ -86,13 +86,10 @@ export default function LoadingScreen() {
   const dotsPhase = useSharedValue(0);
   const statusDotPulse = useSharedValue(0);
 
-  useEffect(() => {
-    handleRoute();
-  }, []);
 
   const handleRoute = () => {
     router.push({
-      pathname: "/preview",
+      pathname: "/resultPreview",
       params: {
         holes: holes,
         photos: photos,

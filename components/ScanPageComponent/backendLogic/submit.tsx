@@ -21,17 +21,30 @@ export type SubmitScanPayload = {
 };
 
 export async function submit({
-  documentReference,
-  hitList,
-  isNineHole,
-}: {
-  documentReference: any;
-  hitList: number[];
-  isNineHole: boolean;
-}): Promise<{ id: string }> {
+  holesCount,
+  courseName,
+  playedAt,
+  parInputEnabled,
+  appliedPar,
+  totalScore,
+  diff,
+  birdieCount,
+  doubleCount,
+  holeScores,
+}: SubmitScanPayload): Promise<{ id: string }> {
   const resultDocRef = doc(collection(db, "ScanResults"));
 
-  await setDoc(documentReference, {
+  await setDoc(resultDocRef, {
+    holesCount,
+    courseName,
+    playedAt,
+    parInputEnabled,
+    appliedPar,
+    totalScore,
+    diff,
+    birdieCount,
+    doubleCount,
+    holeScores,
   });
 
   return { id: resultDocRef.id };

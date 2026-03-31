@@ -1,6 +1,6 @@
-import { ThemedText } from "@/components/themed-text";
+import { ThemedText as Text } from "@/components/themed-text";
 import { router } from "expo-router";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
 
 const GoalSetupPromptComponent = () => {
@@ -9,9 +9,9 @@ const GoalSetupPromptComponent = () => {
       <View style={styles.leftBlock}>
         <Text style={styles.icon}>🎯</Text>
         <View>
-          <ThemedText type="barlowHard" style={styles.title}>
+          <Text type="barlowHard" style={styles.title}>
             목표 스코어 없음
-          </ThemedText>
+          </Text>
           <Text style={styles.subtitle}>목표를 설정하고 성장을 추적하세요</Text>
         </View>
       </View>
@@ -21,9 +21,9 @@ const GoalSetupPromptComponent = () => {
         activeOpacity={0.8}
         onPress={() => router.push("/(modals)/setGoalModal")}
       >
-        <ThemedText type="barlowLight" style={styles.actionText}>
+        <Text type="barlowLight" style={styles.actionText}>
           설정하기
-        </ThemedText>
+        </Text>
       </TouchableOpacity>
     </View>
   );

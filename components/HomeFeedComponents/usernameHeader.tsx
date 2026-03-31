@@ -1,6 +1,6 @@
-import { ThemedText } from '@/components/themed-text';
+import { ThemedText as Text } from '@/components/themed-text';
 import { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
 
 const UsernameHeader = () => {
@@ -37,12 +37,12 @@ const UsernameHeader = () => {
           justifyContent: "center",
         }}
       >
-        <ThemedText type="barlowHard" style={{fontSize: moderateScale(15), color: "white"}}>
+        <Text type="barlowHard" style={{fontSize: moderateScale(15), color: "white"}}>
           {username.slice(0, 1)}
-        </ThemedText>
+        </Text >
       </View>
       <View>
-        <ThemedText type="barlowHard" style={{fontSize: moderateScale(20), color: "white"}}>{username}</ThemedText>
+        <Text type="barlowHard" style={{fontSize: moderateScale(20), color: "white"}}>{username}</Text>
         {/*Stats View*/}
         <View style={{flexDirection: 'row', alignItems: 'center', gap: moderateScale(5)}}>
           <Text

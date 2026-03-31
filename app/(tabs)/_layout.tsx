@@ -1,9 +1,7 @@
 import { ThemedText as Text } from '@/components/themed-text';
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { Pressable, View } from 'react-native';
-
-import { Shadow } from 'react-native-shadow-2';
+import { View } from 'react-native';
 
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -11,7 +9,6 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 //Used icons
 import Feather from '@expo/vector-icons/Feather';
 import Fontisto from '@expo/vector-icons/Fontisto';
-import Ionicons from '@expo/vector-icons/Ionicons';
 import Octicons from '@expo/vector-icons/Octicons';
 
 import { moderateScale } from 'react-native-size-matters';
@@ -40,75 +37,71 @@ export default function TabLayout() {
         <Tabs.Screen
           name="index"
           options={{
-            title: '피드',
+            tabBarLabel: ({ color }) => <Text style={{ color, fontSize: moderateScale(11) }}>피드</Text>,
             tabBarIcon: ({ color }) => <Octicons name="home" size={20} color={color} />,
           }}
         />
         <Tabs.Screen
           name="stats"
           options={{
-            title: '통계',
+            tabBarLabel: ({ color }) => <Text style={{ color, fontSize: moderateScale(11) }}>통계</Text>,
             tabBarIcon: ({ color }) => <Fontisto name="heartbeat-alt" size={20} color={color} />,
           }}
         />
         <Tabs.Screen
           name="scan"
           options={{
-            tabBarButton: (props) => (
+            tabBarLabel: ({ focused }) => (
+              <Text
+                style={{
+                  color: focused ? Colors.dark.tabIconSelected : '#FFFFFF',
+                  fontSize: moderateScale(11),
+                }}>
+                스캔
+              </Text>
+            ),
+            tabBarIcon: ({ focused }) => (
+              <Feather name="camera" size={20} color={focused ? Colors.dark.tabIconSelected : '#FFFFFF'} />
+            ),
+/*             tabBarButton: (props) => (
               <View style={[props.style, { justifyContent: 'center', alignItems: 'center' }]}>
                 <Pressable
                   onPress={props.onPress}
                   style={{ justifyContent: 'center', alignItems: 'center' }}
                 >
-                  <Shadow
-                    distance={moderateScale(10)}
-                    startColor={'#9DE0C038'}
-                    endColor={TAB_BAR_BG}
-                    offset={[0, 0]}
-                    style={{ borderRadius: moderateScale(15) }}
+                  <View
+                    style={{
+                      paddingHorizontal: moderateScale(15),
+                      paddingVertical: moderateScale(14),
+                      //backgroundColor: '#4CAE82',
+                      backgroundColor: "white",
+                      paddingTop: moderateScale(8),
+                      borderRadius: moderateScale(15),
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      flexDirection: 'row',
+                      gap: moderateScale(10),
+                    }}
                   >
-                    <View
+                    <Ionicons name="camera" size={moderateScale(20)} color="black" />
+                    <Text
                       style={{
-                        width: moderateScale(50),
-                        height: moderateScale(50),
-                        backgroundColor: '#4CAE82',
-                        paddingTop: moderateScale(5),
-                        borderRadius: moderateScale(15),
-                        justifyContent: 'center',
-                        alignItems: 'center',
+                        color: 'black',
+                        fontSize: moderateScale(11),
                       }}
                     >
-                      <Ionicons name="scan" size={moderateScale(20)} color="white" />
-                      <Text
-                        style={{
-                          color: 'white',
-                          fontSize: moderateScale(10),
-                        }}
-                      >
-                        스 캔
-                      </Text>
-                    </View>
-                  </Shadow>
+                      스 캔
+                    </Text>
+                  </View>
                 </Pressable>
               </View>
-            ),
+            ), */
           }}
-        /*
-        options={{
-          title: '스캔',
-          tabBarIcon: ({ color }) => <Feather name="camera" size={20} color={color} />,
-          tabBarIconStyle: {
-            padding: moderateScale(15),
-            borderRadius: moderateScale(5),
-            backgroundColor: "#4CAE82",
-          }
-        }}
-        */
         />
         <Tabs.Screen
           name="profile"
           options={{
-            title: '내 정보',
+            tabBarLabel: ({ color }) => <Text style={{ color, fontSize: moderateScale(11) }}>내 정보</Text>,
             tabBarIcon: ({ color }) => <Feather name="users" size={20} color={color} />,
           }}
         />

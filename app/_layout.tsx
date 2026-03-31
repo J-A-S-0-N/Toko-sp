@@ -14,6 +14,7 @@ export const unstable_settings = {
   anchor: '(tabs)',
 };
 
+//{rop to disable font scaling
 (Text as any).defaultProps = (Text as any).defaultProps || {};
 (Text as any).defaultProps.style = { fontFamily: 'Pretendard-Bold' }; 
 

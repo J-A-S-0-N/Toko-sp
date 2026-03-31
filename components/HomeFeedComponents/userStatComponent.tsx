@@ -1,31 +1,31 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
-import { ThemedText } from "../themed-text";
+import { ThemedText as Text } from "../themed-text";
 
 const UserStatComponent = () => {
   return (
     <View style={styles.container}>
       {/*best*/}
       <View style={styles.statBlock}>
-        <ThemedText type="barlowHard" style={styles.valueBest}>
+        <Text type="barlowHard" style={styles.valueBest}>
           23
-        </ThemedText>
+        </Text>
         <Text style={styles.label}>최저 (18홀 기준)</Text>
       </View>
       <View style={styles.separator} />
       {/*avg*/}
       <View style={styles.statBlock}>
-        <ThemedText type="barlowHard" style={styles.valueAvg}>
+        <Text type="barlowHard" style={styles.valueAvg}>
           80.2
-        </ThemedText>
+        </Text>
         <Text style={styles.label}>AVG (평균)</Text>
       </View>
       <View style={styles.separator} />
       {/*monthly round count*/}
       <View style={styles.statBlock}>
-        <ThemedText type="barlowHard" style={styles.valueMonthly}>
+        <Text type="barlowHard" style={styles.valueMonthly}>
           +23.5
-        </ThemedText>
+        </Text>
         <Text style={styles.label}>저번달 대비 -/+</Text>
       </View>
     </View>

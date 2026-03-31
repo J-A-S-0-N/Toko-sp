@@ -1,6 +1,6 @@
-import { ThemedText } from "@/components/themed-text";
+import { ThemedText as Text } from "@/components/themed-text";
 import { LinearGradient } from "expo-linear-gradient";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
 
 const WeeklySummaryComponent = () => {
@@ -14,50 +14,50 @@ const WeeklySummaryComponent = () => {
       <View style={styles.headerRow}>
         <View>
           <Text style={styles.headerLabel}>이번 주 요약</Text>
-          <ThemedText type="barlowHard" style={styles.weekRange}>
+          <Text type="barlowHard" style={styles.weekRange}>
             2월 17일 - 23일
-          </ThemedText>
+          </Text>
         </View>
 
         <View style={styles.deltaBadge}>
-          <ThemedText type="barlowLight" style={styles.deltaBadgeText}>
+          <Text type="barlowLight" style={styles.deltaBadgeText}>
             ↑ 2.5타
-          </ThemedText>
+          </Text>
         </View>
       </View>
 
       <View style={styles.statsRow}>
         <View style={styles.statItem}>
-          <ThemedText type="barlowHard" style={styles.statValue}>
+          <Text type="barlowHard" style={styles.statValue}>
             2
-          </ThemedText>
+          </Text>
           <Text style={styles.statLabel}>라운드</Text>
         </View>
 
         <View style={styles.separator} />
 
         <View style={styles.statItem}>
-          <ThemedText type="barlowHard" style={styles.statValue}>
+          <Text type="barlowHard" style={styles.statValue}>
             79.5
-          </ThemedText>
+          </Text>
           <Text style={styles.statLabel}>평균</Text>
         </View>
 
         <View style={styles.separator} />
 
         <View style={styles.statItem}>
-          <ThemedText type="barlowHard" style={styles.statValueAccent}>
+          <Text type="barlowHard" style={styles.statValueAccent}>
             78
-          </ThemedText>
+          </Text>
           <Text style={styles.statLabel}>최고</Text>
         </View>
 
         <View style={styles.separator} />
 
         <View style={[styles.statItem, styles.comparisonStatItem]}>
-          <ThemedText type="barlowHard" style={styles.statValueAccentKor}>
+          <Text type="barlowHard" style={styles.statValueAccentKor}>
             {"지난주\n대비"}
-          </ThemedText>
+          </Text>
           <Text style={styles.statLabel}>-2.5타</Text>
         </View>
       </View>
