@@ -41,16 +41,16 @@ const styles = StyleSheet.create({
     marginBottom: moderateScale(10),
   },
   tipIcon: {
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(16),
     color: "#A8C5FF",
   },
   headerText: {
     color: "#A8C5FF",
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(16),
   },
   tipText: {
     color: "#F4F8FF",
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(15),
     //lineHeight: moderateScale(25),
     letterSpacing: -0.2,
   },

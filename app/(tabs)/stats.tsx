@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
   },
   brandText: {
     color: "#E8ECEA",
-    fontSize: moderateScale(26),
+    fontSize: moderateScale(29),
     letterSpacing: 0.5,
   },
   pill: {
@@ -135,13 +135,14 @@ const styles = StyleSheet.create({
     borderRadius: moderateScale(20),
   },
   pillText: {
-    color: "#6E7171",
-    fontSize: moderateScale(11),
+    //color: "#6E7171",
+    color: "white",
+    fontSize: moderateScale(16),
   },
   sectionLabel: {
     marginTop: moderateScale(5),
     color: "#6F7775",
-    fontSize: moderateScale(20),
+    fontSize: moderateScale(23),
     letterSpacing: 1.3,
   },
   chartContainer: {
@@ -164,6 +165,6 @@ const styles = StyleSheet.create({
   },
   valueLabel: {
     color: "#8C9492",
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(15),
   },
 });

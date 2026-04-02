@@ -11,7 +11,7 @@ import { useEffect } from 'react';
 import { Text } from 'react-native';
 
 export const unstable_settings = {
-  anchor: '(tabs)',
+  anchor: '(onboarding)',
 };
 
 //{rop to disable font scaling
@@ -55,6 +55,7 @@ export default function RootLayout() {
             contentStyle: { backgroundColor: '#0F0F0F' }
           }}
         >
+          <Stack.Screen name="(onboarding)" options={{ headerShown: false, animation: "none"}} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="(scan)" options={{ headerShown: false }} />
           <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
@@ -77,7 +78,7 @@ export default function RootLayout() {
             }} 
           />
         </Stack>
-      <StatusBar style="auto" />
+      <StatusBar style="light" />
       </GestureHandlerRootView>
     </ThemeProvider>
   );

@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
   howToTitle: {
     paddingHorizontal: moderateScale(10),
     color: "#636A6E",
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(15),
   },
   guideList: {
     paddingHorizontal: moderateScale(10),
@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
   },
   guideIndex: {
     color: "#46C396",
-    fontSize: moderateScale(19),
+    fontSize: moderateScale(20),
     width: moderateScale(20),
   },
   guideTextWrap: {
@@ -78,13 +78,13 @@ const styles = StyleSheet.create({
   },
   guideTitle: {
     color: "#EDF1EE",
-    fontSize: moderateScale(16.5),
+    fontSize: moderateScale(17.5),
     lineHeight: moderateScale(20),
   },
   guideDesc: {
     marginTop: moderateScale(4),
     color: "#61696B",
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(14),
   },
 });
 

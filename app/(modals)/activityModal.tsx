@@ -1,11 +1,11 @@
-import { ThemedText } from "@/components/themed-text";
+import { ThemedText as Text } from "@/components/themed-text";
 import { db } from "@/config/firebase";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import { doc, getDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
@@ -314,12 +314,12 @@ export default function ActivityModal() {
 
           {/* Course info */}
           <View style={{ marginBottom: moderateScale(20) }}>
-            <ThemedText
+            <Text
               type="barlowHard"
               style={styles.courseName}
             >
               {fieldName}
-            </ThemedText>
+            </Text>
             <View style={styles.locationRow}>
               <Text style={styles.locationText}>{fieldAddress}</Text>
               <View style={styles.locationDot} />
@@ -330,36 +330,36 @@ export default function ActivityModal() {
           {/* Score summary */}
           <View style={styles.scoreRow}>
             <View>
-              <ThemedText
+              <Text
                 type="barlowHard"
                 style={styles.totalScore}
               >
                 {score}
-              </ThemedText>
+              </Text>
               <View style={styles.totalDeltaRow}>
-                <ThemedText style={styles.totalDeltaText} type="barlowLight">{delta}</ThemedText>
+                <Text style={styles.totalDeltaText} type="barlowLight">{delta}</Text>
               </View>
-              <ThemedText style={styles.parText} type="barlowLight">Par {fieldPar}</ThemedText>
+              <Text style={styles.parText} type="barlowLight">Par {fieldPar}</Text>
             </View>
 
             <View style={styles.summaryStatsRow}>
               {eagleCount.length > 0 && (
                 <View style={styles.summaryStat}>
-                  <ThemedText type="barlowLight" style={[styles.summaryValue, { color: "#D4AF37" }]}>{eagleCount.length}</ThemedText>
-                  <ThemedText style={styles.summaryLabel}>이글</ThemedText>
+                  <Text type="barlowLight" style={[styles.summaryValue, { color: "#D4AF37" }]}>{eagleCount.length}</Text>
+                  <Text style={styles.summaryLabel}>이글</Text>
                 </View>
               )}
               <View style={styles.summaryStat}>
-                <ThemedText type="barlowLight" style={[styles.summaryValue, { color: "#4CAE82" }]}>{birdieCount.length}</ThemedText>
-                <ThemedText style={styles.summaryLabel}>버디</ThemedText>
+                <Text type="barlowLight" style={[styles.summaryValue, { color: "#4CAE82" }]}>{birdieCount.length}</Text>
+                <Text style={styles.summaryLabel}>버디</Text>
               </View>
               <View style={styles.summaryStat}>
-                <ThemedText type="barlowLight" style={[styles.summaryValue, { color: "#FFFFFF" }]}>{parCount.length}</ThemedText>
-                <ThemedText style={styles.summaryLabel}>파</ThemedText>
+                <Text type="barlowLight" style={[styles.summaryValue, { color: "#FFFFFF" }]}>{parCount.length}</Text>
+                <Text style={styles.summaryLabel}>파</Text>
               </View>
               <View style={styles.summaryStat}>
-                <ThemedText type="barlowLight" style={[styles.summaryValue, { color: "#E83F40" }]}>{bogeyCount.length}</ThemedText>
-                <ThemedText style={styles.summaryLabel}>보기</ThemedText>
+                <Text type="barlowLight" style={[styles.summaryValue, { color: "#E83F40" }]}>{bogeyCount.length}</Text>
+                <Text style={styles.summaryLabel}>보기</Text>
               </View>
             </View>
           </View>
@@ -382,7 +382,7 @@ export default function ActivityModal() {
               return (
                 <View key={item.index}>
                   <View style={styles.tableRow}>
-                    <ThemedText type="barlowLight" style={[styles.holeText, { flex: 2 }]}>{item.index}   홀</ThemedText>
+                    <Text type="barlowLight" style={[styles.holeText, { flex: 2 }]}>{item.index}   홀</Text>
                     <Text style={[styles.parValueText, { flex: 1, textAlign: "center" }]}>
                       {parHit[index].parCount}
                     </Text>
@@ -418,6 +418,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#0F0F0F",
   },
   scrollContent: {
+    paddingVertical: moderateScale(10),
     paddingHorizontal: moderateScale(12),
     paddingBottom: moderateScale(24),
   },
@@ -433,11 +434,11 @@ const styles = StyleSheet.create({
     gap: moderateScale(2),
   },
   backText: {
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(16),
     color: "#FFFFFF",
   },
   courseName: {
-    fontSize: moderateScale(25),
+    fontSize: moderateScale(27),
     color: "white",
   },
   locationRow: {
@@ -447,7 +448,7 @@ const styles = StyleSheet.create({
     marginTop: moderateScale(4),
   },
   locationText: {
-    fontSize: moderateScale(11),
+    fontSize: moderateScale(13),
     color: "#6E7171",
   },
   locationDot: {
@@ -463,8 +464,8 @@ const styles = StyleSheet.create({
     marginBottom: moderateScale(24),
   },
   totalScore: {
-    fontSize: moderateScale(60),
-    lineHeight: moderateScale(60),
+    fontSize: moderateScale(62),
+    lineHeight: moderateScale(62),
     color: "#E83F40",
   },
   totalDeltaRow: {
@@ -473,11 +474,11 @@ const styles = StyleSheet.create({
     marginTop: moderateScale(2),
   },
   totalDeltaText: {
-    fontSize: moderateScale(18),
+    fontSize: moderateScale(20),
     color: "#E83F40",
   },
   parText: {
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(15),
     color: "#6E7171",
     marginTop: moderateScale(4),
   },
@@ -490,10 +491,10 @@ const styles = StyleSheet.create({
     marginLeft: moderateScale(20),
   },
   summaryValue: {
-    fontSize: moderateScale(20),
+    fontSize: moderateScale(22),
   },
   summaryLabel: {
-    fontSize: moderateScale(11),
+    fontSize: moderateScale(13),
     color: "#6E7171",
     marginTop: moderateScale(1),
   },
@@ -501,7 +502,7 @@ const styles = StyleSheet.create({
     marginBottom: moderateScale(8),
   },
   sectionTitle: {
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(14),
     color: "#6E7171",
   },
   tableHeaderRow: {
@@ -510,7 +511,7 @@ const styles = StyleSheet.create({
     marginBottom: moderateScale(8),
   },
   tableHeaderText: {
-    fontSize: moderateScale(11),
+    fontSize: moderateScale(13),
     color: "#6E7171",
   },
   tableContainer: {
@@ -521,11 +522,11 @@ const styles = StyleSheet.create({
     paddingVertical: moderateScale(6),
   },
   holeText: {
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(18),
     color: "#FFFFFF",
   },
   parValueText: {
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(15),
     color: "#FFFFFF",
   },
   scoreCell: {
@@ -543,11 +544,11 @@ const styles = StyleSheet.create({
     marginRight: moderateScale(8),
   },
   scoreStrokeText: {
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(15),
     color: "#FFFFFF",
   },
   scoreDeltaText: {
-    fontSize: moderateScale(11),
+    fontSize: moderateScale(13),
     color: "#6E7171",
     minWidth: moderateScale(20),
     textAlign: "right",

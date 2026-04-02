@@ -46,13 +46,13 @@ const UsernameHeader = () => {
         {/*Stats View*/}
         <View style={{flexDirection: 'row', alignItems: 'center', gap: moderateScale(5)}}>
           <Text
-          style={{fontSize: moderateScale(11), color: "#6E7171"}}
+          style={{fontSize: moderateScale(13), color: "#6E7171"}}
           >+{stats.handi} 핸디캡</Text>
          <View
-          style={{width: moderateScale(3), height: moderateScale(3), borderRadius: moderateScale(5), backgroundColor: "#6E7171"}}
+          style={{width: moderateScale(4), height: moderateScale(4), borderRadius: moderateScale(5), backgroundColor: "#6E7171"}}
           ></View>
           <Text
-          style={{fontSize: moderateScale(11), color: "#6E7171"}}
+          style={{fontSize: moderateScale(13), color: "#6E7171"}}
           >{stats.rounds}회 라운딩</Text>
         </View>
       </View>

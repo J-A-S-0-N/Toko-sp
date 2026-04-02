@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     color: "#6F7775",
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(16),
     letterSpacing: 1,
     marginBottom: moderateScale(12),
   },
@@ -73,16 +73,16 @@ const styles = StyleSheet.create({
   parLabel: {
     //color: "#6F7775",
     color: "#ffffff",
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(16),
     letterSpacing: 0.8,
   },
   averageValue: {
-    fontSize: moderateScale(30),
+    fontSize: moderateScale(24),
     //lineHeight: moderateScale(64),
     paddingVertical: moderateScale(4),
   },
   deltaText: {
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(15),
     letterSpacing: 0.4,
   },
 });

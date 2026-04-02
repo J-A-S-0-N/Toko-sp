@@ -70,13 +70,13 @@ const styles = StyleSheet.create({
   },
   streakHeading: {
     color: "#ffffff",
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(16),
     letterSpacing: 1.6,
   },
   streakValue: {
     color: "#45D07F",
-    fontSize: moderateScale(45),
-    lineHeight: moderateScale(52),
+    fontSize: moderateScale(44),
+    lineHeight: moderateScale(55),
     marginTop: moderateScale(10),
   },
   currentStreakValue: {
@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
   },
   streakSubText: {
     color: "#8A9491",
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(15),
     marginTop: moderateScale(8),
   },
   segmentRow: {
@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
   },
   lastRoundsText: {
     color: "#7A8482",
-    fontSize: moderateScale(11),
+    fontSize: moderateScale(13),
     marginTop: moderateScale(5),
   },
 });

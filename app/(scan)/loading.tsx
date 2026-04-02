@@ -161,8 +161,6 @@ export default function LoadingScreen() {
           const status = snapshot.data()?.status;
           if (status === "pending") return;
 
-          console.error("somethings changed", status);
-
           unsubscribeStatusListener?.();
           unsubscribeStatusListener = null;
 

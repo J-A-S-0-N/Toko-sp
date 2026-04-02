@@ -80,13 +80,13 @@ const styles = StyleSheet.create({
   },
   headerLabel: {
     color: "#53D39A",
-    fontSize: moderateScale(11),
+    fontSize: moderateScale(12),
     marginBottom: moderateScale(6),
   },
   weekRange: {
     color: "#FFFFFF",
-    fontSize: moderateScale(23),
-    lineHeight: moderateScale(30),
+    fontSize: moderateScale(24),
+    lineHeight: moderateScale(33),
   },
   deltaBadge: {
     backgroundColor: "#174D37",
@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
   deltaBadgeText: {
     color: "#56E6A5",
     fontSize: moderateScale(15),
-    lineHeight: moderateScale(18),
+    lineHeight: moderateScale(20),
   },
   statsRow: {
     marginTop: moderateScale(16),
@@ -118,22 +118,22 @@ const styles = StyleSheet.create({
   statValue: {
     color: "#FFFFFF",
     fontSize: moderateScale(25),
-    lineHeight: moderateScale(30),
+    lineHeight: moderateScale(33),
   },
   statValueAccent: {
     color: "#45DB96",
     fontSize: moderateScale(25),
-    lineHeight: moderateScale(30),
+    lineHeight: moderateScale(33),
   },
   statValueAccentKor: {
     color: "#45DB96",
-    fontSize: moderateScale(18),
-    lineHeight: moderateScale(22),
+    fontSize: moderateScale(19),
+    lineHeight: moderateScale(25),
   },
   statLabel: {
     marginTop: moderateScale(4),
     color: "#83968C",
-    fontSize: moderateScale(11),
+    fontSize: moderateScale(12),
   },
   separator: {
     width: moderateScale(1),

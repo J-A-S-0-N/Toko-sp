@@ -1,6 +1,7 @@
+import { ThemedText as Text } from '@/components/themed-text';
 import { router } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Modal, Pressable, StyleSheet, View } from 'react-native';
 import { moderateScale } from 'react-native-size-matters';
 
 type HoleSelectionModalProps = {
@@ -205,6 +206,7 @@ export default function HoleSelectionModal({
                     styles.optionValue,
                     { color: nineValueColor },
                   ]}
+                  allowFontScaling={false}
                 >
                   9 홀
                 </Animated.Text>
@@ -213,6 +215,7 @@ export default function HoleSelectionModal({
                     styles.optionSubLabel,
                     { color: nineSubLabelColor },
                   ]}
+                  allowFontScaling={false}
                 >
                   사진 1장
                 </Animated.Text>
@@ -239,6 +242,7 @@ export default function HoleSelectionModal({
                     styles.optionValue,
                     { color: eighteenValueColor },
                   ]}
+                  allowFontScaling={false}
                 >
                   18 홀
                 </Animated.Text>
@@ -247,6 +251,7 @@ export default function HoleSelectionModal({
                     styles.optionSubLabel,
                     { color: eighteenSubLabelColor },
                   ]}
+                  allowFontScaling={false}
                 >
                   사진 2장
                 </Animated.Text>
@@ -289,14 +294,14 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   title: {
-    fontSize: moderateScale(20),
+    fontSize: moderateScale(22),
     fontWeight: '800',
     color: '#FFFFFF',
     marginBottom: 8,
     letterSpacing: -0.6,
   },
   description: {
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(14),
     color: '#8B9199',
     marginBottom: 20,
   },
@@ -318,17 +323,17 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   optionValue: {
-    fontSize: moderateScale(20),
+    fontSize: moderateScale(26),
     fontWeight: '800',
     marginBottom: 4,
   },
   optionLabel: {
-    fontSize: 20,
+    fontSize: 21,
     fontWeight: '700',
     marginBottom: 8,
   },
   optionSubLabel: {
-    fontSize: 16,
+    fontSize: 17,
   },
   button: {
     width: '100%',
@@ -342,6 +347,6 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#FFFFFF',
     fontWeight: '700',
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(15),
   },
 });

@@ -45,7 +45,7 @@ export default function ScoreDistribution({
 
             return (
               <View key={item.label} style={styles.column}>
-                <Text type="barlowHard" style={styles.valueText}>
+                <Text type="barlowHard" style={styles.scoreValue}>
                   {item.count}
                 </Text>
                 <View style={[styles.bar, { height: barHeight, backgroundColor: item.barColor }]} />
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     color: "#6F7775",
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(17),
     letterSpacing: 1,
     marginBottom: moderateScale(12),
   },
@@ -91,9 +91,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "flex-end",
   },
-  valueText: {
-    color: "#9BA39F",
-    fontSize: moderateScale(16),
+  scoreValue: {
+    color: "#ffffff",
+    fontSize: moderateScale(28),
     marginBottom: moderateScale(8),
   },
   bar: {
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
   },
   labelText: {
     color: "#6E7775",
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(15),
     marginTop: moderateScale(10),
   },
 });

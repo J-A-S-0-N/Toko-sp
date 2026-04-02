@@ -112,13 +112,13 @@ const styles = StyleSheet.create({
   },
   scanTitle: {
     color: "#EEF2EF",
-    fontSize: moderateScale(17),
+    fontSize: moderateScale(18),
     textAlign: "center",
   },
   scanSubtitle: {
     marginTop: moderateScale(3),
     color: "#5E666A",
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(15),
     textAlign: "center",
   },
   actionRow: {
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
   },
   primaryActionText: {
     color: "#FFFFFF",
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(16),
   },
   secondaryAction: {
     flex: 1,
@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
   },
   secondaryActionText: {
     color: "#E5E9E6",
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(15),
   },
 });
 

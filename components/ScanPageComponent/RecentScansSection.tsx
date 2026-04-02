@@ -72,11 +72,11 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     color: "#E5E9E6",
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(17),
   },
   sectionAction: {
     color: "#45BF8F",
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(13),
   },
   recentContainer: {
     paddingLeft: moderateScale(10),
@@ -97,11 +97,11 @@ const styles = StyleSheet.create({
   },
   recentDate: {
     color: "#636A6C",
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(13),
   },
   recentCourse: {
     color: "#EDF0ED",
-    fontSize: moderateScale(17),
+    fontSize: moderateScale(18),
     lineHeight: moderateScale(20),
   },
   scoreRow: {
@@ -112,12 +112,12 @@ const styles = StyleSheet.create({
   },
   recentScore: {
     color: "#FF4E57",
-    fontSize: moderateScale(35),
+    fontSize: moderateScale(36),
     lineHeight: moderateScale(44),
   },
   recentDiff: {
     color: "#D9474F",
-    fontSize: moderateScale(17),
+    fontSize: moderateScale(18),
     paddingBottom: moderateScale(6),
   },
 });

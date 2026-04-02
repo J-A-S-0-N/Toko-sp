@@ -98,7 +98,7 @@ export default function RecentRoundComponent() {
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
           {/* Left Side */}
           <View>
-            <Text type="barlowHard" style={{ fontSize: moderateScale(20), color: "white" }}>{round.courseName}</Text>
+            <Text type="barlowHard" style={{ fontSize: moderateScale(23), color: "white" }}>{round.courseName}</Text>
             <View
               style={{
                 flexDirection: "row",
@@ -107,21 +107,21 @@ export default function RecentRoundComponent() {
               }}
             >
               {/* <ThemedText type="barlowLight" style={{ fontSize: moderateScale(11), color: "#6E7171" }}>{round.location}</ThemedText> */}
-              <Text style={{ fontSize: moderateScale(11), color: "#6E7171" }}>{round.location}</Text>
+              <Text style={{ fontSize: moderateScale(14), color: "#6E7171" }}>{round.location}</Text>
               <View
                 style={{ width: moderateScale(2), height: moderateScale(2), borderRadius: moderateScale(5), backgroundColor: "#6E7171" }}
               />
-              <Text style={{ fontSize: moderateScale(11), color: "#6E7171" }}>{formatDate(round.date)}</Text>
+              <Text style={{ fontSize: moderateScale(14), color: "#6E7171" }}>{formatDate(round.date)}</Text>
             </View>
           </View>
 
           {/* Right Side */}
-          <Text type="barlowHard" style={{ fontSize: moderateScale(50), lineHeight: moderateScale(50), color: "#E83F40" }}>{round.score}</Text>
+          <Text type="barlowHard" style={{ fontSize: moderateScale(53), lineHeight: moderateScale(54), color: "#E83F40" }}>{round.score}</Text>
         </View>
         {/* Height 2 */}
         {/* Score Delta */}
         <View style={{ alignItems: "flex-end" }}>
-          <Text type="barlowLight" style={{ fontSize: moderateScale(11), color: "#E83F40" }}>{getScoreDelta(round.score, round.coursePar) > 0 ? "+" : ""}{getScoreDelta(round.score, round.coursePar)}</Text>
+          <Text type="barlowLight" style={{ fontSize: moderateScale(14), color: "#E83F40" }}>{getScoreDelta(round.score, round.coursePar) > 0 ? "+" : ""}{getScoreDelta(round.score, round.coursePar)}</Text>
         </View>
         {/* Separator */}
         <View
@@ -147,10 +147,10 @@ export default function RecentRoundComponent() {
                 />
               )}
               <View style={{ flex: 1, alignItems: "center" }}>
-                <Text type="barlowHard" style={{ fontSize: moderateScale(25), color: "white" }}>
+                <Text type="barlowHard" style={{ fontSize: moderateScale(29), color: "white" }}>
                   {stat.value}
                 </Text>
-                <Text style={{ fontSize: moderateScale(12), color: "#6E7171", marginTop: moderateScale(2) }}>
+                <Text style={{ fontSize: moderateScale(16), color: "#6E7171", marginTop: moderateScale(2) }}>
                   {stat.label}
                 </Text>
               </View>
@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
     //alignItems: "center",
   },
   title: {
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(16),
     color: "#6E7171",
     marginBottom: moderateScale(10),
   },

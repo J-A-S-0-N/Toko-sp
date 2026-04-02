@@ -48,15 +48,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   valueBest: {
-    fontSize: moderateScale(25),
+    fontSize: moderateScale(28),
     color: "#3DBF6E",
   },
   valueAvg: {
-    fontSize: moderateScale(25),
+    fontSize: moderateScale(28),
     color: "white",
   },
   valueMonthly: {
-    fontSize: moderateScale(25),
+    fontSize: moderateScale(28),
     color: "#3DBF6E",
   },
   label: {

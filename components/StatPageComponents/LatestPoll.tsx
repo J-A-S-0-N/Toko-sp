@@ -71,7 +71,7 @@ export default function LatestPool() {
 const styles = StyleSheet.create({
   sectionTitle: {
     color: "#6F7775",
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(16),
     letterSpacing: 1.2,
     marginBottom: moderateScale(10),
   },
@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
   date: {
     width: moderateScale(52),
     color: "#76807D",
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(17),
   },
   barTrack: {
     flex: 1,
@@ -115,11 +115,11 @@ const styles = StyleSheet.create({
   },
   score: {
     color: "#FF4F5F",
-    fontSize: moderateScale(25),
-    lineHeight: moderateScale(25),
+    fontSize: moderateScale(28),
+    lineHeight: moderateScale(27),
   },
   delta: {
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(15),
   },
   deltaPositive: {
     color: "#FF4F5F",

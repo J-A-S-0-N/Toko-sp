@@ -94,12 +94,12 @@ export default function HandiCapGraph({ headlineDelta, trendLabels }: GraphStatP
             // X-axis labels
             xAxisLabelTextStyle={{
               color: "#999",
-              fontSize: 11,
+              fontSize: 14,
               fontFamily: "BarlowCondensed_400Regular",
               width: 28,
               textAlign: "center",
             }}
-            yAxisTextStyle={{ color: "#999", fontSize: 11 }}
+            yAxisTextStyle={{ color: "#999", fontSize: 14 }}
             // Grid
             rulesColor="#414141"
             rulesType="solid"
@@ -149,7 +149,7 @@ export default function HandiCapGraph({ headlineDelta, trendLabels }: GraphStatP
 const styles = StyleSheet.create({
   sectionTitle: {
     color: "#6F7775",
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(16),
     letterSpacing: 1.2,
     marginBottom: moderateScale(5),
   },
@@ -164,15 +164,15 @@ const styles = StyleSheet.create({
   trendMeta: {
     color: "#ffffff",
     letterSpacing: 1.2,
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(16),
   },
   trendHeadline: {
     color: "#4DAE82",
-    fontSize: moderateScale(30),
+    fontSize: moderateScale(33),
   },
   trendSub: {
     color: "#7E8784",
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(15),
     marginTop: moderateScale(2),
     marginBottom: moderateScale(8),
   },
@@ -191,15 +191,15 @@ const styles = StyleSheet.create({
   },
   statsValue: {
     color: "#9B9C9B",
-    fontSize: moderateScale(24),
+    fontSize: moderateScale(27),
   },
   statsValueSpecial: {
     color: "#3CC06E",
-    fontSize: moderateScale(24),
+    fontSize: moderateScale(27),
   },
   statsLabel: {
     color: "#6E7271",
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(17),
   },
   chartLabelsRow: {
     marginTop: moderateScale(8),
@@ -209,6 +209,6 @@ const styles = StyleSheet.create({
   },
   chartLabel: {
     color: "#6F7775",
-    fontSize: moderateScale(10),
+    fontSize: moderateScale(13),
   },
 });

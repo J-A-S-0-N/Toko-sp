@@ -19,7 +19,7 @@ const HomeFeedHeader = () => {
         }}
       >
         <Text
-          style={{fontSize: moderateScale(11), color: "#6E7171"}}
+          style={{fontSize: moderateScale(13), color: "white"}}
         >내 피드</Text>
       </View>
     </View>

@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
   },
   headerLabel: {
     color: "#58B9FF",
-    fontSize: moderateScale(11),
+    fontSize: moderateScale(12),
     marginBottom: moderateScale(8),
   },
   tempRow: {
@@ -67,8 +67,8 @@ const styles = StyleSheet.create({
   },
   tempValue: {
     color: "#FFFFFF",
-    fontSize: moderateScale(40),
-    lineHeight: moderateScale(52),
+    fontSize: moderateScale(45),
+    lineHeight: moderateScale(55),
   },
   detailText: {
     marginTop: moderateScale(6),
@@ -87,13 +87,13 @@ const styles = StyleSheet.create({
   },
   recommendationLabel: {
     color: "#53D2C0",
-    fontSize: moderateScale(11),
+    fontSize: moderateScale(12),
     marginBottom: moderateScale(4),
   },
   recommendationValue: {
     color: "#FFFFFF",
-    fontSize: moderateScale(20),
-    lineHeight: moderateScale(34),
+    fontSize: moderateScale(21),
+    lineHeight: moderateScale(37),
   },
 });
 

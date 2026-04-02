@@ -1,9 +1,9 @@
-import { ThemedText } from "@/components/themed-text";
+import { ThemedText as Text } from "@/components/themed-text";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
@@ -37,7 +37,7 @@ export default function SetGoalModal() {
           </View>
 
           <View style={styles.titleBlock}>
-            <ThemedText type="barlowHard" style={styles.titleText}>목표 설정</ThemedText>
+            <Text type="barlowHard" style={styles.titleText}>목표 설정</Text>
             <Text style={styles.subtitleText}>현재 평균 스코어: 78타</Text>
           </View>
 
@@ -49,11 +49,11 @@ export default function SetGoalModal() {
                 onPress={() => setTargetScore((prev) => Math.max(60, prev - 1))}
                 style={styles.circleButton}
               >
-                <ThemedText type="barlowLight" style={styles.circleSymbol}>-</ThemedText>
+                <Text type="barlowLight" style={styles.circleSymbol}>-</Text>
               </TouchableOpacity>
 
               <View style={styles.scoreCenterBlock}>
-                <ThemedText type="barlowHard" style={styles.scoreValue}>{targetScore}</ThemedText>
+                <Text type="barlowHard" style={styles.scoreValue}>{targetScore}</Text>
                 <Text style={styles.scoreSubText}>목표 타수</Text>
               </View>
 
@@ -62,7 +62,7 @@ export default function SetGoalModal() {
                 onPress={() => setTargetScore((prev) => Math.min(120, prev + 1))}
                 style={styles.circleButton}
               >
-                <ThemedText type="barlowLight" style={styles.circleSymbol}>+</ThemedText>
+                <Text type="barlowLight" style={styles.circleSymbol}>+</Text>
               </TouchableOpacity>
             </View>
 
@@ -76,9 +76,9 @@ export default function SetGoalModal() {
                     activeOpacity={0.85}
                     style={[styles.optionChip, selected && styles.optionChipActive]}
                   >
-                    <ThemedText type="barlowLight" style={[styles.optionChipText, selected && styles.optionChipTextActive]}>
+                    <Text type="barlowLight" style={[styles.optionChipText, selected && styles.optionChipTextActive]}>
                       {score}타
-                    </ThemedText>
+                    </Text>
                   </TouchableOpacity>
                 );
               })}
@@ -94,23 +94,23 @@ export default function SetGoalModal() {
             <Text style={styles.resultTitle}>목표 달성 시</Text>
             <View style={styles.resultStatsRow}>
               <View style={styles.resultStatItem}>
-                <ThemedText type="barlowHard" style={styles.resultValueGreen}>
+                <Text type="barlowHard" style={styles.resultValueGreen}>
                   {selectedScoreDelta > 0 ? `+${selectedScoreDelta}` : `${selectedScoreDelta}`}타
-                </ThemedText>
+                </Text>
                 <Text style={styles.resultLabel}>개선 목표</Text>
               </View>
 
               <View style={styles.resultDivider} />
 
               <View style={styles.resultStatItem}>
-                <ThemedText type="barlowHard" style={styles.resultValueAmber}>80s</ThemedText>
+                <Text type="barlowHard" style={styles.resultValueAmber}>80s</Text>
                 <Text style={styles.resultLabel}>달성 레벨</Text>
               </View>
 
               <View style={styles.resultDivider} />
 
               <View style={styles.resultStatItem}>
-                <ThemedText type="barlowHard" style={styles.resultValueWhite}>{selectedPeriod}</ThemedText>
+                <Text type="barlowHard" style={styles.resultValueWhite}>{selectedPeriod}</Text>
                 <Text style={styles.resultLabel}>목표 기간</Text>
               </View>
             </View>
@@ -128,9 +128,9 @@ export default function SetGoalModal() {
                     activeOpacity={0.85}
                     style={[styles.optionChip, selected && styles.periodChipActive]}
                   >
-                    <ThemedText type="barlowLight" style={[styles.optionChipText, selected && styles.optionChipTextActive]}>
+                    <Text type="barlowLight" style={[styles.optionChipText, selected && styles.optionChipTextActive]}>
                       {period}
-                    </ThemedText>
+                    </Text>
                   </TouchableOpacity>
                 );
               })}
@@ -138,7 +138,7 @@ export default function SetGoalModal() {
           </View>
 
           <TouchableOpacity style={styles.saveButton} activeOpacity={0.85}>
-            <ThemedText type="barlowLight" style={styles.saveButtonText}>목표 저장하기</ThemedText>
+            <Text type="barlowLight" style={styles.saveButtonText}>목표 저장하기</Text>
           </TouchableOpacity>
         </ScrollView>
       </SafeAreaView>
@@ -150,6 +150,7 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: "#0F0F0F",
+    paddingTop: moderateScale(10),
   },
   screenGlow: {
     position: "absolute",

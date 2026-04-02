@@ -107,15 +107,15 @@ const styles = StyleSheet.create({
     gap: moderateScale(3),
   },
   pinIcon: {
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(16),
   },
   titleText: {
     color: "#FFFFFF",
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(17),
   },
   viewAllText: {
     color: "#45D07F",
-    fontSize: moderateScale(11),
+    fontSize: moderateScale(13),
   },
   card: {
     backgroundColor: "#1F2222",
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
   },
   courseName: {
     color: "#FFFFFF",
-    fontSize: moderateScale(17),
+    fontSize: moderateScale(19),
     marginBottom: moderateScale(2),
   },
   subRow: {
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
   },
   metaText: {
     color: "#6E7171",
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(17),
   },
   metaSeparator: {
     width: moderateScale(2),
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
   },
   priceText: {
     color: "#8A9491",
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(16),
   },
   separator: {
     height: 1,

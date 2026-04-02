@@ -49,18 +49,19 @@ const styles = StyleSheet.create({
     marginRight: moderateScale(10),
   },
   icon: {
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(17),
   },
   title: {
     color: "#F2F5F4",
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(18),
   },
   subtitle: {
     marginTop: moderateScale(2),
     color: "#6F7775",
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(15),
   },
   actionButton: {
+    marginLeft: moderateScale(30),
     backgroundColor: "#173B2E",
     borderColor: "#2A7857",
     borderWidth: 1,
@@ -74,7 +75,7 @@ const styles = StyleSheet.create({
   },
   actionText: {
     color: "#48C28D",
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(15),
   },
 });
 

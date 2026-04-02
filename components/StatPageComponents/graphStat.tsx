@@ -62,7 +62,7 @@ export default function GraphStat({ headlineDelta, trendLabels }: GraphStatProps
         <Text type="barlowHard" style={styles.trendHeadline}>
           {headlineDelta}
         </Text>
-        <Text style={styles.trendSub}>2025년 8월 이후</Text>
+        <Text type="barlowLight" style={styles.trendSub}>2025년 8월 이후</Text>
         <View style={styles.chartWrap}>
           <LineChart
             data={data}
@@ -95,12 +95,12 @@ export default function GraphStat({ headlineDelta, trendLabels }: GraphStatProps
             // X-axis labels
             xAxisLabelTextStyle={{
               color: "#999",
-              fontSize: 11,
+              fontSize: 16,
               fontFamily: "BarlowCondensed_400Regular",
               width: 28,
               textAlign: "center",
             }}
-            yAxisTextStyle={{ color: "#999", fontSize: 11 }}
+            yAxisTextStyle={{ color: "#999", fontSize: 16 }}
             // Grid
             rulesColor="#414141"
             rulesType="solid"
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     color: "#6F7775",
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(16),
     letterSpacing: 1.2,
     marginBottom: moderateScale(5),
   },
@@ -145,15 +145,16 @@ const styles = StyleSheet.create({
   trendMeta: {
     color: "#ffffff",
     letterSpacing: 1.2,
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(18),
   },
   trendHeadline: {
     color: "#4DAE82",
-    fontSize: moderateScale(30),
+    fontSize: moderateScale(37),
+    letterSpacing: 2,
   },
   trendSub: {
     color: "#7E8784",
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(17),
     marginTop: moderateScale(2),
     marginBottom: moderateScale(8),
   },
@@ -169,6 +170,6 @@ const styles = StyleSheet.create({
   },
   chartLabel: {
     color: "#6F7775",
-    fontSize: moderateScale(10),
+    fontSize: moderateScale(15),
   },
 });
