@@ -59,7 +59,7 @@ export default function OnboardingThirdScreen() {
 
       <View style={styles.footer}>
         <OnboardingProgressIndicator step={2} initialStep={2} />
-        <Pressable style={styles.ctaButton} onPress={() => router.replace('/(tabs)')}>
+        <Pressable style={styles.ctaButton} onPress={() => router.replace('/(auth)')}>
           <View style={styles.ctaContent}>
             <Text type="barlowHard" style={styles.ctaText}>시작하기</Text>
             <Ionicons name="arrow-forward" size={20} color="#FFFFFF" />

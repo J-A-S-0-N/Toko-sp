@@ -1,4 +1,4 @@
-import { Platform, StyleSheet, Text, type TextProps } from 'react-native';
+import { StyleSheet, Text, type TextProps } from 'react-native';
 
 import { useThemeColor } from '@/hooks/use-theme-color';
 
@@ -31,7 +31,7 @@ export function ThemedText({
         type === "barlowLight" ? styles.barlowCondensedLight : undefined,
         style,
       ]}
-      {...(Platform.OS === 'android' && { includeFontPadding: false })}
+      //{...(Platform.OS === 'android' && { includeFontPadding: false })}
       {...rest}
     />
   );
@@ -63,6 +63,7 @@ const styles = StyleSheet.create({
   },
   barlowCondensedHard: {
     fontFamily: 'BarlowCondensed_900Black_Italic',
+    lineHeight: 24,
   },
   barlowCondensedLight: {
     fontFamily: 'BarlowCondensed_400Regular',
