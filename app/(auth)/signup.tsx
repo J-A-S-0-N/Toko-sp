@@ -1,6 +1,11 @@
+import { app } from "@/config/firebase";
+import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha';
 import { router } from 'expo-router';
 import { useMemo, useRef, useState } from 'react';
 import { Alert, Animated, Pressable, StyleSheet, TextInput, View } from 'react-native';
+
+// recaptcha function
+import { sendVerification } from './functions/authFunctions';
 
 import { ThemedText as Text } from '@/components/themed-text';
 import { moderateScale } from 'react-native-size-matters';
@@ -24,11 +29,14 @@ export default function SignupScreen() {
   }, [phoneNumber]);
 
   const isPhoneValid = phoneNumber.replace(/\D/g, '').length >= 10;
+  const hasPhoneValue = phoneNumber.replace(/\D/g, '').length > 0;
 
   const handlePhoneChange = (value: string) => {
     const digits = value.replace(/\D/g, '').slice(0, 11);
     setPhoneNumber(digits);
   };
+
+  const recaptchaVerifier = useRef(null);
 
   const handleCountryPress = () => {
     countryShake.stopAnimation();
@@ -65,72 +73,91 @@ export default function SignupScreen() {
     });
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!isPhoneValid) {
       return;
     }
 
-    router.push('/(onboarding)');
+    try {
+      const digitsOnly = phoneNumber.replace(/\D/g, '');
+      const e164PhoneNumber = `+82${digitsOnly.replace(/^0/, '')}`;
+
+      const verificationId = await sendVerification(e164PhoneNumber, recaptchaVerifier);
+
+      router.push({
+        pathname: '/(auth)/verification',
+        params: { phone: phoneNumber, verificationId },
+      });
+    } catch (error) {
+      Alert.alert('인증 실패', '인증번호 전송에 실패했어요. 잠시 후 다시 시도해 주세요.');
+    }
   };
 
+
   return (
-    <View style={styles.container}>
-      <View style={styles.mainArea}>
-        <View style={styles.header}>
-          <Pressable style={styles.iconButton} onPress={() => router.back()}>
-            <Text style={styles.backArrow}>‹</Text>
-          </Pressable>
-
-          <View style={styles.progressRow}>
-            <View style={[styles.progressSegment, styles.progressSegmentActive]} />
-            <View style={styles.progressSegment} />
-            <View style={styles.progressSegment} />
-            <View style={styles.progressSegment} />
-          </View>
-        </View>
-
-        <View style={styles.content}>
-          <Text type="barlowHard" style={styles.title}>
-            전화번호 입력
-          </Text>
-          <Text style={styles.description}>인증 코드를 문자로 발송합니다</Text>
-
-          <Animated.View style={{ transform: [{ translateX: countryShake }] }}>
-            <Pressable style={styles.countryInput} onPress={handleCountryPress}>
-              <View style={styles.countryLeft}>
-                <Text style={styles.countryFlag}>🇰🇷</Text>
-                <Text style={styles.countryLabel}>한국</Text>
-                <Text style={styles.countryCode}>+82</Text>
-              </View>
-              <Text style={styles.countryChevron}>▾</Text>
+    <>
+      <FirebaseRecaptchaVerifierModal
+        ref={recaptchaVerifier}
+        firebaseConfig={app.options}
+      />
+      <View style={styles.container}>
+        <View style={styles.mainArea}>
+          <View style={styles.header}>
+            <Pressable style={styles.iconButton} onPress={() => router.back()}>
+              <Text style={styles.backArrow}>‹</Text>
             </Pressable>
-          </Animated.View>
 
-          <View style={styles.phoneInputWrap}>
-            <Text style={styles.phonePrefix}>+82</Text>
-            <TextInput
-              value={formattedPhoneNumber}
-              onChangeText={handlePhoneChange}
-              keyboardType="number-pad"
-              placeholder="010-0000-0000"
-              placeholderTextColor="#586068"
-              style={styles.phoneInput}
-              maxLength={13}
-            />
+            <View style={styles.progressRow}>
+              <View style={[styles.progressSegment, styles.progressSegmentActive]} />
+              <View style={styles.progressSegment} />
+              <View style={styles.progressSegment} />
+              <View style={styles.progressSegment} />
+            </View>
           </View>
 
-          <Text style={styles.hint}>번호는 인증 목적으로만 사용됩니다</Text>
-        </View>
-      </View>
+          <View style={styles.content}>
+            <Text type="barlowHard" style={styles.title}>
+              전화번호 입력
+            </Text>
+            <Text style={styles.description}>인증 코드를 문자로 발송합니다</Text>
 
-      <Pressable
-        style={[styles.submitButton, !isPhoneValid && styles.submitButtonDisabled]}
-        disabled={!isPhoneValid}
-        onPress={handleSubmit}
-      >
-        <Text style={[styles.submitText, !isPhoneValid && styles.submitTextDisabled]}>인증번호 받기</Text>
-      </Pressable>
-    </View>
+            <Animated.View style={{ transform: [{ translateX: countryShake }] }}>
+              <Pressable style={styles.countryInput} onPress={handleCountryPress}>
+                <View style={styles.countryLeft}>
+                  <Text style={styles.countryFlag}>🇰🇷</Text>
+                  <Text style={styles.countryLabel}>한국</Text>
+                  <Text style={styles.countryCode}>+82</Text>
+                </View>
+                <Text style={styles.countryChevron}>▾</Text>
+              </Pressable>
+            </Animated.View>
+
+            <View style={[styles.phoneInputWrap, hasPhoneValue && styles.phoneInputWrapActive]}>
+              <Text style={styles.phonePrefix}>+82</Text>
+              <TextInput
+                value={formattedPhoneNumber}
+                onChangeText={handlePhoneChange}
+                keyboardType="number-pad"
+                placeholder="010-0000-0000"
+                placeholderTextColor="#586068"
+                style={styles.phoneInput}
+                maxLength={13}
+              />
+            </View>
+
+            <Text style={styles.hint}>번호는 인증 목적으로만 사용됩니다</Text>
+          </View>
+        </View>
+
+        <Pressable
+          style={[styles.submitButton, !isPhoneValid && styles.submitButtonDisabled]}
+          disabled={!isPhoneValid}
+          onPress={handleSubmit}
+        >
+          <Text style={[styles.submitText, !isPhoneValid && styles.submitTextDisabled]}>인증번호 받기</Text>
+        </Pressable>
+      </View>
+    </>
   );
 }
 
@@ -239,6 +266,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: moderateScale(10),
   },
+  phoneInputWrapActive: {
+    borderColor: '#4FB78A',
+  },
   phonePrefix: {
     color: '#7A8389',
     fontSize: moderateScale(13),
@@ -269,7 +299,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#171B1F',
   },
   submitText: {
-    color: '#07120D',
+    color: 'white',
     fontSize: moderateScale(18),
     fontFamily: 'Pretendard-Bold',
   },

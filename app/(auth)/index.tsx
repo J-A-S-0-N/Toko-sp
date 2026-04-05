@@ -14,7 +14,7 @@ export default function AuthEntryScreen() {
         </View>
 
         <Text type="barlowHard" style={styles.title}>
-          TOKO스포츠
+          TOKO스포츠 .
         </Text>
         <Text style={styles.subtitle}>골프를 더 스마트하게</Text>
 
@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: moderateScale(28),
     color: '#F4F7F6',
-    lineHeight: moderateScale(26),
+    lineHeight: moderateScale(30),
     //letterSpacing: 1.5,
   },
   subtitle: {
