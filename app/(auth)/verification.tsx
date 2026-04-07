@@ -6,6 +6,7 @@ import { moderateScale } from 'react-native-size-matters';
 import { ThemedText as Text } from '@/components/themed-text';
 import { Alert } from 'react-native';
 import { confirmCode } from './functions/authFunctions';
+import { saveUserIfNew } from './functions/saveUserFunction';
 
 const CODE_LENGTH = 6;
 
@@ -76,9 +77,12 @@ export default function VerificationScreen() {
 
     try {
       const userCredential = await confirmCode(verificationId, codeDigits.join(''));
+      await saveUserIfNew(userCredential);
       console.log("Logged in user:", userCredential.user.uid);
       router.push('/verifying');
     } catch (error) {
+      setCodeDigits(Array(CODE_LENGTH).fill(''));
+      inputsRef.current[0]?.focus();
       console.log("Invalid code or error:", error);
       Alert.alert("잘못된 인증번호", "다시 시도해주세요");
     }
@@ -105,6 +109,7 @@ export default function VerificationScreen() {
           <View style={styles.progressRow}>
             <View style={[styles.progressSegment, styles.progressSegmentActive]} />
             <View style={[styles.progressSegment, styles.progressSegmentActive]} />
+            <View style={styles.progressSegment} />
             <View style={styles.progressSegment} />
             <View style={styles.progressSegment} />
           </View>

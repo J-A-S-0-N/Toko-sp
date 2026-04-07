@@ -14,13 +14,17 @@ export default function AuthEntryScreen() {
         </View>
 
         <Text type="barlowHard" style={styles.title}>
-          TOKO스포츠 .
+          TOKO스포츠
         </Text>
         <Text style={styles.subtitle}>골프를 더 스마트하게</Text>
 
         <View style={styles.divider} />
 
         <Pressable style={styles.startButton} onPress={() => router.push('/(auth)/signup')}>
+        {/* 
+        this is testing only!!
+        */}
+{/*         <Pressable style={styles.startButton} onPress={() => router.push('/(tabs)')}> */}
           <View style={styles.startTextContainer}>
             <Text type="barlowLight" style={styles.startText}>
               회원가입
@@ -62,7 +66,7 @@ const styles = StyleSheet.create({
     width: moderateScale(80),
     height: moderateScale(80),
     borderRadius: moderateScale(24),
-    backgroundColor: '#1F5A3A',
+    backgroundColor: '#00BA87',
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#1F5A3A',

@@ -140,7 +140,7 @@ export default function CourseSelectionScreen() {
             <View style={[styles.progressSegment, styles.progressSegmentActive]} />
             <View style={[styles.progressSegment, styles.progressSegmentActive]} />
             <View style={[styles.progressSegment, styles.progressSegmentActive]} />
-            <View style={styles.progressSegment} />
+            <View style={[styles.progressSegment, styles.progressSegmentActive]} />
           </View>
         </View>
 

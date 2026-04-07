@@ -3,7 +3,6 @@ import { router } from 'expo-router';
 import { useEffect, useRef } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, View } from 'react-native';
 
-import OnboardingProgressIndicator from '@/components/OnboardingProgressIndicator';
 import { ThemedText as Text } from '@/components/themed-text';
 import { moderateScale } from 'react-native-size-matters';
 
@@ -74,7 +73,17 @@ export default function OnboardingSecondScreen() {
       </View>
 
       <View style={styles.footer}>
-        <OnboardingProgressIndicator step={1} initialStep={1} />
+        <View style={styles.progressIndicator}>
+          <View style={styles.progressSlot}>
+            <View style={styles.progressDot} />
+          </View>
+          <View style={styles.progressSlot}>
+            <View style={styles.activeBar} />
+          </View>
+          <View style={styles.progressSlot}>
+            <View style={styles.progressDot} />
+          </View>
+        </View>
         <Pressable style={styles.ctaButton} onPress={handleNext}>
           <Text type="barlowHard" style={styles.ctaText}>다음</Text>
         </Pressable>
@@ -232,6 +241,30 @@ const styles = StyleSheet.create({
   footer: {
     gap: 18,
     paddingBottom: 10,
+  },
+  progressIndicator: {
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  progressSlot: {
+    width: 14,
+    height: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  progressDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 999,
+    backgroundColor: '#3A7E62',
+  },
+  activeBar: {
+    width: 14,
+    height: 3,
+    borderRadius: 999,
+    backgroundColor: '#4CAE82',
   },
   ctaButton: {
     height: 54,
