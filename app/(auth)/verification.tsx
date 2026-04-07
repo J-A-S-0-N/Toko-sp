@@ -5,8 +5,6 @@ import { moderateScale } from 'react-native-size-matters';
 
 import { ThemedText as Text } from '@/components/themed-text';
 import { Alert } from 'react-native';
-import { confirmCode } from './functions/authFunctions';
-import { saveUserIfNew } from './functions/saveUserFunction';
 
 const CODE_LENGTH = 6;
 
@@ -76,9 +74,9 @@ export default function VerificationScreen() {
     }
 
     try {
-      const userCredential = await confirmCode(verificationId, codeDigits.join(''));
-      await saveUserIfNew(userCredential);
-      console.log("Logged in user:", userCredential.user.uid);
+      //const userCredential = await confirmCode(verificationId, codeDigits.join(''));
+      //await saveUserIfNew(userCredential);
+      //console.log("Logged in user:", userCredential.user.uid);
       router.push('/verifying');
     } catch (error) {
       setCodeDigits(Array(CODE_LENGTH).fill(''));

@@ -1,4 +1,4 @@
-import { auth } from '@/config/firebase';
+/* import { auth } from '@/config/firebase';
 import { PhoneAuthProvider, signInWithCredential } from 'firebase/auth';
 
 // Send OTP
@@ -15,4 +15,16 @@ export const sendVerification = async (phoneNumber: any, recaptchaVerifier: any)
 export const confirmCode = async (verificationId: any, code: any) => {
   const credential = PhoneAuthProvider.credential(verificationId, code);
   return await signInWithCredential(auth, credential);
+}; */
+
+
+import auth from '@react-native-firebase/auth';
+
+export const sendVerification = async (phoneNumber: string) => {
+  const confirmation = await auth().signInWithPhoneNumber(phoneNumber);
+  return confirmation;
+};
+
+export const confirmCode = async (confirmation: any, code: string) => {
+  return await confirmation.confirm(code);
 };

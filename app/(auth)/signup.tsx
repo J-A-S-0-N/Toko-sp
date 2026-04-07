@@ -1,11 +1,9 @@
-import { app } from "@/config/firebase";
-import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha';
+/* import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha'; */
 import { router } from 'expo-router';
 import { useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Animated, Keyboard, Pressable, StyleSheet, TextInput, TouchableWithoutFeedback, View } from 'react-native';
 
 // recaptcha function
-import { sendVerification } from './functions/authFunctions';
 
 import { ThemedText as Text } from '@/components/themed-text';
 import { moderateScale } from 'react-native-size-matters';
@@ -86,11 +84,11 @@ export default function SignupScreen() {
       const digitsOnly = phoneNumber.replace(/\D/g, '');
       const e164PhoneNumber = `+82${digitsOnly.replace(/^0/, '')}`;
 
-      const verificationId = await sendVerification(e164PhoneNumber, recaptchaVerifier);
+      //const verificationId = await sendVerification(e164PhoneNumber, recaptchaVerifier);
 
       router.push({
         pathname: '/(auth)/verification',
-        params: { phone: phoneNumber, verificationId },
+        params: { phone: phoneNumber, verificationId: "test" },
       });
     } catch (error) {
       Alert.alert('인증 실패', '인증번호 전송에 실패했어요. 잠시 후 다시 시도해 주세요.');
@@ -102,11 +100,11 @@ export default function SignupScreen() {
 
   return (
     <>
-      <FirebaseRecaptchaVerifierModal
+{/*       <FirebaseRecaptchaVerifierModal
         ref={recaptchaVerifier}
         firebaseConfig={app.options}
         attemptInvisibleVerification={false}
-      />
+      /> */}
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <View style={styles.container}>
           <View style={styles.mainArea}>

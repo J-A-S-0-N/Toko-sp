@@ -20,11 +20,18 @@ export default function AuthEntryScreen() {
 
         <View style={styles.divider} />
 
-        <Pressable style={styles.startButton} onPress={() => router.push('/(auth)/signup')}>
+{/*         <Pressable style={styles.startButton} onPress={() => router.push('/(auth)/signup')}> */}
+
         {/* 
         this is testing only!!
         */}
 {/*         <Pressable style={styles.startButton} onPress={() => router.push('/(tabs)')}> */}
+        <Pressable
+          style={styles.startButton}
+          onPress={() => {
+            router.push('/(auth)/signup');
+          }}
+        >
           <View style={styles.startTextContainer}>
             <Text type="barlowLight" style={styles.startText}>
               회원가입
@@ -36,7 +43,7 @@ export default function AuthEntryScreen() {
               style={styles.arrowIcon}
             />
           </View>
-        </Pressable>
+        </Pressable>  
 
         <View style={styles.loginRow}>
           <Text style={styles.loginHint}>이미 계정이 있으신가요? </Text>
