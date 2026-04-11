@@ -1,18 +1,17 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { moderateScale } from 'react-native-size-matters';
 
 import { ThemedText as Text } from '@/components/themed-text';
 import auth from '@react-native-firebase/auth';
-import { Alert } from 'react-native';
 import { confirmCode } from './functions/authFunctions';
 import { checkUserExistsByUid } from './functions/loginFetchUserFunction';
 import { setPendingUserCredential } from './functions/userCredentialStore';
 
 const CODE_LENGTH = 6;
 
-export default function VerificationScreen() {
+export default function LoginVerificationScreen() {
   const { phone, verificationId } = useLocalSearchParams<{ phone?: string; verificationId?: string }>();
   const [codeDigits, setCodeDigits] = useState(Array(CODE_LENGTH).fill(''));
   const [resendSeconds, setResendSeconds] = useState(53);
@@ -79,7 +78,7 @@ export default function VerificationScreen() {
 
     if (!verificationId) {
       Alert.alert('인증 정보 없음', '인증번호를 다시 요청해주세요.');
-      router.replace('/(auth)/signup');
+      router.replace('/(auth)/login');
       return;
     }
 
@@ -88,21 +87,19 @@ export default function VerificationScreen() {
       const uid = userCredential.user?.uid ?? '';
       const existingUser = await checkUserExistsByUid(uid);
 
-      if (existingUser) {
+      if (!existingUser) {
         await auth().signOut();
-        Alert.alert('이미 가입된 번호예요', '로그인으로 진행해주세요.');
-        router.replace('/(auth)/login');
+        Alert.alert('가입된 계정이 없어요', '회원가입 후 로그인 해주세요.');
+        router.replace('/(auth)/signup');
         return;
       }
 
       setPendingUserCredential(userCredential);
-      console.log("Logged in user:", userCredential.user.uid);
-      router.push('/verifying');
-    } catch (error) {
+      router.push('/(auth)/loginVerifying');
+    } catch {
       setCodeDigits(Array(CODE_LENGTH).fill(''));
       inputsRef.current[0]?.focus();
-      console.log("Invalid code or error:", error);
-      Alert.alert("잘못된 인증번호", "다시 시도해주세요");
+      Alert.alert('잘못된 인증번호', '다시 시도해주세요');
     }
   };
 
@@ -128,8 +125,6 @@ export default function VerificationScreen() {
             <View style={[styles.progressSegment, styles.progressSegmentActive]} />
             <View style={[styles.progressSegment, styles.progressSegmentActive]} />
             <View style={styles.progressSegment} />
-            <View style={styles.progressSegment} />
-            <View style={styles.progressSegment} />
           </View>
         </View>
 
@@ -139,11 +134,6 @@ export default function VerificationScreen() {
           </Text>
 
           <Text style={styles.description}>{displayPhone}으로 6자리 코드를 보냈습니다</Text>
-
-          {/*           
-          <Text style={styles.testCode}>
-            테스트용 코드: <Text style={styles.testCodeAccent}>123456</Text>
-          </Text> */}
 
           <View style={styles.codeRow}>
             {codeDigits.map((digit, index) => (
@@ -239,16 +229,6 @@ const styles = StyleSheet.create({
     color: '#656D73',
     fontSize: moderateScale(13),
     fontFamily: 'Pretendard-Regular',
-  },
-  testCode: {
-    marginTop: moderateScale(10),
-    color: '#7A8389',
-    fontSize: moderateScale(12),
-    fontFamily: 'Pretendard-Regular',
-  },
-  testCodeAccent: {
-    color: '#4FB78A',
-    fontFamily: 'Pretendard-Bold',
   },
   codeRow: {
     marginTop: moderateScale(20),

@@ -10,6 +10,9 @@ export default function AuthLayout() {
       <Stack.Screen name="verified" />
       <Stack.Screen name="profileSetup" />
       <Stack.Screen name="login" />
+      <Stack.Screen name="loginVerification" />
+      <Stack.Screen name="loginVerifying" />
+      <Stack.Screen name="loginVerified" />
     </Stack>
   );
 }

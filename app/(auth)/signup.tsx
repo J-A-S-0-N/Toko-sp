@@ -7,6 +7,8 @@ import { ActivityIndicator, Alert, Animated, Keyboard, Pressable, StyleSheet, Te
 
 import { ThemedText as Text } from '@/components/themed-text';
 import { moderateScale } from 'react-native-size-matters';
+import { sendVerification } from './functions/authFunctions';
+import { checkUserExistsByPhoneNumber } from './functions/loginFetchUserFunction';
 
 export default function SignupScreen() {
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -73,7 +75,6 @@ export default function SignupScreen() {
   };
 
   const handleSubmit = async () => {
-    console.error("submitting signup");
     if (!isPhoneValid || isSubmitting) {
       return;
     }
@@ -83,14 +84,23 @@ export default function SignupScreen() {
     try {
       const digitsOnly = phoneNumber.replace(/\D/g, '');
       const e164PhoneNumber = `+82${digitsOnly.replace(/^0/, '')}`;
+      const existingUserExists = await checkUserExistsByPhoneNumber(e164PhoneNumber);
 
+      if (existingUserExists) {
+        Alert.alert('이미 가입된 번호예요', '로그인으로 진행해주세요.');
+        router.replace('/(auth)/login');
+        return;
+      }
+
+      const confirmation = await sendVerification(e164PhoneNumber);
       //const verificationId = await sendVerification(e164PhoneNumber, recaptchaVerifier);
 
       router.push({
         pathname: '/(auth)/verification',
-        params: { phone: phoneNumber, verificationId: "test" },
+        params: { phone: phoneNumber, verificationId: confirmation.verificationId },
       });
     } catch (error) {
+      console.error(error);
       Alert.alert('인증 실패', '인증번호 전송에 실패했어요. 잠시 후 다시 시도해 주세요.');
     } finally {
       setIsSubmitting(false);

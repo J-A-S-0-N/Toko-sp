@@ -276,6 +276,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.35,
     shadowRadius: 16,
     shadowOffset: { width: 0, height: 10 },
+    elevation: 10,
   },
   ctaText: {
     fontSize: moderateScale(14),

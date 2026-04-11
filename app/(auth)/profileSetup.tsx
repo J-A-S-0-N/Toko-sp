@@ -1,7 +1,10 @@
 import { router } from 'expo-router';
-import { useMemo, useState } from 'react';
-import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import type { UserCredential } from 'firebase/auth';
+import { useMemo, useRef, useState } from 'react';
+import { Alert, Animated, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { moderateScale } from 'react-native-size-matters';
+import { saveUserInfo } from './functions/saveUserFunction';
+import { clearPendingUserCredential, getPendingUserCredential } from './functions/userCredentialStore';
 
 import { ThemedText as Text } from '@/components/themed-text';
 
@@ -16,6 +19,7 @@ export default function ProfileSetupScreen() {
   const [name, setName] = useState('');
   const [handicap, setHandicap] = useState('');
   const [skillLevel, setSkillLevel] = useState<(typeof SKILL_LEVELS)[number]['id'] | null>(null);
+  const avatarShake = useRef(new Animated.Value(0)).current;
 
   const hasNameValue = name.trim().length > 0;
   const hasHandicapValue = handicap.trim().length > 0;
@@ -27,12 +31,79 @@ export default function ProfileSetupScreen() {
     return hasNameValue && hasHandicapValue && !hasInvalidHandicapChars && !hasInvalidNameChars && !hasNameTooLong && skillLevel !== null;
   }, [hasHandicapValue, hasInvalidHandicapChars, hasInvalidNameChars, hasNameTooLong, hasNameValue, skillLevel]);
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!isNextEnabled) {
       return;
     }
 
-    router.push('/(auth)/locationSetup');
+    const userCredential = getPendingUserCredential();
+
+    if (!userCredential) {
+      Alert.alert('인증 정보 없음', '다시 인증 후 시도해주세요.');
+      router.replace('/(auth)');
+      return;
+    }
+
+    try {
+      const result = await saveUserInfo(userCredential as UserCredential, {
+        name,
+        handicap: parseFloat(handicap),
+        skillLevel,
+        test: 'name',
+      });
+
+      if (!result.saved && (result.reason === 'already_saved' || result.reason === 'existing_user')) {
+        clearPendingUserCredential();
+        Alert.alert('이미 가입된 계정', '이미 저장된 계정입니다. 로그인 해주세요.');
+        router.replace('/(auth)/login');
+        return;
+      }
+
+      if (!result.saved) {
+        Alert.alert('저장 실패', '프로필 저장 중 오류가 발생했어요. 다시 시도해주세요.');
+        return;
+      }
+
+      clearPendingUserCredential();
+      router.push('/(auth)/locationSetup');
+    } catch (error) {
+      Alert.alert('저장 실패', '프로필 저장 중 오류가 발생했어요. 다시 시도해주세요.');
+    }
+  };
+
+  const handleAvatarPress = () => {
+    avatarShake.stopAnimation();
+    avatarShake.setValue(0);
+
+    Animated.sequence([
+      Animated.timing(avatarShake, {
+        toValue: -4,
+        duration: 45,
+        useNativeDriver: true,
+      }),
+      Animated.timing(avatarShake, {
+        toValue: 4,
+        duration: 45,
+        useNativeDriver: true,
+      }),
+      Animated.timing(avatarShake, {
+        toValue: -3,
+        duration: 40,
+        useNativeDriver: true,
+      }),
+      Animated.timing(avatarShake, {
+        toValue: 3,
+        duration: 40,
+        useNativeDriver: true,
+      }),
+      Animated.timing(avatarShake, {
+        toValue: 0,
+        duration: 35,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      Alert.alert('안내', '프로필 이미지 기능은 곧 추가될 예정이에요.');
+    });
   };
 
   return (
@@ -48,6 +119,7 @@ export default function ProfileSetupScreen() {
             <View style={[styles.progressSegment, styles.progressSegmentActive]} />
             <View style={[styles.progressSegment, styles.progressSegmentActive]} />
             <View style={styles.progressSegment} />
+            <View style={styles.progressSegment} />
           </View>
         </View>
 
@@ -57,16 +129,18 @@ export default function ProfileSetupScreen() {
           </Text>
           <Text style={styles.subtitle}>나중에 언제든지 변경할 수 있어요</Text>
 
-          <View style={styles.avatarWrap}>
-            <View style={styles.avatarCircle}>
-              <Text type="barlowHard" style={styles.avatarQuestion}>
-                ?
-              </Text>
-            </View>
-            <View style={styles.editBadge}>
-              <Text style={styles.editBadgeText}>✏️</Text>
-            </View>
-          </View>
+          <Animated.View style={[styles.avatarWrap, { transform: [{ translateX: avatarShake }] }]}>
+            <Pressable onPress={handleAvatarPress} style={styles.avatarPressable}>
+              <View style={styles.avatarCircle}>
+                <Text type="barlowHard" style={styles.avatarQuestion}>
+                  ?
+                </Text>
+              </View>
+              <View style={styles.editBadge}>
+                <Text style={styles.editBadgeText}>✏️</Text>
+              </View>
+            </Pressable>
+          </Animated.View>
 
           <View style={styles.fieldGroup}>
             <Text style={styles.fieldLabel}>이름 *</Text>
@@ -200,6 +274,12 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     width: moderateScale(90),
     height: moderateScale(90),
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarPressable: {
+    width: '100%',
+    height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
   },
