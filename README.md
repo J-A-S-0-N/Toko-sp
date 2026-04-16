@@ -30,9 +30,13 @@ SETUP
    end   
   ```
 
-  and
-
+4. setup for firestore
   ```
-  pod 'RecaptchaEnterprise'
+  GCP — Enabled reCAPTCHA Enterprise API, created an iOS key with your bundle ID, got the site key
+  Firebase Console — Enabled reCAPTCHA under Authentication → Settings → reCAPTCHA (Fraud prevention)
+  Re-downloaded GoogleService-Info.plist and replaced the old one
+  Xcode — Added REVERSED_CLIENT_ID from GoogleService-Info.plist as a URL Scheme under Target → Info → URL Types
+  Podfile — Added pod 'RecaptchaEnterprise' and ran pod install
+  AppDelegate.swift — Added import RecaptchaEnterprise and called Recaptcha.fetchClient(withSiteKey:) inside a Task right after FirebaseApp.configure()
   ```
   
