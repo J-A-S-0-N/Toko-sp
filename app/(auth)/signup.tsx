@@ -75,6 +75,7 @@ export default function SignupScreen() {
   };
 
   const handleSubmit = async () => {
+    console.error("something has been pressed");
     if (!isPhoneValid || isSubmitting) {
       return;
     }
