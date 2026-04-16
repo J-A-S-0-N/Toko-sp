@@ -1,7 +1,7 @@
 /* import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha'; */
 import { router } from 'expo-router';
 import { useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Animated, Keyboard, Pressable, StyleSheet, TextInput, TouchableWithoutFeedback, View } from 'react-native';
+import { ActivityIndicator, Alert, Animated, Keyboard, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 // recaptcha function
 
@@ -73,8 +73,9 @@ export default function SignupScreen() {
       Alert.alert('안내', '현재 서비스는 대한민국(+82)에서만 이용할 수 있어요.');
     });
   };
-
+  
   const handleSubmit = async () => {
+    Keyboard.dismiss();
     console.error("something has been pressed");
     if (!isPhoneValid || isSubmitting) {
       return;
@@ -106,8 +107,7 @@ export default function SignupScreen() {
     } finally {
       setIsSubmitting(false);
     }
-  };
-
+  }; 
 
   return (
     <>
@@ -116,8 +116,7 @@ export default function SignupScreen() {
         firebaseConfig={app.options}
         attemptInvisibleVerification={false}
       /> */}
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-        <View style={styles.container}>
+      <View style={styles.container}>
           <View style={styles.mainArea}>
             <View style={styles.header}>
               <Pressable style={styles.iconButton} onPress={() => router.back()}>
@@ -176,8 +175,7 @@ export default function SignupScreen() {
               인증번호 받기
             </Text>
           </Pressable>
-        </View>
-      </TouchableWithoutFeedback>
+      </View>
 
       {isSubmitting && (
         <View style={styles.loadingOverlay}>

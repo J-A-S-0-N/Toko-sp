@@ -12,7 +12,7 @@ SETUP
 
 3. configure pod file
    ```
-  post_install do |installer|
+   post_install do |installer|
     react_native_post_install(
       installer,
       config[:reactNativePath],
@@ -27,4 +27,12 @@ SETUP
         end
       end
     end
-  end   ```
+   end   
+  ```
+
+  and
+
+  ```
+  pod 'RecaptchaEnterprise'
+  ```
+  
