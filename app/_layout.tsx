@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 
+import { AuthProvider } from '@/context/AuthContext';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 import { BarlowCondensed_400Regular, BarlowCondensed_900Black_Italic, useFonts } from '@expo-google-fonts/barlow-condensed';
@@ -48,6 +49,7 @@ export default function RootLayout() {
   if (!loadedBarlow && !errorBarlow && !loadedPretendard && !errorPretendard) return null;
 
   return (
+    <AuthProvider>
     <ThemeProvider value={DarkTheme}>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <Stack
@@ -55,6 +57,7 @@ export default function RootLayout() {
             contentStyle: { backgroundColor: '#0F0F0F' }
           }}
         >
+          <Stack.Screen name="index" options={{ headerShown: false }} />
           <Stack.Screen name="(onboarding)" options={{ headerShown: false, animation: "none"}} />
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -82,5 +85,6 @@ export default function RootLayout() {
       <StatusBar style="light" />
       </GestureHandlerRootView>
     </ThemeProvider>
+    </AuthProvider>
   );
 }

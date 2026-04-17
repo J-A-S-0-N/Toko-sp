@@ -1,10 +1,13 @@
 import { ThemedText as Text } from '@/components/themed-text';
+import { useAuth } from '@/context/AuthContext';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { moderateScale } from 'react-native-size-matters';
 
 export default function ProfileScreen() {
+  const { username } = useAuth();
+  const initial = (username ?? '').slice(0, 1);
   return (
     <SafeAreaView edges={['top']} style={styles.safeArea}>
       <ScrollView
@@ -30,12 +33,12 @@ export default function ProfileScreen() {
         <View style={styles.heroSection}>
           <View style={styles.avatarCircle}>
             <Text type="barlowHard" style={styles.avatarInitials}>
-              김
+              {initial}
             </Text>
           </View>
 
           <Text type="barlowHard" style={styles.nameText}>
-            김지훈
+            {username ?? ''}
           </Text>
 
           <Text type="barlowLight" style={styles.memberSinceText}>

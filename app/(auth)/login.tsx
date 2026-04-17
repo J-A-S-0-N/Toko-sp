@@ -1,22 +1,22 @@
 import { router } from 'expo-router';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Animated, Keyboard, Pressable, StyleSheet, TextInput, TouchableWithoutFeedback, View } from 'react-native';
 import { moderateScale } from 'react-native-size-matters';
 
 import { ThemedText as Text } from '@/components/themed-text';
 import { sendVerification } from './functions/authFunctions';
-import { checkUserExistsByPhoneNumber, requiresPhoneVerification } from './functions/loginFetchUserFunction';
+import { checkUserExistsByPhoneNumber } from './functions/loginFetchUserFunction';
 
 export default function LoginScreen() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const countryShake = useRef(new Animated.Value(0)).current;
 
-  useEffect(() => {
+/*   useEffect(() => {
     if (!requiresPhoneVerification()) {
       router.replace('/(tabs)');
     }
-  }, []);
+  }, []); */
 
   const formattedPhoneNumber = useMemo(() => {
     const digits = phoneNumber.replace(/\D/g, '').slice(0, 11);

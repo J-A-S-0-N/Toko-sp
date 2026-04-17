@@ -1,5 +1,6 @@
 import { db } from '@/config/firebase';
-import auth from '@react-native-firebase/auth';
+//import auth from '@react-native-firebase/auth';
+import { getAuth } from '@react-native-firebase/auth';
 import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore';
 import { getStoredUserName, setStoredUserName } from './userProfileStorage';
 
@@ -8,8 +9,15 @@ type LoginFetchUserResult = {
   source: 'firestore' | 'cache' | 'none';
 };
 
-export const getCurrentUid = () => auth().currentUser?.uid ?? null;
+//depreceated code
 
+/* export const getCurrentUid = () => auth().currentUser?.uid ?? null;
+
+export const requiresPhoneVerification = () => !getCurrentUid(); */
+
+const auth = getAuth();
+
+export const getCurrentUid = () => auth.currentUser?.uid ?? null;
 export const requiresPhoneVerification = () => !getCurrentUid();
 
 export const checkUserExistsByPhoneNumber = async (phoneNumber: string) => {

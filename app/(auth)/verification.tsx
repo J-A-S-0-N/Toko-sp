@@ -3,8 +3,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { moderateScale } from 'react-native-size-matters';
 
+import { getAuth, signOut } from '@react-native-firebase/auth';
+
 import { ThemedText as Text } from '@/components/themed-text';
-import auth from '@react-native-firebase/auth';
 import { Alert } from 'react-native';
 import { confirmCode } from './functions/authFunctions';
 import { checkUserExistsByUid } from './functions/loginFetchUserFunction';
@@ -89,7 +90,8 @@ export default function VerificationScreen() {
       const existingUser = await checkUserExistsByUid(uid);
 
       if (existingUser) {
-        await auth().signOut();
+        //await auth().signOut();
+        await signOut(getAuth());
         Alert.alert('이미 가입된 번호예요', '로그인으로 진행해주세요.');
         router.replace('/(auth)/login');
         return;

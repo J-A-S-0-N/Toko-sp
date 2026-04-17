@@ -1,19 +1,15 @@
 import { ThemedText as Text } from '@/components/themed-text';
+import { useAuth } from '@/context/AuthContext';
 import { useEffect, useState } from "react";
 import { View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
 
 const UsernameHeader = () => {
-  const [username, setUsername] = useState('');
+  const { username } = useAuth();
   const [stats, setStats] = useState({
     handi: 0,
     rounds: 0,
   });
-
-  useEffect(() => {
-    //TODO: impliment fetch username
-    setUsername('채준성');
-  }, []);
 
   useEffect(() => {
     //TODO: implement fetch stats
@@ -38,7 +34,7 @@ const UsernameHeader = () => {
         }}
       >
         <Text type="barlowHard" style={{fontSize: moderateScale(15), color: "white"}}>
-          {username.slice(0, 1)}
+          {(username ?? '').slice(0, 1)}
         </Text >
       </View>
       <View>

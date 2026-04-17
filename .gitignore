@@ -38,10 +38,5 @@ yarn-error.*
 
 app-example
 
-# generated native folders
-/ios
-/android
-
-
 # expo envrionment variable
 .env
