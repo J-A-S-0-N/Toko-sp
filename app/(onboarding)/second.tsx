@@ -141,14 +141,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: moderateScale(35),
-    lineHeight: 48,
     color: '#FFFFFF',
     //fontFamily: 'Pretendard-Bold',
   },
   description: {
     fontSize: moderateScale(14),
     color: '#7B848D',
-    lineHeight: 21,
     fontFamily: 'Pretendard-Regular',
   },
   card: {

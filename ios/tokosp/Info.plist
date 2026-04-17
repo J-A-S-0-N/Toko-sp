@@ -27,13 +27,6 @@
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
-          <string>tokosp</string>
-          <string>com.tokosp.app</string>
-        </array>
-      </dict>
-      <dict>
-        <key>CFBundleURLSchemes</key>
-        <array>
           <string>com.googleusercontent.apps.815485205204-o6udj014kdfndbg8sv8hbed4mvhjudmo</string>
         </array>
       </dict>

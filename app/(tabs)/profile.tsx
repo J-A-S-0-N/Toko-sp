@@ -172,13 +172,11 @@ const styles = StyleSheet.create({
   avatarInitials: {
     color: '#FFFFFF',
     fontSize: moderateScale(24),
-    lineHeight: moderateScale(24),
   },
   nameText: {
     marginTop: moderateScale(16),
     color: '#F2F3F3',
     fontSize: moderateScale(25),
-    lineHeight: moderateScale(25),
   },
   memberSinceText: {
     marginTop: moderateScale(8),
@@ -227,12 +225,10 @@ const styles = StyleSheet.create({
   statValue: {
     color: '#F3F4F4',
     fontSize: moderateScale(26),
-    lineHeight: moderateScale(26),
   },
   roundStatValue: {
     color: '#D4AF37',
     fontSize: moderateScale(26),
-    lineHeight: moderateScale(26),
   },
   statLabel: {
     color: '#6D7377',

@@ -68,7 +68,6 @@ const styles = StyleSheet.create({
   tempValue: {
     color: "#FFFFFF",
     fontSize: moderateScale(45),
-    lineHeight: moderateScale(55),
   },
   detailText: {
     marginTop: moderateScale(6),
@@ -93,7 +92,6 @@ const styles = StyleSheet.create({
   recommendationValue: {
     color: "#FFFFFF",
     fontSize: moderateScale(21),
-    lineHeight: moderateScale(37),
   },
 });
 

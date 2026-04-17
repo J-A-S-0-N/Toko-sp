@@ -132,13 +132,11 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: moderateScale(35),
-    lineHeight: 48,
     color: '#FFFFFF',
   },
   description: {
     fontSize: moderateScale(14),
     color: '#7B848D',
-    lineHeight: 21,
     fontFamily: 'Pretendard-Regular',
   },
   card: {
@@ -194,7 +192,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#7E858B',
     fontSize: moderateScale(12),
-    lineHeight: 16,
     fontFamily: 'Pretendard-Regular',
   },
   bottomTabs: {

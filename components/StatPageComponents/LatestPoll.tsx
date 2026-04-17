@@ -116,7 +116,6 @@ const styles = StyleSheet.create({
   score: {
     color: "#FF4F5F",
     fontSize: moderateScale(28),
-    lineHeight: moderateScale(27),
   },
   delta: {
     fontSize: moderateScale(15),

@@ -88,7 +88,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: moderateScale(28),
     color: '#F4F7F6',
-    lineHeight: moderateScale(30),
     //letterSpacing: 1.5,
   },
   subtitle: {

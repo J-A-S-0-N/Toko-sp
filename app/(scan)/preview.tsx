@@ -362,7 +362,6 @@ const styles = StyleSheet.create({
   descriptionText: {
     color: "#5B6167",
     fontSize: moderateScale(26 / 2),
-    lineHeight: moderateScale(18),
     marginBottom: moderateScale(14),
   },
   bottomPanel: {

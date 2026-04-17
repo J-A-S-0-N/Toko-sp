@@ -2,11 +2,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withDelay,
-  withSpring,
-  withTiming,
+    useAnimatedStyle,
+    useSharedValue,
+    withDelay,
+    withSpring,
+    withTiming,
 } from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
 
@@ -166,7 +166,6 @@ const styles = StyleSheet.create({
   title: {
     color: '#F2F2F0',
     fontSize: moderateScale(28),
-    lineHeight: moderateScale(30),
     fontWeight: '900',
     fontFamily: 'Pretendard-Bold',
     marginBottom: 6,

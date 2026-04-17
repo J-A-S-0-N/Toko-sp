@@ -12,7 +12,16 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.tokosp.app",
-      "googleServicesFile": "./GoogleService-Info.plist"
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "infoPlist": {
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLSchemes": [
+              "com.googleusercontent.apps.815485205204-o6udj014kdfndbg8sv8hbed4mvhjudmo"
+            ]
+          }
+        ]
+      }
     },
     "android": {
       "package": "com.tokosp.app",

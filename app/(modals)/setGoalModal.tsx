@@ -224,14 +224,12 @@ const styles = StyleSheet.create({
   circleSymbol: {
     fontSize: moderateScale(30),
     color: "#F0F3F2",
-    lineHeight: moderateScale(36),
   },
   scoreCenterBlock: {
     alignItems: "center",
   },
   scoreValue: {
     fontSize: moderateScale(70),
-    lineHeight: moderateScale(95),
     color: "#53D39A",
   },
   scoreSubText: {
@@ -298,17 +296,14 @@ const styles = StyleSheet.create({
   resultValueGreen: {
     color: "#53D39A",
     fontSize: moderateScale(28),
-    lineHeight: moderateScale(30),
   },
   resultValueAmber: {
     color: "#F3A63F",
     fontSize: moderateScale(28),
-    lineHeight: moderateScale(30),
   },
   resultValueWhite: {
     color: "#FFFFFF",
     fontSize: moderateScale(28),
-    lineHeight: moderateScale(30),
   },
   resultLabel: {
     marginTop: moderateScale(4),

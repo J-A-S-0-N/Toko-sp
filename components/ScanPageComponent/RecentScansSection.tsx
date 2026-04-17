@@ -102,7 +102,6 @@ const styles = StyleSheet.create({
   recentCourse: {
     color: "#EDF0ED",
     fontSize: moderateScale(18),
-    lineHeight: moderateScale(20),
   },
   scoreRow: {
     flexDirection: "row",
@@ -113,7 +112,6 @@ const styles = StyleSheet.create({
   recentScore: {
     color: "#FF4E57",
     fontSize: moderateScale(36),
-    lineHeight: moderateScale(44),
   },
   recentDiff: {
     color: "#D9474F",

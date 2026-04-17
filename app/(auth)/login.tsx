@@ -206,7 +206,6 @@ const styles = StyleSheet.create({
   backArrow: {
     color: '#E6ECEF',
     fontSize: moderateScale(26),
-    lineHeight: moderateScale(24),
     fontFamily: 'Pretendard-Bold',
   },
   progressRow: {
@@ -231,7 +230,6 @@ const styles = StyleSheet.create({
   title: {
     color: '#F4F7F6',
     fontSize: moderateScale(36),
-    lineHeight: moderateScale(44),
   },
   description: {
     color: '#656D73',

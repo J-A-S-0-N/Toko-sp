@@ -465,7 +465,6 @@ const styles = StyleSheet.create({
   },
   totalScore: {
     fontSize: moderateScale(62),
-    lineHeight: moderateScale(62),
     color: "#E83F40",
   },
   totalDeltaRow: {

@@ -202,7 +202,6 @@ const styles = StyleSheet.create({
   backArrow: {
     color: '#E6ECEF',
     fontSize: moderateScale(26),
-    lineHeight: moderateScale(24),
     fontFamily: 'Pretendard-Bold',
   },
   progressRow: {
@@ -227,7 +226,6 @@ const styles = StyleSheet.create({
   title: {
     color: '#F4F7F6',
     fontSize: moderateScale(25),
-    lineHeight: moderateScale(30),
   },
   subtitle: {
     marginTop: moderateScale(6),
@@ -267,7 +265,6 @@ const styles = StyleSheet.create({
   customAddIcon: {
     color: '#8E959B',
     fontSize: moderateScale(16),
-    lineHeight: moderateScale(16),
     fontFamily: 'Pretendard-Medium',
   },
   customAddLabel: {

@@ -79,7 +79,6 @@ const styles = StyleSheet.create({
   guideTitle: {
     color: "#EDF1EE",
     fontSize: moderateScale(17.5),
-    lineHeight: moderateScale(20),
   },
   guideDesc: {
     marginTop: moderateScale(4),

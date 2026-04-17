@@ -76,7 +76,6 @@ const styles = StyleSheet.create({
   streakValue: {
     color: "#45D07F",
     fontSize: moderateScale(44),
-    lineHeight: moderateScale(55),
     marginTop: moderateScale(10),
   },
   currentStreakValue: {

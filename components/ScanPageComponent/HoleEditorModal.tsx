@@ -190,7 +190,6 @@ const styles = StyleSheet.create({
   },
   holeEditorAdjustText: {
     fontSize: moderateScale(20),
-    lineHeight: moderateScale(42),
   },
   holeEditorAdjustTextMinus: {
     color: "#FF4D4D",
@@ -200,7 +199,6 @@ const styles = StyleSheet.create({
   },
   holeEditorScoreValue: {
     fontSize: moderateScale(55),
-    lineHeight: moderateScale(80),
   },
   holeEditorParCaption: {
     color: "#7C8589",
@@ -231,7 +229,6 @@ const styles = StyleSheet.create({
   holeEditorParValue: {
     color: "#D5DADD",
     fontSize: moderateScale(24),
-    lineHeight: moderateScale(31),
   },
   holeEditorParValueActive: {
     color: "#E9F5F0",

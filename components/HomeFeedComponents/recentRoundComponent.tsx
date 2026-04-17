@@ -116,7 +116,7 @@ export default function RecentRoundComponent() {
           </View>
 
           {/* Right Side */}
-          <Text type="barlowHard" style={{ fontSize: moderateScale(53), lineHeight: moderateScale(54), color: "#E83F40" }}>{round.score}</Text>
+          <Text type="barlowHard" style={{ fontSize: moderateScale(53), color: "#E83F40" }}>{round.score}</Text>
         </View>
         {/* Height 2 */}
         {/* Score Delta */}

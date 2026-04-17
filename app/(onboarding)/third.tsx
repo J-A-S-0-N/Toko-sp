@@ -128,13 +128,11 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: moderateScale(35),
-    lineHeight: 48,
     color: '#FFFFFF',
   },
   description: {
     fontSize: moderateScale(14),
     color: '#7B848D',
-    lineHeight: 21,
     fontFamily: 'Pretendard-Regular',
   },
   card: {
@@ -155,7 +153,6 @@ const styles = StyleSheet.create({
   scoreText: {
     color: '#54CC96',
     fontSize: moderateScale(46),
-    lineHeight: 44,
   },
   progressTrack: {
     height: 5,
