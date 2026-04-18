@@ -7,14 +7,21 @@ import { View } from 'react-native';
 export default function EntryScreen() {
   const { user, loading } = useAuth();
   const [showSplash, setShowSplash] = useState(true);
+  const [minTimeElapsed, setMinTimeElapsed] = useState(false);
 
-  // Keep showing custom splash until auth resolves, then let it animate out
+  // Ensure splash screen is shown for at least 3.5 seconds
   useEffect(() => {
-    if (!loading) {
-      const timer = setTimeout(() => setShowSplash(false), 800);
-      return () => clearTimeout(timer);
+    const timer = setTimeout(() => setMinTimeElapsed(true), 3500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Dismiss splash only after both auth resolves and minimum time has passed
+  useEffect(() => {
+    if (!loading && minTimeElapsed) {
+      const timer = setTimeout(() => setShowSplash(false), 950);
+      return () => clearTimeout(timer)
     }
-  }, [loading]);
+  }, [loading, minTimeElapsed]);
 
   if (loading || showSplash) {
     return (

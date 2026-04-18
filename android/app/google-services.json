@@ -12,7 +12,20 @@
           "package_name": "com.tokosp.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "815485205204-lbt069v4it2o363a2tqfnisdekqd15h8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tokosp.app",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "815485205204-0dc9he3a432md3dov360he3bs507o08a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAXMkAHK8tx2r0pgUJ8heWvCVrL-XEdP5w"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "815485205204-0dc9he3a432md3dov360he3bs507o08a.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "815485205204-o6udj014kdfndbg8sv8hbed4mvhjudmo.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.tokosp.app"
+              }
+            }
+          ]
         }
       }
     }

@@ -4,10 +4,12 @@ import HitProgressBar from "@/components/StatPageComponents/hitProgressBar";
 import LatestPool from "@/components/StatPageComponents/LatestPoll";
 import ParAnalysis from "@/components/StatPageComponents/parAnalysis";
 import ScoreDistribution from "@/components/StatPageComponents/scoreDistribution";
+import StatPageSkeleton from "@/components/StatPageComponents/StatPageSkeleton";
 import StreakCard from "@/components/StatPageComponents/StreakCard";
 import { ThemedText as Text } from "@/components/themed-text";
-import React from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { StyleSheet, View } from "react-native";
+import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
 
@@ -53,9 +55,35 @@ export default function StatsScreen() {
   const totalDelta = lastScore - firstScore;
   const headlineDelta = `${totalDelta > 0 ? "+" : ""}${totalDelta}타`;
 
+  const [showSkeleton, setShowSkeleton] = useState(true);
+  const hasLoaded = useRef(false);
+
+  useEffect(() => {
+    if (hasLoaded.current) {
+      setShowSkeleton(false);
+      return;
+    }
+    hasLoaded.current = true;
+
+    const timer = setTimeout(() => {
+      setShowSkeleton(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <SafeAreaView edges={["top"]} style={styles.safeArea}>
-      <ScrollView
+      {showSkeleton ? (
+        <Animated.View
+          exiting={FadeOut.duration(400)}
+          style={styles.skeletonContainer}
+        >
+          <StatPageSkeleton />
+        </Animated.View>
+      ) : (
+      <Animated.ScrollView
+        entering={FadeIn.duration(400)}
         style={styles.container}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.content}
@@ -91,7 +119,8 @@ export default function StatsScreen() {
         </View>
 
         <HitProgressBar roundStats={ROUND_STATS} />
-      </ScrollView>
+      </Animated.ScrollView>
+      )}
     </SafeAreaView>
   );
 }
@@ -166,5 +195,10 @@ const styles = StyleSheet.create({
   valueLabel: {
     color: "#8C9492",
     fontSize: moderateScale(15),
+  },
+  skeletonContainer: {
+    flex: 1,
+    paddingHorizontal: moderateScale(10),
+    paddingTop: moderateScale(4),
   },
 });

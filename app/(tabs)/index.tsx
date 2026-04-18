@@ -1,21 +1,42 @@
 import DailyTipComponent from '@/components/HomeFeedComponents/dailyTipComponent';
 import GoalSetupPromptComponent from '@/components/HomeFeedComponents/goalSetupPromptComponent';
 import HomeFeedHeader from '@/components/HomeFeedComponents/homeFeedHeader';
+import HomeFeedSkeleton from '@/components/HomeFeedComponents/HomeFeedSkeleton';
 import NearbyCoursesComponent from '@/components/HomeFeedComponents/nearbyCoursesComponent';
 import RecentRoundComponent from '@/components/HomeFeedComponents/recentRoundComponent';
 import UsernameHeader from '@/components/HomeFeedComponents/usernameHeader';
 import UserStatComponent from '@/components/HomeFeedComponents/userStatComponent';
 import WeatherSummaryComponent from '@/components/HomeFeedComponents/weatherSummaryComponent';
 import WeeklySummaryComponent from '@/components/HomeFeedComponents/weeklySummaryComponent';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { moderateScale } from 'react-native-size-matters';
 
 
 export default function HomeScreen() {
+  const [showSkeleton, setShowSkeleton] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSkeleton(false);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <SafeAreaView edges={['top']} style={styles.safeArea}>
-      <ScrollView
+      {showSkeleton ? (
+        <Animated.View
+          exiting={FadeOut.duration(400)}
+          style={styles.skeletonContainer}
+        >
+          <HomeFeedSkeleton />
+        </Animated.View>
+      ) : (
+      <Animated.ScrollView
+        entering={FadeIn.duration(400)}
         style={styles.container}
       >
 
@@ -55,7 +76,8 @@ export default function HomeScreen() {
           <GoalSetupPromptComponent/>
         </View>
 
-      </ScrollView>
+      </Animated.ScrollView>
+      )}
     </SafeAreaView>
   );
 }
@@ -68,6 +90,10 @@ const styles = StyleSheet.create({
   },
   container: {
     backgroundColor: "#0F1010",
+    flex: 1,
+    paddingHorizontal: moderateScale(10),
+  },
+  skeletonContainer: {
     flex: 1,
     paddingHorizontal: moderateScale(10),
   },

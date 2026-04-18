@@ -1,3 +1,4 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, {
@@ -6,21 +7,20 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withDelay,
-  withSequence,
   withSpring,
-  withTiming,
+  withTiming
 } from 'react-native-reanimated';
 
 export default function CustomSplash({ onComplete }: { onComplete?: () => void }) {
   const titleOpacity = useSharedValue(0);
-  const titleScale = useSharedValue(0.7);
+  const titleScale = useSharedValue(0.92);
   const subtitleOpacity = useSharedValue(0);
   const lineWidth = useSharedValue(0);
 
   useEffect(() => {
     // Title: fade in + spring scale
     titleOpacity.value = withTiming(1, { duration: 600, easing: Easing.out(Easing.cubic) });
-    titleScale.value = withSpring(1, { damping: 12, stiffness: 100 });
+    titleScale.value = withSpring(1, { damping: 14, stiffness: 120 });
 
     // Decorative line expands
     lineWidth.value = withDelay(
@@ -58,15 +58,28 @@ export default function CustomSplash({ onComplete }: { onComplete?: () => void }
       })}
       style={styles.container}
     >
+      <LinearGradient
+        colors={['rgba(65, 159, 113, 0.12)', 'rgba(65, 159, 113, 0)']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0.6, y: 0.7 }}
+        style={styles.topLeftGlow}
+      />
+      <LinearGradient
+        colors={['rgba(65, 159, 113, 0.10)', 'rgba(65, 159, 113, 0)']}
+        start={{ x: 1, y: 1 }}
+        end={{ x: 0.4, y: 0.3 }}
+        style={styles.bottomRightGlow}
+      />
+
       <View style={styles.content}>
         <Animated.Text style={[styles.title, titleStyle]}>
-          TOKO
+          토코스포츠
         </Animated.Text>
 
         <Animated.View style={[styles.line, lineStyle]} />
 
         <Animated.Text style={[styles.subtitle, subtitleStyle]}>
-          Your Golf Companion
+          당신의 골프 동반자
         </Animated.Text>
       </View>
     </Animated.View>
@@ -81,15 +94,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     zIndex: 10,
   },
+  topLeftGlow: {
+    position: 'absolute',
+    top: -30,
+    left: -20,
+    width: 220,
+    height: 240,
+    borderRadius: 130,
+  },
+  bottomRightGlow: {
+    position: 'absolute',
+    bottom: -30,
+    right: -20,
+    width: 220,
+    height: 240,
+    borderRadius: 130,
+  },
   content: {
     alignItems: 'center',
     gap: 12,
   },
   title: {
     fontFamily: 'BarlowCondensed_900Black_Italic',
-    fontSize: 56,
+    fontSize: 50,
     color: '#FFFFFF',
-    letterSpacing: 8,
+    letterSpacing: 3,
   },
   line: {
     height: 2,
