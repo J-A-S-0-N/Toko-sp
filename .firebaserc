@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "toko-sp"
-  }
+    "default": "toko-sp",
+    "data_parsing": "toko-sp"
+  },
+  "targets": {},
+  "etags": {}
 }

@@ -79,7 +79,7 @@ export default function CustomSplash({ onComplete }: { onComplete?: () => void }
         <Animated.View style={[styles.line, lineStyle]} />
 
         <Animated.Text style={[styles.subtitle, subtitleStyle]}>
-          당신의 골프 동반자
+          대한민국 1등 파크골프 스토어 AI 기록기
         </Animated.Text>
       </View>
     </Animated.View>
@@ -126,9 +126,9 @@ const styles = StyleSheet.create({
     borderRadius: 1,
   },
   subtitle: {
-    fontFamily: 'Pretendard-Regular',
+    fontFamily: 'BarlowCondensed_900Black_Italic',
     fontSize: 14,
     color: '#9BA1A6',
-    letterSpacing: 3,
+    letterSpacing: 2,
   },
 });

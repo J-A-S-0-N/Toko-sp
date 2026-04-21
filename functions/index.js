@@ -1,14 +1,16 @@
-import { onDocumentCreated } from "firebase-functions/v2/firestore";
-import OpenAI from "openai";
 import { GoogleGenAI } from "@google/genai";
-import unwrapModule from "./unwrap.js";
+import { Buffer } from "buffer";
+import { onDocumentCreated } from "firebase-functions/v2/firestore";
 
-import { initializeApp, getApps } from "firebase-admin/app";
-import { getFirestore, FieldValue } from "firebase-admin/firestore";
+import fetch from "node-fetch";
+
+import { getApps, initializeApp } from "firebase-admin/app";
+import { getFirestore } from "firebase-admin/firestore";
+
+import { defineSecret } from "firebase-functions/params";
 
 import { getStorage } from "firebase-admin/storage";
-import { randomUUID } from "crypto";
-import 'dotenv/config';
+import { polarUnwrap } from "./unwrap.js";
 
 
 if (!getApps().length) initializeApp();
@@ -16,18 +18,9 @@ const db = getFirestore();
 
 const bucket = getStorage().bucket();
 
-const { polarUnwrap } = unwrapModule;
 
-// delete when pushing github
-const ApiKey = process.env.GEMINI_API_KEY;
+const GEMINI_API_KEY = defineSecret("GEMINI_API_KEY")
 
-//const client = new OpenAI({ apiKey: ApiKey });
-const client = new OpenAI({
-  apiKey: ApiKey,
-  baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/"
-});
-
-const ai = new GoogleGenAI({ apiKey: ApiKey });
 
 /*
 async function uploadAndGetDownloadUrl(buffer, path, contentType = "image/jpeg") {
@@ -50,6 +43,7 @@ async function uploadAndGetDownloadUrl(buffer, path, contentType = "image/jpeg")
 */
 
 async function main(imageBase64) {
+  const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY.value() });
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
     contents: [
@@ -80,9 +74,13 @@ Rules:
   return JSON.parse(response.text);
 }
 
-export const onNewDocument = onDocumentCreated("testBucket/{docId}", async (event) => {
+export const onNewDocument = onDocumentCreated({
+      document: "Scans/{docId}",
+      secrets: [GEMINI_API_KEY] 
+    }, async (event) => {
   const snapshot = event.data;
-  const imageLink = snapshot.get("imageLink");
+  const photoUrls = snapshot.get("photoUrls");
+  const imageLink = Array.isArray(photoUrls) && photoUrls.length > 0 ? photoUrls[0] : null;
 
   if (typeof imageLink !== "string" || imageLink.trim() === "") {
     throw new Error("imageLink is not a valid string");
@@ -119,7 +117,7 @@ export const onNewDocument = onDocumentCreated("testBucket/{docId}", async (even
   console.error("holeCounts: " + holeCounts);
 
 
-  await db.collection("testBucket").doc(event.params.docId).update({
+  await db.collection("Scans").doc(event.params.docId).update({
     hole1: holeCounts[0] == 1 ? hitResults[0] : null,
     hole2: holeCounts[1] == 2 ? hitResults[1] : null,
     hole3: holeCounts[2] == 3 ? hitResults[2] : null,
@@ -129,7 +127,7 @@ export const onNewDocument = onDocumentCreated("testBucket/{docId}", async (even
     hole7: holeCounts[6] == 7 ? hitResults[6] : null,
     hole8: holeCounts[7] == 8 ? hitResults[7] : null,
     hole9: holeCounts[8] == 9 ? hitResults[8] : null,
-    result: "success",
+    status: "done",
   });
   /*
   await updateDoc(doc(db, "testBucket", event.params.docId), {

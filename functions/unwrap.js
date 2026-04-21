@@ -1,5 +1,6 @@
 // unwrap.js
 const sharp = require("sharp");
+const { Buffer } = require("buffer");
 
 async function polarUnwrap(imageBuffer) {
   const image = sharp(imageBuffer);
