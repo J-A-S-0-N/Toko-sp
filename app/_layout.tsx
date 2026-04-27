@@ -72,6 +72,14 @@ export default function RootLayout() {
               headerShown: false, 
             }} 
           />
+          <Stack.Screen name="(modals)/allRoundsModal" 
+            options={{ 
+              presentation: 'modal', 
+              animation: 'fade',
+              title: 'All Rounds', 
+              headerShown: false, 
+            }} 
+          />
           <Stack.Screen name="(modals)/setGoalModal" 
             options={{ 
               presentation: 'modal', 

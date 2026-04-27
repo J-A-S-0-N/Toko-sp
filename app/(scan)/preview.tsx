@@ -83,7 +83,7 @@ export default function PreviewScreen() {
     }
 
     router.replace({
-      pathname: "./loading",
+      pathname: "./roundInfo",
       params: {
         holes: String(holesCount),
         photos: JSON.stringify(parsedPhotos),
@@ -173,7 +173,20 @@ export default function PreviewScreen() {
       <View style={styles.container}>
         <View style={styles.contentLayer}>
           <View style={styles.headerRow}>
-            <Pressable style={styles.iconButton} onPress={() => router.back()}>
+            <Pressable style={styles.iconButton} onPress={() => {
+              Alert.alert(
+                "스캔을 중단하시겠어요?",
+                "지금까지의 진행 내용이 사라집니다.",
+                [
+                  { text: "취소", style: "cancel" },
+                  {
+                    text: "나가기",
+                    style: "destructive",
+                    onPress: () => router.replace("/(tabs)/scan"),
+                  },
+                ]
+              );
+            }}>
               <Feather name="x" size={moderateScale(20)} color="#D4D9DB" />
             </Pressable>
             <View style={styles.headerDot} />

@@ -1,12 +1,14 @@
 import HoleEditorModal from "@/components/ScanPageComponent/HoleEditorModal";
 import { submit } from "@/components/ScanPageComponent/backendLogic/submit";
 import { ThemedText as Text } from "@/components/themed-text";
+import { newRoundSignal } from "@/store/newRoundSignal";
 import Feather from "@expo/vector-icons/Feather";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
 import { Alert, Pressable, ScrollView, StyleSheet, Switch, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
+import { deletePendingScan } from "./scanCleanup";
 
 type HoleScore = {
   hole: number;
@@ -14,37 +16,50 @@ type HoleScore = {
   par: number;
 };
 
-const defaultHoleScores: HoleScore[] = [
-  { hole: 1, score: 5, par: 4 },
+const HoleScoreTemplate: HoleScore[] = [
+  { hole: 1, score: 5, par: 3 },
   { hole: 2, score: 3, par: 3 },
-  { hole: 3, score: 5, par: 5 },
-  { hole: 4, score: 4, par: 4 },
-  { hole: 5, score: 5, par: 4 },
+  { hole: 3, score: 5, par: 3 },
+  { hole: 4, score: 4, par: 3 },
+  { hole: 5, score: 5, par: 3 },
   { hole: 6, score: 3, par: 3 },
-  { hole: 7, score: 4, par: 4 },
-  { hole: 8, score: 6, par: 5 },
-  { hole: 9, score: 4, par: 4 },
-  { hole: 10, score: 4, par: 4 },
+  { hole: 7, score: 4, par: 3 },
+  { hole: 8, score: 6, par: 3 },
+  { hole: 9, score: 4, par: 3 },
+  { hole: 10, score: 4, par: 3 },
   { hole: 11, score: 2, par: 3 },
-  { hole: 12, score: 4, par: 4 },
-  { hole: 13, score: 5, par: 5 },
-  { hole: 14, score: 4, par: 4 },
-  { hole: 15, score: 5, par: 4 },
+  { hole: 12, score: 4, par: 3 },
+  { hole: 13, score: 5, par: 3 },
+  { hole: 14, score: 4, par: 3 },
+  { hole: 15, score: 5, par: 3 },
   { hole: 16, score: 4, par: 3 },
-  { hole: 17, score: 5, par: 5 },
-  { hole: 18, score: 4, par: 4 },
+  { hole: 17, score: 5, par: 3 },
+  { hole: 18, score: 4, par: 3 },
 ];
 
 export default function ResultPreviewScreen() {
   const router = useRouter();
-  const { holes } = useLocalSearchParams<{ holes?: string }>();
+  const { holes, scores, courseName, scanDocId } = useLocalSearchParams<{ holes?: string; scores?: string; courseName?: string; scanDocId?: string }>();
 
   const holesCount = holes === "18" ? 18 : 9;
   const standardCoursePar = holesCount === 18 ? 72 : 36;
 
   const [parInputEnabled, setParInputEnabled] = useState(false);
   const [coursePar, setCoursePar] = useState(standardCoursePar);
-  const [holeScores, setHoleScores] = useState(defaultHoleScores);
+  const [holeScores, setHoleScores] = useState(() => {
+    if (scores) {
+      try {
+        const parsed = JSON.parse(scores) as number[];
+        if (Array.isArray(parsed)) {
+          return HoleScoreTemplate.map((hole, i) => ({
+            ...hole,
+            score: Math.max(1, Math.min(9, parsed[i] ?? hole.score)),
+          }));
+        }
+      } catch {}
+    }
+    return HoleScoreTemplate;
+  });
   const [selectedHoleIndex, setSelectedHoleIndex] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -59,8 +74,14 @@ export default function ResultPreviewScreen() {
     const holeTotalPar = visibleHoleScores.reduce((acc, item) => acc + item.par, 0);
     const appliedPar = parInputEnabled ? holeTotalPar : coursePar;
     const diff = totalScore - appliedPar;
-    const birdieCount = visibleHoleScores.filter((item) => item.score < item.par).length;
-    const doubleCount = visibleHoleScores.filter((item) => item.score - item.par >= 2).length;
+    const birdieCount = visibleHoleScores.filter((item) => {
+      const ep = parInputEnabled ? item.par : coursePar / holesCount;
+      return item.score < ep;
+    }).length;
+    const doubleCount = visibleHoleScores.filter((item) => {
+      const ep = parInputEnabled ? item.par : coursePar / holesCount;
+      return item.score - ep >= 2;
+    }).length;
 
     return {
       totalScore,
@@ -116,9 +137,15 @@ export default function ResultPreviewScreen() {
     try {
       setIsSubmitting(true);
 
+      if (!scanDocId) {
+        Alert.alert("오류", "스캔 문서를 찾을 수 없어요. 다시 시도해 주세요.");
+        return;
+      }
+
       const result = await submit({
+        scanDocId,
         holesCount,
-        courseName: "페블 비치 골프 링크스",
+        courseName: courseName?.trim() || "코스명 없음",
         playedAt: new Date().toISOString(),
         parInputEnabled,
         appliedPar: stats.appliedPar,
@@ -129,12 +156,9 @@ export default function ResultPreviewScreen() {
         holeScores: visibleHoleScores,
       });
 
-      Alert.alert("저장 완료", `분석 결과를 저장했어요.\nID: ${result.id}`, [
-        {
-          text: "확인",
-          onPress: () => router.replace("/(tabs)/scan"),
-        },
-      ]);
+
+      newRoundSignal.id = result.id;
+      router.replace("/(tabs)");
     } catch (error) {
       Alert.alert("저장 실패", "저장 중 오류가 발생했어요. 잠시 후 다시 시도해주세요.");
     } finally {
@@ -155,7 +179,23 @@ export default function ResultPreviewScreen() {
       <View style={styles.resultCard}>
         <ScrollView style={styles.mainContentScroll} contentContainerStyle={styles.mainContentScrollContent}>
           <View style={styles.headerRow}>
-            <Pressable style={styles.backButton} onPress={() => router.back()}>
+            <Pressable style={styles.backButton} onPress={() => {
+              Alert.alert(
+                "스캔을 중단하시겠어요?",
+                "지금까지의 진행 내용이 사라집니다.",
+                [
+                  { text: "취소", style: "cancel" },
+                  {
+                    text: "나가기",
+                    style: "destructive",
+                    onPress: () => {
+                    if (scanDocId) deletePendingScan(scanDocId);
+                    router.replace("/(tabs)/scan");
+                  },
+                  },
+                ]
+              );
+            }}>
               <Feather name="chevron-left" size={moderateScale(18)} color="#B8BEC1" />
             </Pressable>
             <Text type="barlowHard" style={styles.screenTitle}>
@@ -164,7 +204,7 @@ export default function ResultPreviewScreen() {
           </View>
 
           <Text type="barlowHard" style={styles.courseTitle}>
-            페블 비치 골프 링크스
+            {courseName || "코스명 없음"}
           </Text>
           <Text type="barlowLight" style={styles.dateText}>
             2026년 3월 28일 · {holesCount}홀
@@ -255,7 +295,8 @@ export default function ResultPreviewScreen() {
 
           <View style={styles.scoreGrid}>
             {visibleHoleScores.map((item, index) => {
-              const isGood = item.score <= item.par;
+              const effectivePar = parInputEnabled ? item.par : coursePar / holesCount;
+              const isGood = item.score <= effectivePar;
 
               return (
                 <Pressable

@@ -312,28 +312,28 @@ const styles = StyleSheet.create({
   },
   optionCard: {
     flex: 1,
-    borderRadius: moderateScale(20),
+    borderRadius: moderateScale(16),
     borderWidth: 1,
     overflow: 'hidden',
   },
   optionPressable: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 28,
+    paddingVertical: 20,
     width: '100%',
   },
   optionValue: {
-    fontSize: moderateScale(26),
+    fontSize: moderateScale(22),
     fontWeight: '800',
-    marginBottom: 4,
+    marginBottom: 3,
   },
   optionLabel: {
-    fontSize: 21,
+    fontSize: 18,
     fontWeight: '700',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   optionSubLabel: {
-    fontSize: 17,
+    fontSize: 14,
   },
   button: {
     width: '100%',

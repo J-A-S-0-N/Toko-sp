@@ -1,12 +1,13 @@
 import { router } from 'expo-router';
 import type { UserCredential } from 'firebase/auth';
 import { useMemo, useRef, useState } from 'react';
-import { Alert, Animated, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, Animated, Keyboard, Pressable, StyleSheet, TextInput, TouchableWithoutFeedback, View } from 'react-native';
 import { moderateScale } from 'react-native-size-matters';
 import { saveUserInfo } from './functions/saveUserFunction';
 import { clearPendingUserCredential, getPendingUserCredential } from './functions/userCredentialStore';
 
 import { ThemedText as Text } from '@/components/themed-text';
+import { useAuth } from '@/context/AuthContext';
 
 const SKILL_LEVELS = [
   { id: 'beginner', icon: '🚀', label: '입문자', hint: '30+' },
@@ -16,6 +17,7 @@ const SKILL_LEVELS = [
 ] as const;
 
 export default function ProfileSetupScreen() {
+  const { setUsername } = useAuth();
   const [name, setName] = useState('');
   const [handicap, setHandicap] = useState('');
   const [skillLevel, setSkillLevel] = useState<(typeof SKILL_LEVELS)[number]['id'] | null>(null);
@@ -65,6 +67,7 @@ export default function ProfileSetupScreen() {
       }
 
       clearPendingUserCredential();
+      setUsername(name);
       router.push('/(auth)/locationSetup');
     } catch (error) {
       Alert.alert('저장 실패', '프로필 저장 중 오류가 발생했어요. 다시 시도해주세요.');
@@ -107,6 +110,7 @@ export default function ProfileSetupScreen() {
   };
 
   return (
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
     <View style={styles.container}>
       <View style={styles.content}>
         <View style={styles.headerWrap}>
@@ -211,6 +215,7 @@ export default function ProfileSetupScreen() {
         <Text style={[styles.nextText, !isNextEnabled && styles.nextTextDisabled]}>다음</Text>
       </Pressable>
     </View>
+    </TouchableWithoutFeedback>
   );
 }
 

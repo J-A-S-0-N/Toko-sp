@@ -78,69 +78,89 @@ export const onNewDocument = onDocumentCreated({
       document: "Scans/{docId}",
       secrets: [GEMINI_API_KEY] 
     }, async (event) => {
+
   const snapshot = event.data;
   const photoUrls = snapshot.get("photoUrls");
-  const imageLink = Array.isArray(photoUrls) && photoUrls.length > 0 ? photoUrls[0] : null;
+  const imageLinks = Array.isArray(photoUrls) ? photoUrls.filter((url) => typeof url === "string" && url.trim() !== "") : [];
 
-  if (typeof imageLink !== "string" || imageLink.trim() === "") {
+  if (typeof imageLinks[0] !== "string" || imageLinks[0].trim() === "") {
     throw new Error("imageLink is not a valid string");
   }
 
-  //download first and then convert to base64 and throw it to response function
-  const res = await fetch(imageLink);
-  if (!res.ok) {
-    throw new Error(`Failed to fetch image (${res.status}): ${imageLink}`);
+  async function processImage(imageUrl) {
+    const res = await fetch(imageUrl);
+    if (!res.ok) {
+      throw new Error(`Failed to fetch image (${res.status}): ${imageUrl}`);
+    }
+    const arrayBuffer = await res.arrayBuffer();
+    const originalBuffer = Buffer.from(arrayBuffer);
+    const unwrappedBuffer = await polarUnwrap(originalBuffer);
+    const imageBase64 = unwrappedBuffer.toString("base64");
+    return await main(imageBase64);
   }
-
-  const arrayBuffer = await res.arrayBuffer();
-
-  const originalBuffer = Buffer.from(arrayBuffer);
-
-  const unwrappedBuffer = await polarUnwrap(originalBuffer);
-
-  const imageBase64 = unwrappedBuffer.toString("base64");
-
-  //await response(imageBase64);
-  const jsonResponse = await main(imageBase64);
 
   console.error("docId: " + event.params.docId);
 
-  let hitResults = [];
-  let holeCounts = [];
+  //front 9 (holes 1-9)
+  const frontResponse = await processImage(imageLinks[0]);
+  const frontHits = {};
+  for (const pair of frontResponse) {
+    if (pair.hole >= 1 && pair.hole <= 9) {
+      frontHits[pair.hole] = pair.hit;
+    }
+  }
+  console.error("frontHits: " + JSON.stringify(frontHits));
 
-  for (const pair of jsonResponse) {
-    hitResults.push(pair.hit);
-    holeCounts.push(pair.hole);
+  //back 9 (holes 10-18) — only if a second image exists
+  const backHits = {};
+  if (imageLinks[1]) {
+    const backResponse = await processImage(imageLinks[1]);
+    for (const pair of backResponse) {
+      if (pair.hole >= 1 && pair.hole <= 9) {
+        backHits[pair.hole + 9] = pair.hit;
+      }
+    }
+    console.error("backHits: " + JSON.stringify(backHits));
   }
 
-  console.error("hitResults: " + hitResults);
-  console.error("holeCounts: " + holeCounts);
-
-
-  await db.collection("Scans").doc(event.params.docId).update({
-    hole1: holeCounts[0] == 1 ? hitResults[0] : null,
-    hole2: holeCounts[1] == 2 ? hitResults[1] : null,
-    hole3: holeCounts[2] == 3 ? hitResults[2] : null,
-    hole4: holeCounts[3] == 4 ? hitResults[3] : null,
-    hole5: holeCounts[4] == 5 ? hitResults[4] : null,
-    hole6: holeCounts[5] == 6 ? hitResults[5] : null,
-    hole7: holeCounts[6] == 7 ? hitResults[6] : null,
-    hole8: holeCounts[7] == 8 ? hitResults[7] : null,
-    hole9: holeCounts[8] == 9 ? hitResults[8] : null,
+  const updateData_Nine = {
+    hole1_raw: frontHits[1] ?? null,
+    hole2_raw: frontHits[2] ?? null,
+    hole3_raw: frontHits[3] ?? null,
+    hole4_raw: frontHits[4] ?? null,
+    hole5_raw: frontHits[5] ?? null,
+    hole6_raw: frontHits[6] ?? null,
+    hole7_raw: frontHits[7] ?? null,
+    hole8_raw: frontHits[8] ?? null,
+    hole9_raw: frontHits[9] ?? null,
     status: "done",
-  });
-  /*
-  await updateDoc(doc(db, "testBucket", event.params.docId), {
-      hole1: jsonResponse.hole1,
-      hole2: jsonResponse.hole2,
-      hole3: jsonResponse.hole3,
-      hole4: jsonResponse.hole4,
-      hole5: jsonResponse.hole5,
-      hole6: jsonResponse.hole6,
-      hole7: jsonResponse.hole7,
-      hole8: jsonResponse.hole8,
-      hole9: jsonResponse.hole9,
-      result: "success",
-  });
-  */
+  };
+
+  const updateData_Eighteen = {
+    hole1_raw: frontHits[1] ?? null,
+    hole2_raw: frontHits[2] ?? null,
+    hole3_raw: frontHits[3] ?? null,
+    hole4_raw: frontHits[4] ?? null,
+    hole5_raw: frontHits[5] ?? null,
+    hole6_raw: frontHits[6] ?? null,
+    hole7_raw: frontHits[7] ?? null,
+    hole8_raw: frontHits[8] ?? null,
+    hole9_raw: frontHits[9] ?? null,
+    hole10_raw: backHits[10] ?? null,
+    hole11_raw: backHits[11] ?? null,
+    hole12_raw: backHits[12] ?? null,
+    hole13_raw: backHits[13] ?? null,
+    hole14_raw: backHits[14] ?? null,
+    hole15_raw: backHits[15] ?? null,
+    hole16_raw: backHits[16] ?? null,
+    hole17_raw: backHits[17] ?? null,
+    hole18_raw: backHits[18] ?? null,
+    status: "done",
+  };
+
+  if (imageLinks[1]) {
+    await db.collection("Scans").doc(event.params.docId).update(updateData_Eighteen);
+  } else {
+    await db.collection("Scans").doc(event.params.docId).update(updateData_Nine);
+  }
 });

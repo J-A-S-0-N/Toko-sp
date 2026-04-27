@@ -3,7 +3,7 @@ import Feather from "@expo/vector-icons/Feather";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Alert, Pressable, StyleSheet, View } from "react-native";
 import Animated, { FadeInUp, FadeOutDown } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
@@ -18,6 +18,7 @@ export default function CaptureScreen() {
     photos?: string;
   }>();
   const currentShotIndex = shotIndex === "2" ? 2 : 1;
+
   const parsedPhotos = React.useMemo(() => {
     if (!photos) return [] as string[];
 
@@ -119,7 +120,20 @@ export default function CaptureScreen() {
         */}
 
         <View style={styles.headerRow}>
-          <Pressable style={styles.iconButton} onPress={() => router.back()}>
+          <Pressable style={styles.iconButton} onPress={() => {
+            Alert.alert(
+              "스캔을 중단하시겠어요?",
+              "지금까지의 진행 내용이 사라집니다.",
+              [
+                { text: "취소", style: "cancel" },
+                {
+                  text: "나가기",
+                  style: "destructive",
+                  onPress: () => router.replace("/(tabs)/scan"),
+                },
+              ]
+            );
+          }}>
             <Feather name="x" size={moderateScale(20)} color="#D4D9DB" />
           </Pressable>
 

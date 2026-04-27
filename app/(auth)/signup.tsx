@@ -1,7 +1,7 @@
 /* import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha'; */
 import { router } from 'expo-router';
 import { useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Animated, Keyboard, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, Animated, Keyboard, Pressable, StyleSheet, TextInput, TouchableWithoutFeedback, View } from 'react-native';
 
 // recaptcha function
 
@@ -115,6 +115,7 @@ export default function SignupScreen() {
         firebaseConfig={app.options}
         attemptInvisibleVerification={false}
       /> */}
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={styles.container}>
           <View style={styles.mainArea}>
             <View style={styles.header}>
@@ -175,6 +176,7 @@ export default function SignupScreen() {
             </Text>
           </Pressable>
       </View>
+      </TouchableWithoutFeedback>
 
       {isSubmitting && (
         <View style={styles.loadingOverlay}>

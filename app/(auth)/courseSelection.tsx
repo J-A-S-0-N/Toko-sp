@@ -61,7 +61,7 @@ export default function CourseSelectionScreen() {
   };
 
   const handleNext = () => {
-    router.push('/(onboarding)');
+    router.replace('/(tabs)');
   };
 
   const handleCustomCourseAdd = () => {

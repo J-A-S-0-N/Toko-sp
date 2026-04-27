@@ -1,19 +1,13 @@
 import { ThemedText as Text } from "@/components/themed-text";
+import { newRoundSignal } from "@/store/newRoundSignal";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { FlatList, StyleSheet, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, TouchableOpacity, View } from "react-native";
+import Animated, { FadeIn } from "react-native-reanimated";
 import { moderateScale } from "react-native-size-matters";
 
 
-/*
-- impliment placeholder component for empty state [not loaded]
--
 
-FIXES:
-- fix gap between user score and score delta
--
-
-*/
 
 interface Round {
   id: string;
@@ -31,6 +25,22 @@ interface Round {
 
 export default function RecentRoundComponent() {
   const [recentRounds, setRecentRounds] = useState<Round[]>([]);
+  const [loadingId, setLoadingId] = useState<string | null>(() => {
+    const id = newRoundSignal.id;
+    newRoundSignal.id = null;
+    return id;
+  });
+  const [revealedId, setRevealedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (loadingId) {
+      const timer = setTimeout(() => {
+        setRevealedId(loadingId);
+        setLoadingId(null);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [loadingId]);
 
   useEffect(() => {
     //TODO: implement fetch recent rounds
@@ -88,7 +98,16 @@ export default function RecentRoundComponent() {
   };
 
   const renderRecentRound = (round: Round) => {
+    if (round.id === loadingId) {
+      return (
+        <View style={[styles.roundContainer, styles.loadingContainer]}>
+          <ActivityIndicator size="small" color="#4CAE82" />
+        </View>
+      );
+    }
+
     return (
+      <Animated.View entering={round.id === revealedId ? FadeIn.duration(400) : undefined}>
       <TouchableOpacity
         activeOpacity={1}
         onPress={() => router.push(`/activityModal?id=${round.id}`)}
@@ -158,12 +177,18 @@ export default function RecentRoundComponent() {
           ))}
         </View>
       </TouchableOpacity>
+      </Animated.View>
     );
   };
 
   return (
     <View style={styles.container}>
-      <Text type="barlowLight" style={styles.title}>최근 라운드</Text>
+      <View style={styles.titleRow}>
+        <Text type="barlowLight" style={styles.title}>최근 라운드</Text>
+        <Pressable onPress={() => router.push("/(modals)/allRoundsModal")}>
+          <Text type="barlowLight" style={styles.viewAllLink}>전체 보기 →</Text>
+        </Pressable>
+      </View>
       <FlatList
         scrollEnabled={false}
         showsVerticalScrollIndicator={false}
@@ -188,9 +213,23 @@ const styles = StyleSheet.create({
     borderColor: "#353838",
     //alignItems: "center",
   },
+  loadingContainer: {
+    minHeight: moderateScale(120),
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  titleRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: moderateScale(10),
+  },
   title: {
     fontSize: moderateScale(16),
     color: "#6E7171",
-    marginBottom: moderateScale(10),
+  },
+  viewAllLink: {
+    fontSize: moderateScale(14),
+    color: "#4CAE82",
   },
 });

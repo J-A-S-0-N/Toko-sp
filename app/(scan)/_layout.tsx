@@ -10,6 +10,7 @@ export default function ScanFlowLayout() {
 				animation: 'fade',
 				title: 'Activity',
 			}} />
+			<Stack.Screen name="roundInfo" options={{ headerShown: false }} />
 			<Stack.Screen name="loading" options={{ headerShown: false }} />
 			<Stack.Screen name="resultPreview" options={{ headerShown: false }} />
 		</Stack>

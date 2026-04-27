@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
   pillText: {
     //color: "#6E7171",
     color: "white",
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(13),
   },
   sectionLabel: {
     marginTop: moderateScale(5),

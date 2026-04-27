@@ -8,14 +8,17 @@ import UsernameHeader from '@/components/HomeFeedComponents/usernameHeader';
 import UserStatComponent from '@/components/HomeFeedComponents/userStatComponent';
 import WeatherSummaryComponent from '@/components/HomeFeedComponents/weatherSummaryComponent';
 import WeeklySummaryComponent from '@/components/HomeFeedComponents/weeklySummaryComponent';
+import { ThemedText as Text } from '@/components/themed-text';
+import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { moderateScale } from 'react-native-size-matters';
 
 
 export default function HomeScreen() {
+  const router = useRouter();
   const [showSkeleton, setShowSkeleton] = useState(true);
 
   useEffect(() => {
@@ -76,6 +79,15 @@ export default function HomeScreen() {
           <GoalSetupPromptComponent/>
         </View>
 
+        <Pressable
+          style={styles.allRoundsButton}
+          onPress={() => router.push('/(modals)/allRoundsModal')}
+        >
+          <Text type="barlowLight" style={styles.allRoundsButtonText}>
+            전체 라운드 보기 (14개) →
+          </Text>
+        </Pressable>
+
       </Animated.ScrollView>
       )}
     </SafeAreaView>
@@ -112,5 +124,19 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     position: 'absolute',
+  },
+  allRoundsButton: {
+    backgroundColor: '#1F2222',
+    borderRadius: moderateScale(14),
+    borderWidth: moderateScale(0.5),
+    borderColor: '#353838',
+    paddingVertical: moderateScale(16),
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: moderateScale(30),
+  },
+  allRoundsButtonText: {
+    color: '#A2AAAE',
+    fontSize: moderateScale(15),
   },
 });

@@ -2,7 +2,7 @@ import { db } from "@/config/firebase";
 import { collection, doc, serverTimestamp, setDoc } from "firebase/firestore";
 import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 
-export async function createPendingScan(holesCount: number, photoUris: string[]) {
+export async function createPendingScan(holesCount: number, photoUris: string[], userId: string) {
   const storage = getStorage();
   const uploadTimestamp = Date.now();
 
@@ -24,6 +24,7 @@ export async function createPendingScan(holesCount: number, photoUris: string[])
   const scanDocRef = doc(collection(db, "Scans"));
 
   await setDoc(scanDocRef, {
+    userId,
     holes: holesCount,
     photoUrls: uploadedPhotoUrls,
     status: "pending",

@@ -1,5 +1,5 @@
 import { db } from "@/config/firebase";
-import { collection, doc, setDoc } from "firebase/firestore";
+import { doc, updateDoc } from "firebase/firestore";
 
 export type SubmitHoleScore = {
   hole: number;
@@ -8,6 +8,7 @@ export type SubmitHoleScore = {
 };
 
 export type SubmitScanPayload = {
+  scanDocId: string;
   holesCount: number;
   courseName: string;
   playedAt: string;
@@ -21,6 +22,7 @@ export type SubmitScanPayload = {
 };
 
 export async function submit({
+  scanDocId,
   holesCount,
   courseName,
   playedAt,
@@ -32,9 +34,9 @@ export async function submit({
   doubleCount,
   holeScores,
 }: SubmitScanPayload): Promise<{ id: string }> {
-  const resultDocRef = doc(collection(db, "ScanResults"));
+  const scanDocRef = doc(db, "Scans", scanDocId);
 
-  await setDoc(resultDocRef, {
+  await updateDoc(scanDocRef, {
     holesCount,
     courseName,
     playedAt,
@@ -45,7 +47,8 @@ export async function submit({
     birdieCount,
     doubleCount,
     holeScores,
+    status: "completed",
   });
 
-  return { id: resultDocRef.id };
+  return { id: scanDocId };
 }

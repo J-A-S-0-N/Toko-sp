@@ -1,83 +1,14 @@
 import { ThemedText as Text } from "@/components/themed-text";
 import { db } from "@/config/firebase";
-import Ionicons from "@expo/vector-icons/Ionicons";
+import Feather from "@expo/vector-icons/Feather";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import { doc, getDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
-
-const HOLES = [
-  { index: 1, par: 4, strokes: 5, delta: "+1", type: "bogey" },
-  { index: 2, par: 3, strokes: 3, delta: "E", type: "par" },
-  { index: 3, par: 4, strokes: 5, delta: "+1", type: "bogey" },
-  { index: 4, par: 4, strokes: 4, delta: "E", type: "par" },
-  { index: 5, par: 5, strokes: 5, delta: "E", type: "par" },
-  { index: 6, par: 3, strokes: 3, delta: "E", type: "par" },
-  { index: 7, par: 4, strokes: 4, delta: "E", type: "par" },
-  { index: 8, par: 4, strokes: 6, delta: "+2", type: "double" },
-  { index: 9, par: 4, strokes: 4, delta: "E", type: "par" },
-  { index: 10, par: 4, strokes: 4, delta: "E", type: "par" },
-  { index: 11, par: 3, strokes: 2, delta: "-1", type: "birdie" },
-  { index: 12, par: 4, strokes: 4, delta: "E", type: "par" },
-  { index: 13, par: 5, strokes: 5, delta: "E", type: "par" },
-  { index: 14, par: 4, strokes: 4, delta: "E", type: "par" },
-  { index: 15, par: 4, strokes: 5, delta: "+1", type: "bogey" },
-  { index: 16, par: 3, strokes: 4, delta: "+1", type: "bogey" },
-  { index: 17, par: 5, strokes: 5, delta: "E", type: "par" },
-  { index: 18, par: 4, strokes: 4, delta: "E", type: "par" },
-] as const;
-
-/*
-const parHit = [
-  { index: 1, parCount: 4 },
-  { index: 2, parCount: 3 },
-  { index: 3, parCount: 5 },
-  { index: 4, parCount: 4 },
-  { index: 5, parCount: 4 },
-  { index: 6, parCount: 5 },
-  { index: 7, parCount: 4 },
-  { index: 8, parCount: 3 },
-  { index: 9, parCount: 4 },
-  { index: 10, parCount: 5 },
-  { index: 11, parCount: 3 },
-  { index: 12, parCount: 4 },
-  { index: 13, parCount: 4 },
-  { index: 14, parCount: 3 },
-  { index: 15, parCount: 5 },
-  { index: 16, parCount: 4 },
-  { index: 17, parCount: 3 },
-  { index: 18, parCount: 4 }
-]
-*/
-
-/*
-const userHit = [
-  { index: 1, hitCount: 4 },
-  { index: 2, hitCount: 5 },
-  { index: 3, hitCount: 3 },
-  { index: 4, hitCount: 4 },
-  { index: 5, hitCount: 6 },
-  { index: 6, hitCount: 4 },
-  { index: 7, hitCount: 5 },
-  { index: 8, hitCount: 7 },
-  { index: 9, hitCount: 4 },
-  { index: 10, hitCount: 4 },
-  { index: 11, hitCount: 3 },
-  { index: 12, hitCount: 4 },
-  { index: 13, hitCount: 5 },
-  { index: 14, hitCount: 4 },
-  { index: 15, hitCount: 6 },
-  { index: 16, hitCount: 5 },
-  { index: 17, hitCount: 6 },
-  { index: 18, hitCount: 4 },
-]
-*/
-
-type HoleType = (typeof HOLES)[number]["type"];
 
 function getScoreCircleColors(delta: string) {
   const deltaValue = Number(delta);
@@ -102,181 +33,74 @@ export default function ActivityModal() {
   const { id } = useLocalSearchParams<{ id: string }>();
 
   const [fieldName, setFieldName] = useState<string>("");
-  const [fieldAddress, setFieldAddress] = useState<string>("");
-  const [date, setDate] = useState<string>(""); // Iso format string variable
+  const [location, setLocation] = useState<string>("");
+  const [date, setDate] = useState<string>("");
 
-  const [score, setScore] = useState<number>();
-  const [fieldPar, setFieldPar] = useState<number>();
+  const [score, setScore] = useState<number>(0);
+  const [fieldPar, setFieldPar] = useState<number>(0);
   const [delta, setDelta] = useState<string>("");
 
-  const [parCount, setParCount] = useState<number[]>([]);
-  const [birdieCount, setBirdieCount] = useState<number[]>([]);
-  const [bogeyCount, setBogeyCount] = useState<number[]>([]);
-  const [eagleCount, setEagleCount] = useState<number[]>([]);
-  const [doubleCount, setDoubleCount] = useState<number[]>([]);
+  const [parCount, setParCount] = useState<number>(0);
+  const [birdieCount, setBirdieCount] = useState<number>(0);
+  const [bogeyCount, setBogeyCount] = useState<number>(0);
+  const [eagleCount, setEagleCount] = useState<number>(0);
+  const [doubleCount, setDoubleCount] = useState<number>(0);
 
-  let parHit: { index: number; parCount: number }[] = [];
-  let userHit: { index: number; hitCount: number }[] = [];
-  let userDelta: { index: number; delta: string }[] = [];
+  const [holeData, setHoleData] = useState<{ hole: number; par: number; score: number; delta: string }[]>([]);
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    if(score == null || fieldPar == null) return;
-    const d = score - fieldPar;
-    if(d > 0) {
-      setDelta("+" + d.toString());
-    } else {
-      setDelta("-" + d.toString());
-    }
-  }, [score, fieldPar]);
+    if (!id) return;
 
-  useEffect(() => {
-    const fetchFromFirebase = async () => {
-      const userRef = doc(db, "User", "Username");
-      const postDocRef = doc(userRef, "Posts", "Mzvg5v4Cyh9iTAaYFv6o"); // TODO : replace with id from params
-      const postSnap = await getDoc(postDocRef);
+    const fetchRound = async () => {
+      try {
+        const scanDoc = await getDoc(doc(db, "Scans", id));
+        if (!scanDoc.exists()) return;
 
-      if (postSnap.exists()) {
-        const postData = postSnap.data();
-        setFieldName(postData.FieldName);
-        setFieldAddress(postData.FieldAddress);
-        setDate(postData.Date);
+        const data = scanDoc.data();
+        setFieldName(data.courseName ?? "코스명 없음");
+        setLocation(data.location ?? "");
+        const rawDate = data.playedAt ?? "";
+        setDate(rawDate ? rawDate.slice(0, 10) : "");
+        setScore(data.totalScore ?? 0);
+        setFieldPar(data.appliedPar ?? 0);
 
+        const diff = (data.totalScore ?? 0) - (data.appliedPar ?? 0);
+        setDelta(diff > 0 ? `+${diff}` : diff === 0 ? "E" : `${diff}`);
 
-        if (postData.isNine == true) {
-          userHit.push({ index: 1, hitCount: Number(postData.Hit1) });
-          userHit.push({ index: 2, hitCount: Number(postData.Hit2) });
-          userHit.push({ index: 3, hitCount: Number(postData.Hit3) });
-          userHit.push({ index: 4, hitCount: Number(postData.Hit4) });
-          userHit.push({ index: 5, hitCount: Number(postData.Hit5) });
-          userHit.push({ index: 6, hitCount: Number(postData.Hit6) });
-          userHit.push({ index: 7, hitCount: Number(postData.Hit7) });
-          userHit.push({ index: 8, hitCount: Number(postData.Hit8) });
-          userHit.push({ index: 9, hitCount: Number(postData.Hit9) });
-          parHit.push({ index : 1 , parCount : Number(postData.Par1)});
-          parHit.push({ index : 2 , parCount : Number(postData.Par2)});
-          parHit.push({ index : 3 , parCount : Number(postData.Par3)});
-          parHit.push({ index : 4 , parCount : Number(postData.Par4)});
-          parHit.push({ index : 5 , parCount : Number(postData.Par5)});
-          parHit.push({ index : 6 , parCount : Number(postData.Par6)});
-          parHit.push({ index : 7 , parCount : Number(postData.Par7)});
-          parHit.push({ index : 8 , parCount : Number(postData.Par8)});
-          parHit.push({ index : 9 , parCount : Number(postData.Par9)});
-        } else {
-          userHit.push({ index: 1, hitCount: Number(postData.Hit1) });
-          userHit.push({ index: 2, hitCount: Number(postData.Hit2) });
-          userHit.push({ index: 3, hitCount: Number(postData.Hit3) });
-          userHit.push({ index: 4, hitCount: Number(postData.Hit4) });
-          userHit.push({ index: 5, hitCount: Number(postData.Hit5) });
-          userHit.push({ index: 6, hitCount: Number(postData.Hit6) });
-          userHit.push({ index: 7, hitCount: Number(postData.Hit7) });
-          userHit.push({ index: 8, hitCount: Number(postData.Hit8) });
-          userHit.push({ index: 9, hitCount: Number(postData.Hit9) });
-          userHit.push({ index: 10, hitCount: Number(postData.Hit10) });
-          userHit.push({ index: 11, hitCount: Number(postData.Hit11) });
-          userHit.push({ index: 12, hitCount: Number(postData.Hit12) });
-          userHit.push({ index: 13, hitCount: Number(postData.Hit13) });
-          userHit.push({ index: 14, hitCount: Number(postData.Hit14) });
-          userHit.push({ index: 15, hitCount: Number(postData.Hit15) });
-          userHit.push({ index: 16, hitCount: Number(postData.Hit16) });
-          userHit.push({ index: 17, hitCount: Number(postData.Hit17) });
-          userHit.push({ index: 18, hitCount: Number(postData.Hit18) });
-          parHit.push({ index :1, parCount: Number(postData.Par1)});
-          parHit.push({ index :2, parCount: Number(postData.Par2)});
-          parHit.push({ index :3, parCount: Number(postData.Par3)});
-          parHit.push({ index :4, parCount: Number(postData.Par4)});
-          parHit.push({ index :5, parCount: Number(postData.Par5)});
-          parHit.push({ index :6, parCount: Number(postData.Par6)});
-          parHit.push({ index :7, parCount: Number(postData.Par7)});
-          parHit.push({ index :8, parCount: Number(postData.Par8)});
-          parHit.push({ index :9, parCount: Number(postData.Par9)});
-          parHit.push({ index :10, parCount: Number(postData.Par10)});
-          parHit.push({ index :11, parCount: Number(postData.Par11)});
-          parHit.push({ index :12, parCount: Number(postData.Par12)});
-          parHit.push({ index :13, parCount: Number(postData.Par13)});
-          parHit.push({ index :14, parCount: Number(postData.Par14)});
-          parHit.push({ index :15, parCount: Number(postData.Par15)});
-          parHit.push({ index :16, parCount: Number(postData.Par16)});
-          parHit.push({ index :17, parCount: Number(postData.Par17)});
-          parHit.push({ index :18, parCount: Number(postData.Par18)});
-        }
+        const holes: { hole: number; score: number; par: number }[] = data.holeScores ?? [];
+
+        let eagles = 0, birdies = 0, pars = 0, bogeys = 0, doubles = 0;
+        const processed = holes.map((h) => {
+          const d = h.score - h.par;
+          if (d <= -2) eagles++;
+          else if (d === -1) birdies++;
+          else if (d === 0) pars++;
+          else if (d === 1) bogeys++;
+          else if (d >= 2) doubles++;
+
+          let deltaStr = "E";
+          if (d > 0) deltaStr = `+${d}`;
+          else if (d < 0) deltaStr = `${d}`;
+
+          return { hole: h.hole, par: h.par, score: h.score, delta: deltaStr };
+        });
+
+        setEagleCount(eagles);
+        setBirdieCount(birdies);
+        setParCount(pars);
+        setBogeyCount(bogeys);
+        setDoubleCount(doubles);
+        setHoleData(processed);
+      } catch (error) {
+        console.error("Failed to fetch round:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    const fetchTotalScore = async () => {
-      const iterHitCount = userHit.reduce((acc, value) => {
-        const hitValue = value.hitCount;
-        acc += hitValue;
-        return acc;
-      }, 0);
-
-      setScore(iterHitCount);
-    };
-
-    const fetchFieldPar = async () => {
-      const iterPar = parHit.reduce((acc, value) => {
-        const parValue = value.parCount;
-        acc += parValue;
-        return acc;
-      }, 0);
-
-      setFieldPar(iterPar);
-    };
-
-    const fetchParCount = async () => {
-      parHit.forEach((par , i) => {
-        let hit = userHit[i].hitCount;
-        const diff = par.parCount - hit;
-        if (diff == 0){
-          setParCount(prev => [...prev, i]);
-        }
-        else if (diff == 1){
-          setBirdieCount(prev => [...prev, i]);        }
-        else if (diff == -1){
-          setBogeyCount(prev => [...prev, i]);
-        }
-        else if (diff == 2){
-          setDoubleCount(prev => [...prev, i]);
-        }
-        else if (diff == -2){
-          setEagleCount(prev => [...prev, i]);
-        }
-      });
-    };
-
-    const calculateScoreDelta = async () => {
-      userHit.forEach((hit, i) => {
-        let par = parHit[i].parCount;
-        const diff = hit.hitCount - par;
-        if (diff == 0){
-          userDelta.push({ index: i, delta: "E" });
-        }
-        else if (diff == 1){
-          userDelta.push({ index: i, delta: "+" + diff.toString() });
-        }
-        else if (diff == -1){
-          userDelta.push({ index: i, delta: diff.toString() });
-        }
-        else if (diff == 2){
-          userDelta.push({ index: i, delta: "+" + diff.toString() });
-        }
-        else if (diff == -2){
-          userDelta.push({ index: i, delta: diff.toString() });
-        }
-      });
-    };
-
-    const main = async () => {
-      await fetchFromFirebase();
-      await fetchTotalScore();
-      await fetchFieldPar();
-      await fetchParCount();
-      await calculateScoreDelta();
-      setIsLoading(false);
-    };
-
-    main();
+    fetchRound();
   }, [id]);
 
   if (isLoading) {
@@ -302,14 +126,10 @@ export default function ActivityModal() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.headerRow}>
-            <TouchableOpacity
-              onPress={() => router.back()}
-              style={styles.backButton}
-              activeOpacity={0.7}
-            >
-              <Ionicons name="chevron-back" size={moderateScale(20)} color="#FFFFFF" />
-              <Text style={styles.backText}>Feed</Text>
-            </TouchableOpacity>
+            <Pressable style={styles.backButton} onPress={() => router.back()}>
+              <Feather name="chevron-left" size={moderateScale(18)} color="#B8BEC1" />
+            </Pressable>
+            <Text type="barlowLight" style={styles.backLabel}>피드</Text>
           </View>
 
           {/* Course info */}
@@ -321,8 +141,12 @@ export default function ActivityModal() {
               {fieldName}
             </Text>
             <View style={styles.locationRow}>
-              <Text style={styles.locationText}>{fieldAddress}</Text>
-              <View style={styles.locationDot} />
+              {location ? (
+                <>
+                  <Text style={styles.locationText}>{location}</Text>
+                  <View style={styles.locationDot} />
+                </>
+              ) : null}
               <Text style={styles.locationText}>{date}</Text>
             </View>
           </View>
@@ -343,22 +167,22 @@ export default function ActivityModal() {
             </View>
 
             <View style={styles.summaryStatsRow}>
-              {eagleCount.length > 0 && (
+              {eagleCount > 0 && (
                 <View style={styles.summaryStat}>
-                  <Text type="barlowLight" style={[styles.summaryValue, { color: "#D4AF37" }]}>{eagleCount.length}</Text>
+                  <Text type="barlowLight" style={[styles.summaryValue, { color: "#D4AF37" }]}>{eagleCount}</Text>
                   <Text style={styles.summaryLabel}>이글</Text>
                 </View>
               )}
               <View style={styles.summaryStat}>
-                <Text type="barlowLight" style={[styles.summaryValue, { color: "#4CAE82" }]}>{birdieCount.length}</Text>
+                <Text type="barlowLight" style={[styles.summaryValue, { color: "#4CAE82" }]}>{birdieCount}</Text>
                 <Text style={styles.summaryLabel}>버디</Text>
               </View>
               <View style={styles.summaryStat}>
-                <Text type="barlowLight" style={[styles.summaryValue, { color: "#FFFFFF" }]}>{parCount.length}</Text>
+                <Text type="barlowLight" style={[styles.summaryValue, { color: "#FFFFFF" }]}>{parCount}</Text>
                 <Text style={styles.summaryLabel}>파</Text>
               </View>
               <View style={styles.summaryStat}>
-                <Text type="barlowLight" style={[styles.summaryValue, { color: "#E83F40" }]}>{bogeyCount.length}</Text>
+                <Text type="barlowLight" style={[styles.summaryValue, { color: "#E83F40" }]}>{bogeyCount}</Text>
                 <Text style={styles.summaryLabel}>보기</Text>
               </View>
             </View>
@@ -376,15 +200,18 @@ export default function ActivityModal() {
 
           {/* Scorecard rows */}
           <View style={styles.tableContainer}>
-            {userDelta.map((item, index) => {
+            {holeData.map((item, index) => {
               const colors = getScoreCircleColors(item.delta);
-              const isLast = index === HOLES.length - 1;
+              const isLast = index === holeData.length - 1;
               return (
-                <View key={item.index}>
+                <View key={item.hole}>
                   <View style={styles.tableRow}>
-                    <Text type="barlowLight" style={[styles.holeText, { flex: 2 }]}>{item.index}   홀</Text>
+                    <View style={{ flex: 2, flexDirection: 'row', alignItems: 'center', gap: moderateScale(5)}}>
+                      <Text type="barlowLight" style={styles.holeCountText}>{item.hole}</Text>
+                      <Text style={styles.holeText}>홀</Text>
+                    </View>
                     <Text style={[styles.parValueText, { flex: 1, textAlign: "center" }]}>
-                      {parHit[index].parCount}
+                      {item.par}
                     </Text>
                     <View style={[styles.scoreCell, { flex: 1 }]}>
                       <View
@@ -396,7 +223,7 @@ export default function ActivityModal() {
                           },
                         ]}
                       >
-                        <Text style={styles.scoreStrokeText}>{item.delta}</Text>
+                        <Text style={styles.scoreStrokeText}>{item.score}</Text>
                       </View>
                       <Text style={styles.scoreDeltaText}>{item.delta}</Text>
                     </View>
@@ -425,17 +252,21 @@ const styles = StyleSheet.create({
   headerRow: {
     flexDirection: "row",
     alignItems: "center",
+    gap: moderateScale(8),
     marginBottom: moderateScale(20),
     marginTop: moderateScale(4),
   },
   backButton: {
-    flexDirection: "row",
+    width: moderateScale(36),
+    height: moderateScale(36),
+    borderRadius: moderateScale(18),
     alignItems: "center",
-    gap: moderateScale(2),
+    justifyContent: "center",
+    backgroundColor: "#000000",
   },
-  backText: {
-    fontSize: moderateScale(16),
-    color: "#FFFFFF",
+  backLabel: {
+    color: "#7B8083",
+    fontSize: moderateScale(14),
   },
   courseName: {
     fontSize: moderateScale(27),
@@ -520,9 +351,13 @@ const styles = StyleSheet.create({
     borderColor: "#353838",
     paddingVertical: moderateScale(6),
   },
-  holeText: {
+  holeCountText: {
     fontSize: moderateScale(18),
     color: "#FFFFFF",
+  },
+  holeText: {
+    fontSize: moderateScale(15),
+    color: "#999",
   },
   parValueText: {
     fontSize: moderateScale(15),

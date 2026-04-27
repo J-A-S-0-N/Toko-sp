@@ -1,9 +1,11 @@
 import { ThemedText as Text } from "@/components/themed-text";
+import { db } from "@/config/firebase";
+import { useAuth } from "@/context/AuthContext";
 import Feather from "@expo/vector-icons/Feather";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { onSnapshot } from "firebase/firestore";
+import { doc, type DocumentReference, onSnapshot } from "firebase/firestore";
 import React, { useEffect, useMemo, useState } from "react";
-import { Alert, LayoutChangeEvent, StyleSheet, View } from "react-native";
+import { Alert, LayoutChangeEvent, Pressable, StyleSheet, View } from "react-native";
 import Animated, {
   Easing,
   FadeIn,
@@ -18,6 +20,7 @@ import Animated, {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
 
+import { deletePendingScan } from "./scanCleanup";
 import { createPendingScan } from "./scanFirebase";
 
 const tips = [
@@ -56,9 +59,12 @@ const DOT_PHASE_STEP = (2 * Math.PI) / 3;
 
 export default function LoadingScreen() {
   const router = useRouter();
-  const { holes, photos } = useLocalSearchParams<{
+  const { user } = useAuth();
+  const { holes, photos, scanDocId, courseName } = useLocalSearchParams<{
     holes?: string;
     photos?: string;
+    scanDocId?: string;
+    courseName?: string;
   }>();
 
   const [tipIndex, setTipIndex] = useState(0);
@@ -147,50 +153,63 @@ export default function LoadingScreen() {
 
   useEffect(() => {
     if (uploadStartedRef.current) return;
-    if (!parsedPhotos.length) return;
-
     uploadStartedRef.current = true;
+
     let unsubscribeStatusListener: (() => void) | null = null;
     let isActive = true;
 
-    const persistScan = async () => {
-      try {
-        const scanDocRef = await createPendingScan(holesCount, parsedPhotos);
+    const listenForResult = (scanDocRef: DocumentReference) => {
+      unsubscribeStatusListener = onSnapshot(scanDocRef, (snapshot) => {
+        const data = snapshot.data();
+        const status = data?.status;
+        if (status === "pending") return;
 
-        unsubscribeStatusListener = onSnapshot(scanDocRef, (snapshot) => {
-          const status = snapshot.data()?.status;
-          if (status === "pending") return;
+        const scores: number[] = [];
+        for (let i = 1; i <= holesCount; i++) {
+          scores.push(data?.[`hole${i}`] ?? 0);
+        }
 
-          unsubscribeStatusListener?.();
-          unsubscribeStatusListener = null;
+        unsubscribeStatusListener?.();
+        unsubscribeStatusListener = null;
 
-          if (isActive) {
-            router.replace({
-              pathname: "./resultPreview",
-              params: {
-                holes: String(holesCount),
-              },
-            });
-          }
-        });
-      } catch (error) {
-        console.error("Failed to upload scan photos:", error);
-        Alert.alert("업로드 실패", "사진 업로드 중 오류가 발생했어요. 다시 시도해 주세요.", [
-          {
-            text: "확인",
-            onPress: () => router.back(),
-          },
-        ]);
-      }
+        if (isActive) {
+          router.replace({
+            pathname: "./resultPreview",
+            params: {
+              holes: String(holesCount),
+              scores: JSON.stringify(scores),
+              courseName: courseName ?? "",
+              scanDocId: scanDocRef.id,
+            },
+          });
+        }
+      });
     };
 
-    persistScan();
+    if (scanDocId) {
+      listenForResult(doc(db, "Scans", scanDocId));
+    } else if (parsedPhotos.length) {
+      (async () => {
+        try {
+          const scanDocRef = await createPendingScan(holesCount, parsedPhotos, user?.uid ?? "");
+          listenForResult(scanDocRef);
+        } catch (error) {
+          console.error("Failed to upload scan photos:", error);
+          Alert.alert("업로드 실패", "사진 업로드 중 오류가 발생했어요. 다시 시도해 주세요.", [
+            {
+              text: "확인",
+              onPress: () => router.back(),
+            },
+          ]);
+        }
+      })();
+    }
 
     return () => {
       isActive = false;
       unsubscribeStatusListener?.();
     };
-  }, [holesCount, parsedPhotos, router]);
+  }, [holesCount, parsedPhotos, scanDocId, router]);
 
   const indicatorStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: indicatorTranslateX.value }],
@@ -240,6 +259,25 @@ export default function LoadingScreen() {
     <SafeAreaView edges={["top", "bottom"]} style={styles.safeArea}>
       <View style={styles.container}>
         <View style={styles.topStatusRow}>
+          <Pressable style={styles.backButton} onPress={() => {
+            Alert.alert(
+              "스캔을 중단하시겠어요?",
+              "지금까지의 진행 내용이 사라집니다.",
+              [
+                { text: "취소", style: "cancel" },
+                {
+                  text: "나가기",
+                  style: "destructive",
+                  onPress: () => {
+                    if (scanDocId) deletePendingScan(scanDocId);
+                    router.replace("/(tabs)/scan");
+                  },
+                },
+              ]
+            );
+          }}>
+            <Feather name="x" size={moderateScale(18)} color="#D4D9DB" />
+          </Pressable>
           <Animated.View style={[styles.statusDot, statusDotStyle]} />
           <Text type="barlowLight" style={styles.statusText}>
             분석 중
@@ -333,6 +371,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: moderateScale(8),
     marginTop: moderateScale(6),
+  },
+  backButton: {
+    width: moderateScale(36),
+    height: moderateScale(36),
+    borderRadius: moderateScale(18),
+    borderWidth: 1,
+    borderColor: "#1F2528",
+    backgroundColor: "#0A0D0F",
+    justifyContent: "center",
+    alignItems: "center",
   },
   statusDot: {
     width: moderateScale(7),
