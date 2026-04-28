@@ -1,4 +1,5 @@
 import { ThemedText as Text } from "@/components/themed-text";
+import { FONT } from '@/constants/theme';
 import React from "react";
 import { Dimensions, StyleSheet, View } from "react-native";
 import { LineChart } from "react-native-gifted-charts";
@@ -95,12 +96,12 @@ export default function GraphStat({ headlineDelta, trendLabels }: GraphStatProps
             // X-axis labels
             xAxisLabelTextStyle={{
               color: "#999",
-              fontSize: 16,
+              fontSize: moderateScale(FONT.sm),
               fontFamily: "BarlowCondensed_400Regular",
               width: 28,
               textAlign: "center",
             }}
-            yAxisTextStyle={{ color: "#999", fontSize: 16 }}
+            yAxisTextStyle={{ color: "#999", fontSize: moderateScale(FONT.sm) }}
             // Grid
             rulesColor="#414141"
             rulesType="solid"
@@ -130,7 +131,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     color: "#6F7775",
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(FONT.sm),
     letterSpacing: 1.2,
     marginBottom: moderateScale(5),
   },
@@ -145,16 +146,16 @@ const styles = StyleSheet.create({
   trendMeta: {
     color: "#ffffff",
     letterSpacing: 1.2,
-    fontSize: moderateScale(18),
+    fontSize: moderateScale(FONT.sm),
   },
   trendHeadline: {
     color: "#4DAE82",
-    fontSize: moderateScale(37),
+    fontSize: moderateScale(FONT.xxl),
     letterSpacing: 2,
   },
   trendSub: {
     color: "#7E8784",
-    fontSize: moderateScale(17),
+    fontSize: moderateScale(FONT.md),
     marginTop: moderateScale(2),
     marginBottom: moderateScale(8),
   },
@@ -170,6 +171,6 @@ const styles = StyleSheet.create({
   },
   chartLabel: {
     color: "#6F7775",
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(FONT.sm),
   },
 });

@@ -5,7 +5,20 @@
 
 import { Platform } from 'react-native';
 
-const tintColor = '#419F71';
+const tintColor = '#49DF80';
+
+export const FONT = {
+  xxs: 11,
+  xs: 13,
+  sm: 15,
+  md: 17,
+  lg: 20,
+  xl: 24,
+  xxl: 28,
+  h2: 36,
+  h1: 45,
+  hero: 54,
+};
 
 export const Colors = {
   light: {

@@ -1,5 +1,6 @@
 import { ThemedText as Text } from "@/components/themed-text";
 import { db } from "@/config/firebase";
+import { FONT } from '@/constants/theme';
 import Feather from "@expo/vector-icons/Feather";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
@@ -8,7 +9,7 @@ import { useEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { moderateScale } from "react-native-size-matters";
+import { moderateScale } from 'react-native-size-matters';
 
 function getScoreCircleColors(delta: string) {
   const deltaValue = Number(delta);
@@ -266,10 +267,10 @@ const styles = StyleSheet.create({
   },
   backLabel: {
     color: "#7B8083",
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(FONT.xs),
   },
   courseName: {
-    fontSize: moderateScale(27),
+    fontSize: moderateScale(FONT.xxl),
     color: "white",
   },
   locationRow: {
@@ -279,7 +280,7 @@ const styles = StyleSheet.create({
     marginTop: moderateScale(4),
   },
   locationText: {
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(FONT.xs),
     color: "#6E7171",
   },
   locationDot: {
@@ -295,7 +296,7 @@ const styles = StyleSheet.create({
     marginBottom: moderateScale(24),
   },
   totalScore: {
-    fontSize: moderateScale(62),
+    fontSize: moderateScale(FONT.hero),
     color: "#E83F40",
   },
   totalDeltaRow: {
@@ -304,11 +305,11 @@ const styles = StyleSheet.create({
     marginTop: moderateScale(2),
   },
   totalDeltaText: {
-    fontSize: moderateScale(20),
+    fontSize: moderateScale(FONT.lg),
     color: "#E83F40",
   },
   parText: {
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(FONT.sm),
     color: "#6E7171",
     marginTop: moderateScale(4),
   },
@@ -321,10 +322,10 @@ const styles = StyleSheet.create({
     marginLeft: moderateScale(20),
   },
   summaryValue: {
-    fontSize: moderateScale(22),
+    fontSize: moderateScale(FONT.xl),
   },
   summaryLabel: {
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(FONT.xs),
     color: "#6E7171",
     marginTop: moderateScale(1),
   },
@@ -332,7 +333,7 @@ const styles = StyleSheet.create({
     marginBottom: moderateScale(8),
   },
   sectionTitle: {
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(FONT.xs),
     color: "#6E7171",
   },
   tableHeaderRow: {
@@ -341,7 +342,7 @@ const styles = StyleSheet.create({
     marginBottom: moderateScale(8),
   },
   tableHeaderText: {
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(FONT.xs),
     color: "#6E7171",
   },
   tableContainer: {
@@ -352,15 +353,15 @@ const styles = StyleSheet.create({
     paddingVertical: moderateScale(6),
   },
   holeCountText: {
-    fontSize: moderateScale(18),
+    fontSize: moderateScale(FONT.md),
     color: "#FFFFFF",
   },
   holeText: {
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(FONT.sm),
     color: "#999",
   },
   parValueText: {
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(FONT.sm),
     color: "#FFFFFF",
   },
   scoreCell: {
@@ -378,11 +379,11 @@ const styles = StyleSheet.create({
     marginRight: moderateScale(8),
   },
   scoreStrokeText: {
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(FONT.sm),
     color: "#FFFFFF",
   },
   scoreDeltaText: {
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(FONT.xs),
     color: "#6E7171",
     minWidth: moderateScale(20),
     textAlign: "right",

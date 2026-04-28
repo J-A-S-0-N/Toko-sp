@@ -1,4 +1,5 @@
 import { ThemedText as Text } from "@/components/themed-text";
+import { FONT } from '@/constants/theme';
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
@@ -6,7 +7,7 @@ import { useMemo, useState } from "react";
 import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { moderateScale } from "react-native-size-matters";
+import { moderateScale } from 'react-native-size-matters';
 
 const SCORE_OPTIONS = [77, 75, 73, 70] as const;
 const PERIOD_OPTIONS = ["1개월", "3개월", "6개월", "1년"] as const;
@@ -176,19 +177,19 @@ const styles = StyleSheet.create({
   },
   backText: {
     color: "#FFFFFF",
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(FONT.xs),
   },
   titleBlock: {
     marginBottom: moderateScale(20),
   },
   titleText: {
     color: "#FFFFFF",
-    fontSize: moderateScale(20),
+    fontSize: moderateScale(FONT.lg),
     //lineHeight: moderateScale(24),
   },
   subtitleText: {
     marginTop: moderateScale(6),
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(FONT.xs),
     color: "#767D7A",
   },
   card: {
@@ -202,7 +203,7 @@ const styles = StyleSheet.create({
   },
   cardLabel: {
     color: "#757C79",
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(FONT.xxs),
     marginBottom: moderateScale(12),
   },
   scoreControlRow: {
@@ -222,19 +223,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   circleSymbol: {
-    fontSize: moderateScale(30),
+    fontSize: moderateScale(FONT.xxl),
     color: "#F0F3F2",
   },
   scoreCenterBlock: {
     alignItems: "center",
   },
   scoreValue: {
-    fontSize: moderateScale(70),
+    fontSize: moderateScale(FONT.hero),
     color: "#53D39A",
   },
   scoreSubText: {
     marginTop: moderateScale(2),
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(FONT.xxs),
     color: "#7A827E",
   },
   optionRow: {
@@ -261,7 +262,7 @@ const styles = StyleSheet.create({
   },
   optionChipText: {
     color: "#9AA19E",
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(FONT.sm),
   },
   optionChipTextActive: {
     color: "#EFFCF5",
@@ -276,7 +277,7 @@ const styles = StyleSheet.create({
   },
   resultTitle: {
     color: "#49CA90",
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(FONT.xxs),
     marginBottom: moderateScale(12),
   },
   resultStatsRow: {
@@ -295,20 +296,20 @@ const styles = StyleSheet.create({
   },
   resultValueGreen: {
     color: "#53D39A",
-    fontSize: moderateScale(28),
+    fontSize: moderateScale(FONT.xxl),
   },
   resultValueAmber: {
     color: "#F3A63F",
-    fontSize: moderateScale(28),
+    fontSize: moderateScale(FONT.xxl),
   },
   resultValueWhite: {
     color: "#FFFFFF",
-    fontSize: moderateScale(28),
+    fontSize: moderateScale(FONT.xxl),
   },
   resultLabel: {
     marginTop: moderateScale(4),
     color: "#7F8B85",
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(FONT.xxs),
   },
   saveButton: {
     marginTop: moderateScale(20),
@@ -324,6 +325,6 @@ const styles = StyleSheet.create({
   },
   saveButtonText: {
     color: "#F4FFF9",
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(FONT.sm),
   },
 });

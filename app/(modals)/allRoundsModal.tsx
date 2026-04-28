@@ -1,5 +1,6 @@
 import { ThemedText as Text } from "@/components/themed-text";
 import { db } from "@/config/firebase";
+import { FONT } from '@/constants/theme';
 import { useAuth } from "@/context/AuthContext";
 import Feather from "@expo/vector-icons/Feather";
 import { LinearGradient } from "expo-linear-gradient";
@@ -9,7 +10,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, LayoutChangeEvent, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { moderateScale } from "react-native-size-matters";
+import { moderateScale } from 'react-native-size-matters';
 
 // ── Types ──────────────────────────────────────────────────
 
@@ -220,7 +221,7 @@ export default function AllRoundsModal() {
           {/* Header */}
           <View style={styles.headerRow}>
             <Pressable style={styles.backButton} onPress={() => router.back()}>
-              <Feather name="chevron-left" size={moderateScale(18)} color="#B8BEC1" />
+              <Feather name="chevron-left" size={moderateScale(FONT.md)} color="#B8BEC1" />
             </Pressable>
             <Text type="barlowLight" style={styles.backLabel}>피드</Text>
           </View>
@@ -232,7 +233,7 @@ export default function AllRoundsModal() {
               <Text type="barlowLight" style={styles.subtitle}>{totalRounds}개의 라운드 기록</Text>
             </View>
             <Pressable style={styles.sortButton} onPress={() => setSortByScore((prev) => !prev)}>
-              <Feather name="sliders" size={moderateScale(14)} color="#A2AAAE" />
+              <Feather name="sliders" size={moderateScale(FONT.xxs)} color="#A2AAAE" />
               <Text type="barlowLight" style={styles.sortButtonText}>{sortByScore ? "스코어순" : "날짜순"}</Text>
             </Pressable>
           </View>
@@ -280,7 +281,7 @@ export default function AllRoundsModal() {
             </View>
           ) : filteredGroups.length === 0 ? (
             <View style={styles.loadingContainer}>
-              <Text type="barlowLight" style={{ color: "#6E7171", fontSize: moderateScale(14) }}>기록된 라운드가 없습니다</Text>
+              <Text type="barlowLight" style={{ color: "#6E7171", fontSize: moderateScale(FONT.xxs) }}>기록된 라운드가 없습니다</Text>
             </View>
           ) : filteredGroups.map((group) => (
             <View key={group.label} style={styles.monthGroup}>
@@ -325,7 +326,7 @@ export default function AllRoundsModal() {
                     </View>
                   </View>
 
-                  <Feather name="chevron-right" size={moderateScale(16)} color="#4A5053" style={styles.chevron} />
+                  <Feather name="chevron-right" size={moderateScale(FONT.sm)} color="#4A5053" style={styles.chevron} />
                 </Pressable>
               ))}
             </View>
@@ -389,7 +390,7 @@ const styles = StyleSheet.create({
   },
   backLabel: {
     color: "#7B8083",
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(FONT.xs),
   },
 
   /* Title */
@@ -401,12 +402,12 @@ const styles = StyleSheet.create({
   },
   title: {
     color: "#F2F4F5",
-    fontSize: moderateScale(28),
+    fontSize: moderateScale(FONT.xxl),
     marginBottom: moderateScale(2),
   },
   subtitle: {
     color: "#6E7171",
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(FONT.xs),
   },
   sortButton: {
     flexDirection: "row",
@@ -421,7 +422,7 @@ const styles = StyleSheet.create({
   },
   sortButtonText: {
     color: "#A2AAAE",
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(FONT.xxs),
   },
 
   /* Stats */
@@ -445,7 +446,7 @@ const styles = StyleSheet.create({
   },
   statValue: {
     color: "#F2F4F5",
-    fontSize: moderateScale(22),
+    fontSize: moderateScale(FONT.xl),
     marginBottom: moderateScale(2),
   },
   statValueBest: {
@@ -453,7 +454,7 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     color: "#6E7171",
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(FONT.xxs),
   },
 
   /* Filters */
@@ -476,7 +477,7 @@ const styles = StyleSheet.create({
   },
   filterTabText: {
     color: "#7B8083",
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(FONT.xs),
   },
   filterTabTextActive: {
     color: "#4CAE82",
@@ -495,11 +496,11 @@ const styles = StyleSheet.create({
   },
   monthLabel: {
     color: "#6E7171",
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(FONT.xs),
   },
   monthCount: {
     color: "#4A5053",
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(FONT.xxs),
   },
 
   /* Round row */
@@ -523,7 +524,7 @@ const styles = StyleSheet.create({
     marginRight: moderateScale(12),
   },
   scoreCircleText: {
-    fontSize: moderateScale(18),
+    fontSize: moderateScale(FONT.md),
   },
   roundInfo: {
     flex: 1,
@@ -531,7 +532,7 @@ const styles = StyleSheet.create({
   },
   roundCourseName: {
     color: "#F2F4F5",
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(FONT.sm),
   },
   roundMeta: {
     flexDirection: "row",
@@ -540,10 +541,10 @@ const styles = StyleSheet.create({
   },
   roundDate: {
     color: "#6E7171",
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(FONT.xxs),
   },
   starIcon: {
-    fontSize: moderateScale(11),
+    fontSize: moderateScale(FONT.xxs),
   },
 
   /* Right side */
@@ -553,7 +554,7 @@ const styles = StyleSheet.create({
     gap: moderateScale(4),
   },
   roundDelta: {
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(FONT.sm),
   },
   roundBadges: {
     flexDirection: "row",
@@ -569,11 +570,11 @@ const styles = StyleSheet.create({
     paddingVertical: moderateScale(2),
   },
   badgeIcon: {
-    fontSize: moderateScale(10),
+    fontSize: moderateScale(FONT.xxs),
   },
   badgeText: {
     color: "#7B8083",
-    fontSize: moderateScale(11),
+    fontSize: moderateScale(FONT.xxs),
   },
   chevron: {
     marginLeft: moderateScale(2),

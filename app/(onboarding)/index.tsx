@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText as Text } from '@/components/themed-text';
+import { FONT } from '@/constants/theme';
 import { moderateScale } from 'react-native-size-matters';
 
 export default function OnboardingFirstScreen() {
@@ -18,10 +19,6 @@ export default function OnboardingFirstScreen() {
     }).start();
   }, [cardSlideAnim]);
 
-  const handleSkip = () => {
-    router.replace('/(tabs)');
-  };
-
   const handleNext = () => {
     router.push('./second');
   };
@@ -34,10 +31,6 @@ export default function OnboardingFirstScreen() {
         end={{ x: 0.6, y: 0.7 }}
         style={styles.topGlow}
       />
-
-      <Pressable style={styles.skipButton} onPress={handleSkip}>
-        <Text style={styles.skipText}>건너뛰기</Text>
-      </Pressable>
 
       <View style={styles.content}>
         <View style={styles.badge}>
@@ -103,18 +96,10 @@ const styles = StyleSheet.create({
     height: 230,
     borderRadius: 130,
   },
-  skipButton: {
-    alignSelf: 'flex-end',
-    marginTop: 6,
-  },
-  skipText: {
-    fontSize: 13,
-    color: '#767D86',
-    fontFamily: 'Pretendard-Regular',
-  },
   content: {
+    flex: 1,
+    justifyContent: 'center',
     gap: 14,
-    marginTop: 40,
   },
   badge: {
     alignSelf: 'flex-start',
@@ -126,16 +111,16 @@ const styles = StyleSheet.create({
     borderColor: '#1E5D48',
   },
   badgeText: {
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(FONT.xxs),
     color: '#49C390',
     fontFamily: 'Pretendard-Bold',
   },
   title: {
-    fontSize: moderateScale(35),
+    fontSize: moderateScale(FONT.h2),
     color: '#FFFFFF',
   },
   description: {
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(FONT.xs),
     color: '#7B848D',
     fontFamily: 'Pretendard-Regular',
   },
@@ -149,7 +134,8 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   scanFrame: {
-    height: 96,
+    minHeight: 96,
+    paddingVertical: 16,
     borderRadius: 8,
     backgroundColor: '#04110F',
     borderWidth: 1,
@@ -191,7 +177,7 @@ const styles = StyleSheet.create({
   scanTitle: {
     textAlign: 'center',
     color: '#7E858B',
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(FONT.xxs),
     fontFamily: 'Pretendard-Regular',
   },
   bottomTabs: {
@@ -200,7 +186,8 @@ const styles = StyleSheet.create({
   },
   bottomTab: {
     flex: 1,
-    height: 28,
+    minHeight: 28,
+    paddingVertical: 4,
     borderRadius: 7,
     backgroundColor: '#27332F',
     alignItems: 'center',
@@ -208,7 +195,7 @@ const styles = StyleSheet.create({
   },
   bottomTabText: {
     color: '#4DC995',
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(FONT.xs),
     //fontFamily: 'Pretendard-Regular',
   },
   footer: {
@@ -240,7 +227,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#4CAE82',
   },
   ctaButton: {
-    height: 54,
+    minHeight: 54,
+    paddingVertical: 14,
     borderRadius: 14,
     backgroundColor: '#4CAE82',
     alignItems: 'center',
@@ -252,7 +240,7 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
   ctaText: {
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(FONT.xs),
     color: '#FFFFFF',
   },
 });

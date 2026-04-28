@@ -1,4 +1,7 @@
 import { ThemedText as Text } from "@/components/themed-text";
+import { FONT } from '@/constants/theme';
+import Feather from "@expo/vector-icons/Feather";
+import { useRouter } from "expo-router";
 import React from "react";
 import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
@@ -20,45 +23,63 @@ type RecentScansSectionProps = {
   scans?: RecentScan[];
 };
 
-const RecentScansSection = ({ scans = RECENT_SCANS }: RecentScansSectionProps) => {
+const RecentScansSection = ({ scans = [] }: RecentScansSectionProps) => {
+  const router = useRouter();
+
   return (
     <>
       <View style={styles.sectionHeader}>
         <Text type="barlowHard" style={styles.sectionTitle}>
           최근 스캔
         </Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push("/(modals)/allRoundsModal")}>
           <Text type="barlowLight" style={styles.sectionAction}>
             전체 보기
           </Text>
         </TouchableOpacity>
       </View>
 
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.recentList}
-        style={styles.recentContainer}
-      >
-        {scans.map((item) => (
-          <View key={`${item.date}-${item.course}`} style={styles.recentCard}>
-            <Text type="barlowLight" style={styles.recentDate}>
-              {item.date}
-            </Text>
-            <Text type="barlowHard" style={styles.recentCourse}>
-              {item.course}
-            </Text>
-            <View style={styles.scoreRow}>
-              <Text type="barlowHard" style={styles.recentScore}>
-                {item.score}
-              </Text>
-              <Text type="barlowLight" style={styles.recentDiff}>
-                {item.diff}
-              </Text>
+      {scans.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <View style={styles.emptyCard}>
+            <View style={styles.emptyIconCircle}>
+              <Feather name="camera" size={moderateScale(20)} color="#636A6C" />
             </View>
+            <Text type="barlowHard" style={styles.emptyTitle}>
+              아직 스캔 기록이 없어요
+            </Text>
+            <Text type="barlowLight" style={styles.emptySubtitle}>
+              첫 번째 스코어카드를 스캔해보세요
+            </Text>
           </View>
-        ))}
-      </ScrollView>
+        </View>
+      ) : (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.recentList}
+          style={styles.recentContainer}
+        >
+          {scans.map((item) => (
+            <View key={`${item.date}-${item.course}`} style={styles.recentCard}>
+              <Text type="barlowLight" style={styles.recentDate}>
+                {item.date}
+              </Text>
+              <Text type="barlowHard" style={styles.recentCourse}>
+                {item.course}
+              </Text>
+              <View style={styles.scoreRow}>
+                <Text type="barlowHard" style={styles.recentScore}>
+                  {item.score}
+                </Text>
+                <Text type="barlowLight" style={styles.recentDiff}>
+                  {item.diff}
+                </Text>
+              </View>
+            </View>
+          ))}
+        </ScrollView>
+      )}
     </>
   );
 };
@@ -72,11 +93,11 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     color: "#E5E9E6",
-    fontSize: moderateScale(17),
+    fontSize: moderateScale(FONT.md),
   },
   sectionAction: {
     color: "#45BF8F",
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(FONT.xs),
   },
   recentContainer: {
     paddingLeft: moderateScale(10),
@@ -97,11 +118,11 @@ const styles = StyleSheet.create({
   },
   recentDate: {
     color: "#636A6C",
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(FONT.xs),
   },
   recentCourse: {
     color: "#EDF0ED",
-    fontSize: moderateScale(18),
+    fontSize: moderateScale(FONT.md),
   },
   scoreRow: {
     flexDirection: "row",
@@ -111,12 +132,42 @@ const styles = StyleSheet.create({
   },
   recentScore: {
     color: "#FF4E57",
-    fontSize: moderateScale(36),
+    fontSize: moderateScale(FONT.h2),
   },
   recentDiff: {
     color: "#D9474F",
-    fontSize: moderateScale(18),
+    fontSize: moderateScale(FONT.md),
     paddingBottom: moderateScale(6),
+  },
+  emptyContainer: {
+    paddingHorizontal: moderateScale(10),
+  },
+  emptyCard: {
+    borderRadius: moderateScale(16),
+    borderWidth: 1,
+    borderColor: "#292E31",
+    borderStyle: "dashed",
+    paddingVertical: moderateScale(28),
+    alignItems: "center",
+    gap: moderateScale(8),
+  },
+  emptyIconCircle: {
+    width: moderateScale(44),
+    height: moderateScale(44),
+    borderRadius: moderateScale(22),
+    borderWidth: 1,
+    borderColor: "#292E31",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: moderateScale(4),
+  },
+  emptyTitle: {
+    color: "#636A6C",
+    fontSize: moderateScale(FONT.sm),
+  },
+  emptySubtitle: {
+    color: "#454B4D",
+    fontSize: moderateScale(FONT.xs),
   },
 });
 

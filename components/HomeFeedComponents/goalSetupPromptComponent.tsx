@@ -1,4 +1,5 @@
 import { ThemedText as Text } from "@/components/themed-text";
+import { FONT } from '@/constants/theme';
 import { router } from "expo-router";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
@@ -49,16 +50,16 @@ const styles = StyleSheet.create({
     marginRight: moderateScale(10),
   },
   icon: {
-    fontSize: moderateScale(17),
+    fontSize: moderateScale(FONT.md),
   },
   title: {
     color: "#F2F5F4",
-    fontSize: moderateScale(18),
+    fontSize: moderateScale(FONT.md),
   },
   subtitle: {
     marginTop: moderateScale(2),
     color: "#6F7775",
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(FONT.sm),
   },
   actionButton: {
     marginLeft: moderateScale(30),
@@ -75,7 +76,7 @@ const styles = StyleSheet.create({
   },
   actionText: {
     color: "#48C28D",
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(FONT.sm),
   },
 });
 

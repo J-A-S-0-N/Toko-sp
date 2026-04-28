@@ -1,4 +1,5 @@
 import { ThemedText as Text } from "@/components/themed-text";
+import { FONT } from "@/constants/theme";
 import Feather from "@expo/vector-icons/Feather";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
@@ -319,7 +320,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     color: "#F5F7F8",
-    fontSize: moderateScale(18),
+    fontSize: moderateScale(FONT.lg),
   },
   headerDot: {
     width: moderateScale(8),
@@ -401,7 +402,7 @@ const styles = StyleSheet.create({
   },
   statusChipText: {
     color: "#36DC9F",
-    fontSize: moderateScale(11),
+    fontSize: moderateScale(FONT.xxs),
   },
   divider: {
     borderBottomWidth: 1,
@@ -420,7 +421,7 @@ const styles = StyleSheet.create({
   checkLabel: {
     //color: "#7B8086",
     color:"white",
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(FONT.xxs),
   },
   checkStatusWrap: {
     flexDirection: "row",
@@ -445,11 +446,11 @@ const styles = StyleSheet.create({
   },
   checkTextGood: {
     color: "#38DBA1",
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(FONT.sm),
   },
   checkTextWarning: {
     color: "#F9B24D",
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(FONT.sm),
   },
   actionRow: {
     flexDirection: "row",
@@ -499,10 +500,10 @@ const styles = StyleSheet.create({
   },
   secondaryButtonText: {
     color: "#F4F6F7",
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(FONT.xs),
   },
   primaryButtonText: {
     color: "#F4F6F7",
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(FONT.xs),
   },
 });

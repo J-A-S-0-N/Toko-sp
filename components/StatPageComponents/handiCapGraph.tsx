@@ -1,4 +1,5 @@
 import { ThemedText as Text } from "@/components/themed-text";
+import { FONT } from '@/constants/theme';
 import React from "react";
 import { Dimensions, StyleSheet, View } from "react-native";
 import { LineChart } from "react-native-gifted-charts";
@@ -94,12 +95,12 @@ export default function HandiCapGraph({ headlineDelta, trendLabels }: GraphStatP
             // X-axis labels
             xAxisLabelTextStyle={{
               color: "#999",
-              fontSize: 14,
+              fontSize: moderateScale(FONT.xs),
               fontFamily: "BarlowCondensed_400Regular",
               width: 28,
               textAlign: "center",
             }}
-            yAxisTextStyle={{ color: "#999", fontSize: 14 }}
+            yAxisTextStyle={{ color: "#999", fontSize: moderateScale(FONT.xs) }}
             // Grid
             rulesColor="#414141"
             rulesType="solid"
@@ -149,7 +150,7 @@ export default function HandiCapGraph({ headlineDelta, trendLabels }: GraphStatP
 const styles = StyleSheet.create({
   sectionTitle: {
     color: "#6F7775",
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(FONT.sm),
     letterSpacing: 1.2,
     marginBottom: moderateScale(5),
   },
@@ -164,15 +165,15 @@ const styles = StyleSheet.create({
   trendMeta: {
     color: "#ffffff",
     letterSpacing: 1.2,
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(FONT.sm),
   },
   trendHeadline: {
     color: "#4DAE82",
-    fontSize: moderateScale(33),
+    fontSize: moderateScale(FONT.h2),
   },
   trendSub: {
     color: "#7E8784",
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(FONT.sm),
     marginTop: moderateScale(2),
     marginBottom: moderateScale(8),
   },
@@ -191,15 +192,15 @@ const styles = StyleSheet.create({
   },
   statsValue: {
     color: "#9B9C9B",
-    fontSize: moderateScale(27),
+    fontSize: moderateScale(FONT.xxl),
   },
   statsValueSpecial: {
     color: "#3CC06E",
-    fontSize: moderateScale(27),
+    fontSize: moderateScale(FONT.xxl),
   },
   statsLabel: {
     color: "#6E7271",
-    fontSize: moderateScale(17),
+    fontSize: moderateScale(FONT.md),
   },
   chartLabelsRow: {
     marginTop: moderateScale(8),
@@ -209,6 +210,6 @@ const styles = StyleSheet.create({
   },
   chartLabel: {
     color: "#6F7775",
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(FONT.xs),
   },
 });

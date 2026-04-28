@@ -1,4 +1,5 @@
 import { ThemedText } from "@/components/themed-text";
+import { FONT } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -107,15 +108,15 @@ const styles = StyleSheet.create({
     gap: moderateScale(3),
   },
   pinIcon: {
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(FONT.sm),
   },
   titleText: {
     color: "#FFFFFF",
-    fontSize: moderateScale(17),
+    fontSize: moderateScale(FONT.md),
   },
   viewAllText: {
     color: "#45D07F",
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(FONT.xs),
   },
   card: {
     backgroundColor: "#1F2222",
@@ -137,7 +138,7 @@ const styles = StyleSheet.create({
   },
   courseName: {
     color: "#FFFFFF",
-    fontSize: moderateScale(19),
+    fontSize: moderateScale(FONT.lg),
     marginBottom: moderateScale(2),
   },
   subRow: {
@@ -147,7 +148,7 @@ const styles = StyleSheet.create({
   },
   metaText: {
     color: "#6E7171",
-    fontSize: moderateScale(17),
+    fontSize: moderateScale(FONT.md),
   },
   metaSeparator: {
     width: moderateScale(2),
@@ -157,7 +158,7 @@ const styles = StyleSheet.create({
   },
   priceText: {
     color: "#8A9491",
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(FONT.sm),
   },
   separator: {
     height: 1,

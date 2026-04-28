@@ -1,14 +1,15 @@
+import { FONT } from '@/constants/theme';
 import * as Location from 'expo-location';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import Animated, {
-  Easing,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withSpring,
-  withTiming,
+    Easing,
+    useAnimatedStyle,
+    useSharedValue,
+    withRepeat,
+    withSpring,
+    withTiming,
 } from 'react-native-reanimated';
 import { moderateScale } from 'react-native-size-matters';
 
@@ -282,7 +283,7 @@ const styles = StyleSheet.create({
   },
   backArrow: {
     color: '#E6ECEF',
-    fontSize: moderateScale(26),
+    fontSize: moderateScale(FONT.xl),
     fontFamily: 'Pretendard-Bold',
   },
   progressRow: {
@@ -305,12 +306,12 @@ const styles = StyleSheet.create({
   },
   title: {
     color: '#F4F7F6',
-    fontSize: moderateScale(25),
+    fontSize: moderateScale(FONT.xl),
   },
   subtitle: {
     marginTop: moderateScale(6),
     color: '#656D73',
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(FONT.xs),
     fontFamily: 'Pretendard-Regular',
   },
   locationButton: {
@@ -345,7 +346,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   locationIcon: {
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(FONT.sm),
   },
   spinnerContainer: {
     width: moderateScale(16),
@@ -372,7 +373,7 @@ const styles = StyleSheet.create({
   },
   checkmarkText: {
     color: '#4CAF82',
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(FONT.sm),
     fontWeight: '700',
   },
   locationText: {
@@ -380,13 +381,13 @@ const styles = StyleSheet.create({
   },
   locationTitle: {
     color: '#EAF3EF',
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(FONT.sm),
     fontFamily: 'Pretendard-Medium',
   },
   locationSubtitle: {
     marginTop: moderateScale(2),
     color: '#8C949A',
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(FONT.xs),
     fontFamily: 'Pretendard-Regular',
   },
   divider: {
@@ -402,7 +403,7 @@ const styles = StyleSheet.create({
   },
   dividerText: {
     color: '#656D73',
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(FONT.xxs),
     fontFamily: 'Pretendard-Regular',
   },
   searchContainer: {
@@ -418,14 +419,14 @@ const styles = StyleSheet.create({
     gap: moderateScale(12),
   },
   searchIcon: {
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(FONT.sm),
     color: '#8C949A',
   },
   searchInput: {
     flex: 1,
     height: '100%',
     color: '#EAF3EF',
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(FONT.sm),
     fontFamily: 'Pretendard-Regular',
   },
   citiesGrid: {
@@ -451,7 +452,7 @@ const styles = StyleSheet.create({
   },
   cityButtonText: {
     color: '#EAF3EF',
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(FONT.xs),
     fontFamily: 'Pretendard-Medium',
   },
   cityButtonTextSelected: {
@@ -469,7 +470,7 @@ const styles = StyleSheet.create({
   },
   nextText: {
     color: '#FFFFFF',
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(FONT.sm),
     fontFamily: 'Pretendard-Medium',
   },
   nextTextDisabled: {

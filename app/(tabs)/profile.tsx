@@ -1,7 +1,10 @@
 import { ThemedText as Text } from '@/components/themed-text';
+import { FONT } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { getAuth, signOut } from '@react-native-firebase/auth';
+import { router } from 'expo-router';
+import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { moderateScale } from 'react-native-size-matters';
 
@@ -23,11 +26,26 @@ export default function ProfileScreen() {
             </Text>
           </View>
 
-          <View style={styles.profileChip}>
-            <Text type="barlowLight" style={styles.profileChipText}>
-              프로필
+          <Pressable
+            style={styles.logoutChip}
+            onPress={() =>
+              Alert.alert('로그아웃', '정말 로그아웃 하시겠어요?', [
+                { text: '취소', style: 'cancel' },
+                {
+                  text: '로그아웃',
+                  style: 'destructive',
+                  onPress: async () => {
+                    await signOut(getAuth());
+                    router.replace('/(auth)');
+                  },
+                },
+              ])
+            }
+          >
+            <Text type="barlowLight" style={styles.logoutChipText}>
+              로그아웃
             </Text>
-          </View>
+          </Pressable>
         </View>
 
         <View style={styles.heroSection}>
@@ -141,20 +159,20 @@ const styles = StyleSheet.create({
   },
   brandText: {
     color: '#E5E7E7',
-    fontSize: moderateScale(26),
+    fontSize: moderateScale(FONT.xl),
     letterSpacing: moderateScale(0.5),
   },
-  profileChip: {
+  logoutChip: {
     borderWidth: moderateScale(0.5),
-    borderColor: '#353838',
-    backgroundColor: '#1F2222',
+    borderColor: '#453030',
+    backgroundColor: '#2A1F1F',
     borderRadius: moderateScale(20),
     paddingHorizontal: moderateScale(15),
     paddingVertical: moderateScale(5),
   },
-  profileChipText: {
-    color: 'white',
-    fontSize: moderateScale(13),
+  logoutChipText: {
+    color: '#E83F40',
+    fontSize: moderateScale(FONT.xs),
   },
   heroSection: {
     marginTop: moderateScale(28),
@@ -170,17 +188,17 @@ const styles = StyleSheet.create({
   },
   avatarInitials: {
     color: '#FFFFFF',
-    fontSize: moderateScale(24),
+    fontSize: moderateScale(FONT.xl),
   },
   nameText: {
     marginTop: moderateScale(16),
     color: '#F2F3F3',
-    fontSize: moderateScale(25),
+    fontSize: moderateScale(FONT.xl),
   },
   memberSinceText: {
     marginTop: moderateScale(8),
     color: '#656B70',
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(FONT.xs),
   },
   handicapChip: {
     marginTop: moderateScale(16),
@@ -196,7 +214,7 @@ const styles = StyleSheet.create({
   },
   handicapText: {
     color: '#49C895',
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(FONT.xs),
   },
   divider: {
     marginTop: moderateScale(30),
@@ -223,14 +241,14 @@ const styles = StyleSheet.create({
   },
   statValue: {
     color: '#F3F4F4',
-    fontSize: moderateScale(26),
+    fontSize: moderateScale(FONT.xl),
   },
   roundStatValue: {
     color: '#D4AF37',
-    fontSize: moderateScale(26),
+    fontSize: moderateScale(FONT.xl),
   },
   statLabel: {
     color: '#6D7377',
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(FONT.xxs),
   },
 });

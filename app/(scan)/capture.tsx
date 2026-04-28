@@ -1,4 +1,5 @@
 import { ThemedText as Text } from "@/components/themed-text";
+import { FONT } from '@/constants/theme';
 import Feather from "@expo/vector-icons/Feather";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -208,7 +209,7 @@ const styles = StyleSheet.create({
   permissionText: {
     color: "#D4D9DB",
     textAlign: "center",
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(FONT.xs),
   },
   permissionButton: {
     borderWidth: 1,
@@ -220,12 +221,12 @@ const styles = StyleSheet.create({
   },
   permissionButtonText: {
     color: "#E9ECEE",
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(FONT.xs),
   },
   helperText: {
     textAlign: "center",
     color: "#A8AFB3",
-    fontSize: moderateScale(11),
+    fontSize: moderateScale(FONT.xxs),
     marginTop: moderateScale(4),
   },
   headerRow: {
@@ -245,7 +246,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   titleText: {
-    fontSize: moderateScale(20),
+    fontSize: moderateScale(FONT.lg),
     color: "#E9ECEE",
     letterSpacing: moderateScale(0.5),
   },
@@ -275,7 +276,7 @@ const styles = StyleSheet.create({
   },
   tipText: {
     color: "#C9CED1",
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(FONT.xxs),
   },
   controlsRow: {
     flexDirection: "row",

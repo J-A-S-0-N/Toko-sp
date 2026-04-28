@@ -1,4 +1,5 @@
 import { ThemedText as Text } from "@/components/themed-text";
+import { FONT } from '@/constants/theme';
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
@@ -51,7 +52,7 @@ const styles = StyleSheet.create({
   howToTitle: {
     paddingHorizontal: moderateScale(10),
     color: "#636A6E",
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(FONT.sm),
   },
   guideList: {
     paddingHorizontal: moderateScale(10),
@@ -70,7 +71,7 @@ const styles = StyleSheet.create({
   },
   guideIndex: {
     color: "#46C396",
-    fontSize: moderateScale(20),
+    fontSize: moderateScale(FONT.lg),
     width: moderateScale(20),
   },
   guideTextWrap: {
@@ -78,12 +79,12 @@ const styles = StyleSheet.create({
   },
   guideTitle: {
     color: "#EDF1EE",
-    fontSize: moderateScale(17.5),
+    fontSize: moderateScale(FONT.md),
   },
   guideDesc: {
     marginTop: moderateScale(4),
     color: "#61696B",
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(FONT.xs),
   },
 });
 

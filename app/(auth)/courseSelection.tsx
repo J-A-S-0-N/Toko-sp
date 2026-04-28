@@ -1,3 +1,4 @@
+import { FONT } from '@/constants/theme';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
@@ -201,7 +202,7 @@ const styles = StyleSheet.create({
   },
   backArrow: {
     color: '#E6ECEF',
-    fontSize: moderateScale(26),
+    fontSize: moderateScale(FONT.xl),
     fontFamily: 'Pretendard-Bold',
   },
   progressRow: {
@@ -225,18 +226,18 @@ const styles = StyleSheet.create({
   },
   title: {
     color: '#F4F7F6',
-    fontSize: moderateScale(25),
+    fontSize: moderateScale(FONT.xl),
   },
   subtitle: {
     marginTop: moderateScale(6),
     color: '#656D73',
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(FONT.xs),
     fontFamily: 'Pretendard-Regular',
   },
   selectionCount: {
     marginTop: moderateScale(4),
     color: '#4FB78A',
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(FONT.xxs),
     fontFamily: 'Pretendard-Medium',
   },
   coursesList: {
@@ -264,13 +265,13 @@ const styles = StyleSheet.create({
   },
   customAddIcon: {
     color: '#8E959B',
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(FONT.sm),
     fontFamily: 'Pretendard-Medium',
   },
   customAddLabel: {
     marginLeft: moderateScale(14),
     color: '#7A8288',
-    fontSize: moderateScale(22 / 2),
+    fontSize: moderateScale(FONT.xl / 2),
     fontFamily: 'Pretendard-Medium',
   },
   customInputRow: {
@@ -288,7 +289,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#151B20',
     paddingHorizontal: moderateScale(16),
     color: '#EAF3EF',
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(FONT.sm),
     fontFamily: 'Pretendard-Regular',
   },
   customAddButton: {
@@ -302,7 +303,7 @@ const styles = StyleSheet.create({
   },
   customAddButtonText: {
     color: '#7F878D',
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(FONT.sm),
     fontFamily: 'Pretendard-Bold',
   },
   courseCard: {
@@ -338,7 +339,7 @@ const styles = StyleSheet.create({
   },
   courseNumber: {
     color: '#8C949A',
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(FONT.xs),
     fontFamily: 'Pretendard-Medium',
   },
   courseInfo: {
@@ -347,13 +348,13 @@ const styles = StyleSheet.create({
   },
   courseName: {
     color: '#EAF3EF',
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(FONT.sm),
     fontFamily: 'Pretendard-Medium',
   },
   courseDetails: {
     marginTop: moderateScale(2),
     color: '#8C949A',
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(FONT.xs),
     fontFamily: 'Pretendard-Regular',
   },
   radioButton: {
@@ -371,7 +372,7 @@ const styles = StyleSheet.create({
   },
   radioButtonText: {
     color: '#FFFFFF',
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(FONT.xxs),
     fontWeight: '700',
   },
   nextButton: {
@@ -386,7 +387,7 @@ const styles = StyleSheet.create({
   },
   nextText: {
     color: '#FFFFFF',
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(FONT.sm),
     fontFamily: 'Pretendard-Medium',
   },
   nextTextDisabled: {

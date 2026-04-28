@@ -19,7 +19,7 @@ export function ThemedText({
 
   return (
     <Text
-      allowFontScaling={false}
+      allowFontScaling={true}
       style={[
         { color },
         type === 'default' ? styles.default : undefined,

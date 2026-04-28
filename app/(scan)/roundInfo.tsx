@@ -1,17 +1,18 @@
 import { ThemedText as Text } from "@/components/themed-text";
+import { FONT } from '@/constants/theme';
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import Animated, {
-  Easing,
-  type SharedValue,
-  interpolateColor,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withSequence,
-  withSpring,
-  withTiming,
+    Easing,
+    type SharedValue,
+    interpolateColor,
+    useAnimatedStyle,
+    useSharedValue,
+    withRepeat,
+    withSequence,
+    withSpring,
+    withTiming,
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
@@ -387,28 +388,28 @@ const styles = StyleSheet.create({
   },
   statusText: {
     color: "#22C783",
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(FONT.xxs),
   },
   progressText: {
     color: "#22C783",
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(FONT.xs),
   },
   content: {
     flex: 1,
   },
   sectionLabel: {
     color: "#888888",
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(FONT.xs),
     marginBottom: moderateScale(8),
   },
   title: {
     color: "#F2F4F5",
-    fontSize: moderateScale(32),
+    fontSize: moderateScale(FONT.h2),
     marginBottom: moderateScale(8),
   },
   subtitle: {
     color: "#6B7578",
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(FONT.xs),
     marginBottom: moderateScale(28),
   },
   inputGroup: {
@@ -431,13 +432,13 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 0 },
   },
   inputIcon: {
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(FONT.sm),
     marginRight: moderateScale(10),
   },
   textInput: {
     flex: 1,
     color: "#E4E8EA",
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(FONT.xs),
     paddingVertical: moderateScale(14),
   },
   memoRow: {
@@ -463,7 +464,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "#FFFFFF",
-    fontSize: moderateScale(17),
+    fontSize: moderateScale(FONT.md),
   },
   buttonTextInactive: {
     color: "#5C7A70",

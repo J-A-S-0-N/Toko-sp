@@ -1,3 +1,4 @@
+import { FONT } from '@/constants/theme';
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { moderateScale } from 'react-native-size-matters';
@@ -82,16 +83,16 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 10 },
   },
   logoEmoji: {
-    fontSize: moderateScale(18),
+    fontSize: moderateScale(FONT.hero),
   },
   title: {
     marginTop: 10,
-    fontSize: moderateScale(28),
+    fontSize: moderateScale(FONT.xxl),
     color: '#F4F7F6',
     //letterSpacing: 1.5,
   },
   subtitle: {
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(FONT.sm),
     color: '#6E757D',
     fontFamily: 'Pretendard-Regular',
   },
@@ -119,7 +120,7 @@ const styles = StyleSheet.create({
   startText: {
     fontWeight: '800',
     paddingRight: moderateScale(4),
-    fontSize: moderateScale(18),
+    fontSize: moderateScale(FONT.md),
     letterSpacing: 0.8, // <-- key fix
     color: '#F5F9F7',
   },
@@ -138,12 +139,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loginHint: {
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(FONT.xxs),
     color: '#586068',
     //fontFamily: 'Pretendard-Regular',
   },
   loginLink: {
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(FONT.xxs),
     color: '#4CAF82',
   },
 });

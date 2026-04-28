@@ -1,4 +1,5 @@
 import { ThemedText as Text } from '@/components/themed-text';
+import { FONT } from '@/constants/theme';
 import { router } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Modal, Pressable, StyleSheet, View } from 'react-native';
@@ -294,14 +295,14 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   title: {
-    fontSize: moderateScale(22),
+    fontSize: moderateScale(FONT.xl),
     fontWeight: '800',
     color: '#FFFFFF',
     marginBottom: 8,
     letterSpacing: -0.6,
   },
   description: {
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(FONT.xs),
     color: '#8B9199',
     marginBottom: 20,
   },
@@ -323,17 +324,17 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   optionValue: {
-    fontSize: moderateScale(22),
+    fontSize: moderateScale(FONT.xl),
     fontWeight: '800',
     marginBottom: 3,
   },
   optionLabel: {
-    fontSize: 18,
+    fontSize: moderateScale(FONT.sm),
     fontWeight: '700',
     marginBottom: 6,
   },
   optionSubLabel: {
-    fontSize: 14,
+    fontSize: moderateScale(FONT.xs),
   },
   button: {
     width: '100%',
@@ -347,6 +348,6 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#FFFFFF',
     fontWeight: '700',
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(FONT.sm),
   },
 });

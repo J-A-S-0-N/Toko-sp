@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText as Text } from '@/components/themed-text';
+import { FONT } from '@/constants/theme';
 import { moderateScale } from 'react-native-size-matters';
 
 export default function OnboardingSecondScreen() {
@@ -30,10 +31,6 @@ export default function OnboardingSecondScreen() {
         end={{ x: 0.7, y: 0.75 }}
         style={styles.topGlow}
       />
-
-      <Pressable style={styles.skipButton} onPress={() => router.replace('/(tabs)')}>
-        <Text style={styles.skipText}>건너뛰기</Text>
-      </Pressable>
 
       <View style={styles.content}>
         <View style={styles.badge}>
@@ -112,18 +109,10 @@ const styles = StyleSheet.create({
     height: 240,
     borderRadius: 130,
   },
-  skipButton: {
-    alignSelf: 'flex-end',
-    marginTop: 6,
-  },
-  skipText: {
-    fontSize: 13,
-    color: '#767D86',
-    fontFamily: 'Pretendard-Regular',
-  },
   content: {
+    flex: 1,
+    justifyContent: 'center',
     gap: 14,
-    marginTop: 40,
   },
   badge: {
     alignSelf: 'flex-start',
@@ -135,17 +124,17 @@ const styles = StyleSheet.create({
     borderColor: '#1E667B',
   },
   badgeText: {
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(FONT.xxs),
     color: '#44D0B1',
     fontFamily: 'Pretendard-Bold',
   },
   title: {
-    fontSize: moderateScale(35),
+    fontSize: moderateScale(FONT.h2),
     color: '#FFFFFF',
     //fontFamily: 'Pretendard-Bold',
   },
   description: {
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(FONT.xs),
     color: '#7B848D',
     fontFamily: 'Pretendard-Regular',
   },
@@ -161,7 +150,7 @@ const styles = StyleSheet.create({
   },
   cardLabel: {
     color: '#6F767D',
-    fontSize: moderateScale(11),
+    fontSize: moderateScale(FONT.xxs),
     fontFamily: 'Pretendard-Regular',
   },
   lineWrap: {
@@ -220,7 +209,7 @@ const styles = StyleSheet.create({
   },
   statValue: {
     color: '#66EFAF',
-    fontSize: moderateScale(18),
+    fontSize: moderateScale(FONT.md),
     textAlign: 'center',
   },
   statValueMid: {
@@ -232,7 +221,7 @@ const styles = StyleSheet.create({
   statLabel: {
     marginTop: 2,
     color: '#6F767D',
-    fontSize: moderateScale(10),
+    fontSize: moderateScale(FONT.xxs),
     textAlign: 'center',
     fontFamily: 'Pretendard-Regular',
   },
@@ -265,7 +254,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#4CAE82',
   },
   ctaButton: {
-    height: 54,
+    minHeight: 54,
+    paddingVertical: 14,
     borderRadius: 14,
     backgroundColor: '#4CAE82',
     alignItems: 'center',
@@ -277,7 +267,7 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
   ctaText: {
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(FONT.xs),
     color: '#FFFFFF',
   },
 });

@@ -7,6 +7,7 @@ import ScoreDistribution from "@/components/StatPageComponents/scoreDistribution
 import StatPageSkeleton from "@/components/StatPageComponents/StatPageSkeleton";
 import StreakCard from "@/components/StatPageComponents/StreakCard";
 import { ThemedText as Text } from "@/components/themed-text";
+import { FONT } from '@/constants/theme';
 import React, { useEffect, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
@@ -152,7 +153,7 @@ const styles = StyleSheet.create({
   },
   brandText: {
     color: "#E8ECEA",
-    fontSize: moderateScale(29),
+    fontSize: moderateScale(FONT.xxl),
     letterSpacing: 0.5,
   },
   pill: {
@@ -166,12 +167,12 @@ const styles = StyleSheet.create({
   pillText: {
     //color: "#6E7171",
     color: "white",
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(FONT.xs),
   },
   sectionLabel: {
     marginTop: moderateScale(5),
     color: "#6F7775",
-    fontSize: moderateScale(23),
+    fontSize: moderateScale(FONT.xl),
     letterSpacing: 1.3,
   },
   chartContainer: {
@@ -194,7 +195,7 @@ const styles = StyleSheet.create({
   },
   valueLabel: {
     color: "#8C9492",
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(FONT.sm),
   },
   skeletonContainer: {
     flex: 1,

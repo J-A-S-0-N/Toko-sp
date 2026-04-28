@@ -1,6 +1,7 @@
 import HoleEditorModal from "@/components/ScanPageComponent/HoleEditorModal";
 import { submit } from "@/components/ScanPageComponent/backendLogic/submit";
 import { ThemedText as Text } from "@/components/themed-text";
+import { FONT } from '@/constants/theme';
 import { newRoundSignal } from "@/store/newRoundSignal";
 import Feather from "@expo/vector-icons/Feather";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -285,7 +286,7 @@ export default function ResultPreviewScreen() {
             <Text
               type="barlowHard"
               style={{
-                fontSize: moderateScale(16),
+                fontSize: moderateScale(FONT.sm),
                 color: "white",
               }}
             >
@@ -394,7 +395,7 @@ const styles = StyleSheet.create({
   },
   topScreenLabel: {
     color: "#7B8083",
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(FONT.sm),
     marginBottom: moderateScale(12),
     alignSelf: "center",
   },
@@ -427,7 +428,7 @@ const styles = StyleSheet.create({
   },
   screenTitle: {
     color: "#F4F6F7",
-    fontSize: moderateScale(21),
+    fontSize: moderateScale(FONT.lg),
   },
   aiBadge: {
     alignSelf: "flex-start",
@@ -449,16 +450,16 @@ const styles = StyleSheet.create({
   },
   aiBadgeText: {
     color: "#46D49A",
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(FONT.xs),
   },
   courseTitle: {
     color: "#F4F6F7",
-    fontSize: moderateScale(27),
+    fontSize: moderateScale(FONT.xxl),
     marginTop: moderateScale(14),
   },
   dateText: {
     color: "#80878B",
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(FONT.sm),
     marginTop: moderateScale(2),
     marginBottom: moderateScale(14),
   },
@@ -482,11 +483,11 @@ const styles = StyleSheet.create({
   },
   courseParLabel: {
     color: "#788083",
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(FONT.sm),
   },
   courseParHint: {
     color: "#626A6D",
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(FONT.xxs),
   },
   courseParControl: {
     flexDirection: "row",
@@ -506,7 +507,7 @@ const styles = StyleSheet.create({
   },
   courseParValue: {
     color: "#57C79A",
-    fontSize: moderateScale(41),
+    fontSize: moderateScale(FONT.h1),
     minWidth: moderateScale(52),
     textAlign: "center",
   },
@@ -527,23 +528,23 @@ const styles = StyleSheet.create({
   },
   summaryValuePrimary: {
     color: "#57C79A",
-    fontSize: moderateScale(21),
+    fontSize: moderateScale(FONT.lg),
   },
   summaryValueDanger: {
     color: "#FF4D4D",
-    fontSize: moderateScale(21),
+    fontSize: moderateScale(FONT.lg),
   },
   summaryValueSuccess: {
     color: "#4FD18E",
-    fontSize: moderateScale(21),
+    fontSize: moderateScale(FONT.lg),
   },
   summaryValueWarn: {
     color: "#F5C048",
-    fontSize: moderateScale(21),
+    fontSize: moderateScale(FONT.lg),
   },
   summaryLabel: {
     color: "#828A8D",
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(FONT.xxs),
   },
   sectionDivider: {
     height: 1,
@@ -552,7 +553,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     color: "#8B9396",
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(FONT.sm),
     marginBottom: moderateScale(10),
   },
   scoreGrid: {
@@ -587,10 +588,10 @@ const styles = StyleSheet.create({
   },
   holeNumber: {
     color: "#7A8387",
-    fontSize: moderateScale(11),
+    fontSize: moderateScale(FONT.xxs),
   },
   holeScore: {
-    fontSize: moderateScale(23),
+    fontSize: moderateScale(FONT.xl),
   },
   holeScoreNormal: {
     color: "#C1C7C8",
@@ -600,16 +601,16 @@ const styles = StyleSheet.create({
   },
   holeParPrimary: {
     color: "#7BE3B8",
-    fontSize: moderateScale(21),
+    fontSize: moderateScale(FONT.lg),
   },
   holeParText: {
     color: "#8DA8A0",
-    fontSize: moderateScale(11),
+    fontSize: moderateScale(FONT.xxs),
   },
   helperText: {
     minHeight: moderateScale(18),
     color: "#6E7679",
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(FONT.xxs),
     textAlign: "center",
     marginTop: moderateScale(8),
   },
@@ -624,7 +625,7 @@ const styles = StyleSheet.create({
   },
   switchLabel: {
     color: "#A2AAAE",
-    fontSize: moderateScale(18),
+    fontSize: moderateScale(FONT.md),
   },
   bottomButtonsRow: {
     flexDirection: "row",
@@ -642,7 +643,7 @@ const styles = StyleSheet.create({
   },
   secondaryButtonText: {
     color: "#A2AAB0",
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(FONT.xs),
   },
   primaryButton: {
     flex: 0.62,
@@ -657,6 +658,6 @@ const styles = StyleSheet.create({
   },
   primaryButtonText: {
     color: "#ECF7F1",
-    fontSize: moderateScale(18),
+    fontSize: moderateScale(FONT.md),
   },
 });

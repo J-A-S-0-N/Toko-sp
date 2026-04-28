@@ -1,4 +1,5 @@
 import { ThemedText as Text } from "@/components/themed-text";
+import { FONT } from '@/constants/theme';
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
@@ -56,7 +57,7 @@ export default function HitProgressBar({ roundStats, headerTitle = "타수 통�
 const styles = StyleSheet.create({
   headerTitle: {
     color: "#6F7775",
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(FONT.sm),
     letterSpacing: 1.2,
     marginBottom: moderateScale(10),
   },
@@ -76,10 +77,10 @@ const styles = StyleSheet.create({
   },
   metricLabel: {
     color: "#8A9290",
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(FONT.sm),
   },
   metricValue: {
-    fontSize: moderateScale(21),
+    fontSize: moderateScale(FONT.lg),
   },
   track: {
     height: moderateScale(3),

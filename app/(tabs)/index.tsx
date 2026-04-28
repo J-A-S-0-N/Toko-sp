@@ -9,17 +9,22 @@ import UserStatComponent from '@/components/HomeFeedComponents/userStatComponent
 import WeatherSummaryComponent from '@/components/HomeFeedComponents/weatherSummaryComponent';
 import WeeklySummaryComponent from '@/components/HomeFeedComponents/weeklySummaryComponent';
 import { ThemedText as Text } from '@/components/themed-text';
+import db from '@/config/firebase';
+import { FONT } from '@/constants/theme';
+import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'expo-router';
+import { collection, getCountFromServer, query, where } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { moderateScale } from 'react-native-size-matters';
 
-
 export default function HomeScreen() {
   const router = useRouter();
+  const { user } = useAuth();
   const [showSkeleton, setShowSkeleton] = useState(true);
+  const [roundCount, setRoundCount] = useState<number | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -27,6 +32,24 @@ export default function HomeScreen() {
     }, 2000);
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    if (!user?.uid) return;
+    const fetchCount = async () => {
+      try {
+        const q = query(
+          collection(db, 'Scans'),
+          where('userId', '==', user.uid),
+          where('status', '==', 'completed')
+        );
+        const snapshot = await getCountFromServer(q);
+        setRoundCount(snapshot.data().count);
+      } catch (error) {
+        console.error('Failed to fetch round count:', error);
+      }
+    };
+    fetchCount();
+  }, [user?.uid]);
 
   return (
     <SafeAreaView edges={['top']} style={styles.safeArea}>
@@ -84,7 +107,7 @@ export default function HomeScreen() {
           onPress={() => router.push('/(modals)/allRoundsModal')}
         >
           <Text type="barlowLight" style={styles.allRoundsButtonText}>
-            전체 라운드 보기 (14개) →
+            전체 라운드 보기 ({roundCount !== null ? `${roundCount}개` : '…'}) →
           </Text>
         </Pressable>
 
@@ -118,13 +141,6 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom: 8,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
   allRoundsButton: {
     backgroundColor: '#1F2222',
     borderRadius: moderateScale(14),
@@ -137,6 +153,6 @@ const styles = StyleSheet.create({
   },
   allRoundsButtonText: {
     color: '#A2AAAE',
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(FONT.sm),
   },
 });

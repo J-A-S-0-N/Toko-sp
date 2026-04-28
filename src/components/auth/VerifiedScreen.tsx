@@ -11,6 +11,7 @@ import Animated, {
 import Svg, { Path } from 'react-native-svg';
 
 import { ThemedText as Text } from '@/components/themed-text';
+import { FONT } from '@/constants/theme';
 import { moderateScale } from 'react-native-size-matters';
 
 type VerifiedScreenProps = {
@@ -165,14 +166,14 @@ const styles = StyleSheet.create({
   },
   title: {
     color: '#F2F2F0',
-    fontSize: moderateScale(28),
+    fontSize: moderateScale(FONT.xxl),
     fontWeight: '900',
     fontFamily: 'Pretendard-Bold',
     marginBottom: 6,
   },
   subtitle: {
     color: '#6E7271',
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(FONT.xs),
     fontFamily: 'Pretendard-Regular',
   },
 });

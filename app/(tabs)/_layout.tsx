@@ -11,6 +11,7 @@ import Feather from '@expo/vector-icons/Feather';
 import Fontisto from '@expo/vector-icons/Fontisto';
 import Octicons from '@expo/vector-icons/Octicons';
 
+import { FONT } from '@/constants/theme';
 import { moderateScale } from 'react-native-size-matters';
 
 const TAB_BAR_BG = '#191919';
@@ -22,6 +23,7 @@ export default function TabLayout() {
     <View style={{ flex: 1, backgroundColor: '#0F0F0F' }}>
       <Tabs
         screenOptions={{
+          animation: 'fade',
           tabBarActiveTintColor: Colors.dark.tabIconSelected,
           headerShown: false,
           tabBarStyle: {
@@ -37,14 +39,14 @@ export default function TabLayout() {
         <Tabs.Screen
           name="index"
           options={{
-            tabBarLabel: ({ color }) => <Text style={{ color, fontSize: moderateScale(11) }}>피드</Text>,
+            tabBarLabel: ({ color }) => <Text style={{ color, fontSize: moderateScale(FONT.xxs) }}>피드</Text>,
             tabBarIcon: ({ color }) => <Octicons name="home" size={20} color={color} />,
           }}
         />
         <Tabs.Screen
           name="stats"
           options={{
-            tabBarLabel: ({ color }) => <Text style={{ color, fontSize: moderateScale(11) }}>통계</Text>,
+            tabBarLabel: ({ color }) => <Text style={{ color, fontSize: moderateScale(FONT.xxs) }}>통계</Text>,
             tabBarIcon: ({ color }) => <Fontisto name="heartbeat-alt" size={20} color={color} />,
           }}
         />
@@ -55,7 +57,7 @@ export default function TabLayout() {
               <Text
                 style={{
                   color: focused ? Colors.dark.tabIconSelected : '#FFFFFF',
-                  fontSize: moderateScale(11),
+                  fontSize: moderateScale(FONT.xxs),
                 }}>
                 스캔
               </Text>
@@ -87,7 +89,7 @@ export default function TabLayout() {
                     <Text
                       style={{
                         color: 'black',
-                        fontSize: moderateScale(11),
+                        fontSize: moderateScale(FONT.xxs),
                       }}
                     >
                       스 캔
@@ -101,7 +103,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="profile"
           options={{
-            tabBarLabel: ({ color }) => <Text style={{ color, fontSize: moderateScale(11) }}>내 정보</Text>,
+            tabBarLabel: ({ color }) => <Text style={{ color, fontSize: moderateScale(FONT.xxs) }}>내 정보</Text>,
             tabBarIcon: ({ color }) => <Feather name="users" size={20} color={color} />,
           }}
         />

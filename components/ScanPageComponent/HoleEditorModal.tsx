@@ -1,7 +1,8 @@
 import { ThemedText as Text } from "@/components/themed-text";
+import { FONT } from '@/constants/theme';
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Animated, Modal, Pressable, StyleSheet, View } from "react-native";
-import { moderateScale } from "react-native-size-matters";
+import { moderateScale } from 'react-native-size-matters';
 
 type HoleEditorModalProps = {
   visible: boolean;
@@ -164,7 +165,7 @@ const styles = StyleSheet.create({
     marginBottom: moderateScale(14),
   },
   holeEditorTitle: {
-    fontSize: moderateScale(18),
+    fontSize: moderateScale(FONT.md),
     textAlign: "center",
     marginBottom: moderateScale(14),
   },
@@ -189,7 +190,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#2A3033",
   },
   holeEditorAdjustText: {
-    fontSize: moderateScale(20),
+    fontSize: moderateScale(FONT.lg),
   },
   holeEditorAdjustTextMinus: {
     color: "#FF4D4D",
@@ -198,11 +199,11 @@ const styles = StyleSheet.create({
     color: "#57C79A",
   },
   holeEditorScoreValue: {
-    fontSize: moderateScale(55),
+    fontSize: moderateScale(FONT.hero),
   },
   holeEditorParCaption: {
     color: "#7C8589",
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(FONT.xs),
     textAlign: "center",
     marginBottom: moderateScale(10),
   },
@@ -228,14 +229,14 @@ const styles = StyleSheet.create({
   },
   holeEditorParValue: {
     color: "#D5DADD",
-    fontSize: moderateScale(24),
+    fontSize: moderateScale(FONT.xl),
   },
   holeEditorParValueActive: {
     color: "#E9F5F0",
   },
   holeEditorParHint: {
     color: "#8A9296",
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(FONT.xxs),
   },
   holeEditorParHintActive: {
     color: "#86C9AE",
@@ -249,6 +250,6 @@ const styles = StyleSheet.create({
   },
   holeEditorConfirmText: {
     color: "#ECF7F1",
-    fontSize: moderateScale(17),
+    fontSize: moderateScale(FONT.md),
   },
 });

@@ -1,7 +1,7 @@
 import {
-  RecentScansSection,
-  ScanFrameSection,
-  ScanGuideSection
+    RecentScansSection,
+    ScanFrameSection,
+    ScanGuideSection
 } from "@/components/ScanPageComponent";
 import React from "react";
 import { ScrollView, StyleSheet } from "react-native";

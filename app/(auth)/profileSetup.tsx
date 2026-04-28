@@ -1,3 +1,4 @@
+import { FONT } from '@/constants/theme';
 import { router } from 'expo-router';
 import type { UserCredential } from 'firebase/auth';
 import { useMemo, useRef, useState } from 'react';
@@ -241,7 +242,7 @@ const styles = StyleSheet.create({
   },
   backArrow: {
     color: '#E6ECEF',
-    fontSize: moderateScale(26),
+    fontSize: moderateScale(FONT.xl),
     fontFamily: 'Pretendard-Bold',
   },
   progressRow: {
@@ -264,12 +265,12 @@ const styles = StyleSheet.create({
   },
   title: {
     color: '#F4F7F6',
-    fontSize: moderateScale(25),
+    fontSize: moderateScale(FONT.xl),
   },
   subtitle: {
     marginTop: moderateScale(6),
     color: '#656D73',
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(FONT.xs),
     fontFamily: 'Pretendard-Regular',
   },
   avatarWrap: {
@@ -298,7 +299,7 @@ const styles = StyleSheet.create({
   },
   avatarQuestion: {
     color: '#E8FFF5',
-    fontSize: moderateScale(34),
+    fontSize: moderateScale(FONT.h2),
   },
   editBadge: {
     position: 'absolute',
@@ -314,7 +315,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   editBadgeText: {
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(FONT.xxs),
   },
   fieldGroup: {
     marginTop: moderateScale(18),
@@ -322,7 +323,7 @@ const styles = StyleSheet.create({
   },
   fieldLabel: {
     color: '#5E666D',
-    fontSize: moderateScale(11),
+    fontSize: moderateScale(FONT.xxs),
     fontFamily: 'Pretendard-Regular',
   },
   textField: {
@@ -333,7 +334,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#13191F',
     color: '#EAF3EF',
     paddingHorizontal: moderateScale(14),
-    fontSize: moderateScale(17),
+    fontSize: moderateScale(FONT.md),
     fontFamily: 'Pretendard-Regular',
   },
   textFieldActive: {
@@ -363,12 +364,12 @@ const styles = StyleSheet.create({
     height: '100%',
     color: '#EAF3EF',
     paddingHorizontal: moderateScale(14),
-    fontSize: moderateScale(17),
+    fontSize: moderateScale(FONT.md),
     fontFamily: 'Pretendard-Regular',
   },
   chevron: {
     color: '#8C949A',
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(FONT.sm),
     fontFamily: 'Pretendard-Bold',
   },
   skillRow: {
@@ -391,12 +392,12 @@ const styles = StyleSheet.create({
   },
   skillChipText: {
     color: '#D1D6DA',
-    fontSize: moderateScale(11),
+    fontSize: moderateScale(FONT.xxs),
     fontFamily: 'Pretendard-Regular',
   },
   skillChipHint: {
     color: '#717980',
-    fontSize: moderateScale(10),
+    fontSize: moderateScale(FONT.xxs),
     fontFamily: 'Pretendard-Regular',
   },
   nextButton: {
@@ -412,7 +413,7 @@ const styles = StyleSheet.create({
   },
   nextText: {
     color: '#FFFFFF',
-    fontSize: moderateScale(18),
+    fontSize: moderateScale(FONT.md),
     fontFamily: 'Pretendard-Bold',
   },
   nextTextDisabled: {

@@ -1,3 +1,4 @@
+import { FONT } from '@/constants/theme';
 import { router } from 'expo-router';
 import { useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Animated, Keyboard, Pressable, StyleSheet, TextInput, TouchableWithoutFeedback, View } from 'react-native';
@@ -205,7 +206,7 @@ const styles = StyleSheet.create({
   },
   backArrow: {
     color: '#E6ECEF',
-    fontSize: moderateScale(26),
+    fontSize: moderateScale(FONT.xl),
     fontFamily: 'Pretendard-Bold',
   },
   progressRow: {
@@ -229,11 +230,11 @@ const styles = StyleSheet.create({
   },
   title: {
     color: '#F4F7F6',
-    fontSize: moderateScale(36),
+    fontSize: moderateScale(FONT.h2),
   },
   description: {
     color: '#656D73',
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(FONT.xs),
     fontFamily: 'Pretendard-Regular',
     marginTop: moderateScale(5),
   },
@@ -256,21 +257,21 @@ const styles = StyleSheet.create({
     gap: moderateScale(6),
   },
   countryFlag: {
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(FONT.xs),
   },
   countryLabel: {
     color: '#B4BDC4',
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(FONT.xxs),
     fontFamily: 'Pretendard-Regular',
   },
   countryCode: {
     color: '#7A8389',
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(FONT.xxs),
     fontFamily: 'Pretendard-Regular',
   },
   countryChevron: {
     color: '#7A8389',
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(FONT.xs),
   },
   phoneInputWrap: {
     marginTop: moderateScale(8),
@@ -290,20 +291,20 @@ const styles = StyleSheet.create({
   },
   phonePrefix: {
     color: '#7A8389',
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(FONT.xs),
     fontFamily: 'Pretendard-Regular',
   },
   phoneInput: {
     flex: 1,
     color: '#DCE4E8',
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(FONT.sm),
     fontFamily: 'Pretendard-Regular',
     paddingVertical: moderateScale(10),
   },
   hint: {
     marginTop: 8,
     color: '#515A61',
-    fontSize: moderateScale(11),
+    fontSize: moderateScale(FONT.xxs),
     fontFamily: 'Pretendard-Regular',
   },
   submitButton: {
@@ -319,7 +320,7 @@ const styles = StyleSheet.create({
   },
   submitText: {
     color: 'white',
-    fontSize: moderateScale(18),
+    fontSize: moderateScale(FONT.md),
     fontFamily: 'Pretendard-Bold',
   },
   submitTextDisabled: {
@@ -335,7 +336,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     color: '#DCE4E8',
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(FONT.xs),
     fontFamily: 'Pretendard-Medium',
   },
 });

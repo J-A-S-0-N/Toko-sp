@@ -1,4 +1,5 @@
 import { ThemedText as Text } from "@/components/themed-text";
+import { FONT } from '@/constants/theme';
 import Feather from "@expo/vector-icons/Feather";
 import React from "react";
 import { Pressable, StyleSheet, View } from "react-native";
@@ -112,13 +113,13 @@ const styles = StyleSheet.create({
   },
   scanTitle: {
     color: "#EEF2EF",
-    fontSize: moderateScale(18),
+    fontSize: moderateScale(FONT.md),
     textAlign: "center",
   },
   scanSubtitle: {
     marginTop: moderateScale(3),
     color: "#5E666A",
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(FONT.sm),
     textAlign: "center",
   },
   actionRow: {
@@ -144,7 +145,7 @@ const styles = StyleSheet.create({
   },
   primaryActionText: {
     color: "#FFFFFF",
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(FONT.sm),
   },
   secondaryAction: {
     flex: 1,
@@ -154,7 +155,7 @@ const styles = StyleSheet.create({
   },
   secondaryActionText: {
     color: "#E5E9E6",
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(FONT.sm),
   },
 });
 

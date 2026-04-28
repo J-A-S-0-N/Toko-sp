@@ -5,6 +5,7 @@ import { useEffect, useRef } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText as Text } from '@/components/themed-text';
+import { FONT } from '@/constants/theme';
 import { moderateScale } from 'react-native-size-matters';
 
 export default function OnboardingThirdScreen() {
@@ -27,10 +28,6 @@ export default function OnboardingThirdScreen() {
         end={{ x: 0.6, y: 0.8 }}
         style={styles.topGlow}
       />
-
-      <Pressable style={styles.skipButton} onPress={() => router.replace('/(tabs)')}>
-        <Text style={styles.skipText}>건너뛰기</Text>
-      </Pressable>
 
       <View style={styles.content}>
         <View style={styles.badge}>
@@ -99,18 +96,10 @@ const styles = StyleSheet.create({
     height: 240,
     borderRadius: 130,
   },
-  skipButton: {
-    alignSelf: 'flex-end',
-    marginTop: 6,
-  },
-  skipText: {
-    fontSize: 13,
-    color: '#767D86',
-    fontFamily: 'Pretendard-Regular',
-  },
   content: {
+    flex: 1,
+    justifyContent: 'center',
     gap: 14,
-    marginTop: 40,
   },
   badge: {
     alignSelf: 'flex-start',
@@ -122,16 +111,16 @@ const styles = StyleSheet.create({
     borderColor: '#5A4A1F',
   },
   badgeText: {
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(FONT.xxs),
     color: '#6FDEAE',
     fontFamily: 'Pretendard-Bold',
   },
   title: {
-    fontSize: moderateScale(35),
+    fontSize: moderateScale(FONT.h2),
     color: '#FFFFFF',
   },
   description: {
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(FONT.xs),
     color: '#7B848D',
     fontFamily: 'Pretendard-Regular',
   },
@@ -147,12 +136,12 @@ const styles = StyleSheet.create({
   },
   cardLabel: {
     color: '#6F767D',
-    fontSize: moderateScale(11),
+    fontSize: moderateScale(FONT.xxs),
     fontFamily: 'Pretendard-Regular',
   },
   scoreText: {
     color: '#54CC96',
-    fontSize: moderateScale(46),
+    fontSize: moderateScale(FONT.h1),
   },
   progressTrack: {
     height: 5,
@@ -173,12 +162,12 @@ const styles = StyleSheet.create({
   },
   legendText: {
     color: '#6F767D',
-    fontSize: moderateScale(10),
+    fontSize: moderateScale(FONT.xxs),
     fontFamily: 'Pretendard-Regular',
   },
   legendPercent: {
     color: '#4CC291',
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(FONT.xxs),
     fontFamily: 'Pretendard-Bold',
   },
   footer: {
@@ -210,7 +199,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#4CAE82',
   },
   ctaButton: {
-    height: 54,
+    minHeight: 54,
+    paddingVertical: 14,
     borderRadius: 14,
     backgroundColor: '#F0B42A',
     alignItems: 'center',
@@ -227,7 +217,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   ctaText: {
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(FONT.xs),
     color: '#FFFFFF',
   },
 });

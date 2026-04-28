@@ -1,7 +1,8 @@
 import { ThemedText } from "@/components/themed-text";
+import { FONT } from '@/constants/theme';
 import { LinearGradient } from "expo-linear-gradient";
 import { StyleSheet, Text, View } from "react-native";
-import { moderateScale } from "react-native-size-matters";
+import { moderateScale } from 'react-native-size-matters';
 
 const DailyTipComponent = () => {
   return (
@@ -41,16 +42,16 @@ const styles = StyleSheet.create({
     marginBottom: moderateScale(10),
   },
   tipIcon: {
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(FONT.sm),
     color: "#A8C5FF",
   },
   headerText: {
     color: "#A8C5FF",
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(FONT.sm),
   },
   tipText: {
     color: "#F4F8FF",
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(FONT.sm),
     //lineHeight: moderateScale(25),
     letterSpacing: -0.2,
   },

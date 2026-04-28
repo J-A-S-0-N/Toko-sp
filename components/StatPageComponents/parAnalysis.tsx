@@ -1,4 +1,5 @@
 import { ThemedText as Text } from "@/components/themed-text";
+import { FONT } from '@/constants/theme';
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
@@ -48,7 +49,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     color: "#6F7775",
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(FONT.sm),
     letterSpacing: 1,
     marginBottom: moderateScale(12),
   },
@@ -73,16 +74,16 @@ const styles = StyleSheet.create({
   parLabel: {
     //color: "#6F7775",
     color: "#ffffff",
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(FONT.sm),
     letterSpacing: 0.8,
   },
   averageValue: {
-    fontSize: moderateScale(24),
+    fontSize: moderateScale(FONT.xl),
     //lineHeight: moderateScale(64),
     paddingVertical: moderateScale(4),
   },
   deltaText: {
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(FONT.sm),
     letterSpacing: 0.4,
   },
 });

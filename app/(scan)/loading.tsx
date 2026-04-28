@@ -1,5 +1,6 @@
 import { ThemedText as Text } from "@/components/themed-text";
 import { db } from "@/config/firebase";
+import { FONT } from '@/constants/theme';
 import { useAuth } from "@/context/AuthContext";
 import Feather from "@expo/vector-icons/Feather";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -7,18 +8,18 @@ import { doc, type DocumentReference, onSnapshot } from "firebase/firestore";
 import React, { useEffect, useMemo, useState } from "react";
 import { Alert, LayoutChangeEvent, Pressable, StyleSheet, View } from "react-native";
 import Animated, {
-  Easing,
-  FadeIn,
-  FadeInUp,
-  FadeOut,
-  FadeOutUp,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withTiming
+    Easing,
+    FadeIn,
+    FadeInUp,
+    FadeOut,
+    FadeOutUp,
+    useAnimatedStyle,
+    useSharedValue,
+    withRepeat,
+    withTiming
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { moderateScale } from "react-native-size-matters";
+import { moderateScale } from 'react-native-size-matters';
 
 import { deletePendingScan } from "./scanCleanup";
 import { createPendingScan } from "./scanFirebase";
@@ -394,7 +395,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     color: "#818E95",
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(FONT.md),
   },
   centerSection: {
     flex: 1,
@@ -421,12 +422,12 @@ const styles = StyleSheet.create({
   },
   titleText: {
     color: "#F2F4F5",
-    fontSize: moderateScale(20),
+    fontSize: moderateScale(FONT.lg),
     //letterSpacing: moderateScale(0.2),
   },
   subtitleText: {
     color: "#8E9A9F",
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(FONT.xs),
   },
   tipCard: {
     backgroundColor: "#181A1A",
@@ -441,7 +442,7 @@ const styles = StyleSheet.create({
   },
   tipLabel: {
     color: "#73828A",
-    fontSize: moderateScale(11),
+    fontSize: moderateScale(FONT.xxs),
   },
   tipContentArea: {
     minHeight: moderateScale(58),
@@ -467,11 +468,11 @@ const styles = StyleSheet.create({
   },
   tipTitle: {
     color: "#E4E8EA",
-    fontSize: moderateScale(20),
+    fontSize: moderateScale(FONT.lg),
   },
   tipDescription: {
     color: "#88959C",
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(FONT.xxs),
   },
   tabsTrack: {
     position: "relative",

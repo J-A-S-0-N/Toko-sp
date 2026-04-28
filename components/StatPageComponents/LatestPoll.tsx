@@ -1,4 +1,5 @@
 import { ThemedText as Text, ThemedText } from "@/components/themed-text";
+import { FONT } from '@/constants/theme';
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
@@ -71,7 +72,7 @@ export default function LatestPool() {
 const styles = StyleSheet.create({
   sectionTitle: {
     color: "#6F7775",
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(FONT.sm),
     letterSpacing: 1.2,
     marginBottom: moderateScale(10),
   },
@@ -91,7 +92,7 @@ const styles = StyleSheet.create({
   date: {
     width: moderateScale(52),
     color: "#76807D",
-    fontSize: moderateScale(17),
+    fontSize: moderateScale(FONT.md),
   },
   barTrack: {
     flex: 1,
@@ -115,10 +116,10 @@ const styles = StyleSheet.create({
   },
   score: {
     color: "#FF4F5F",
-    fontSize: moderateScale(28),
+    fontSize: moderateScale(FONT.xxl),
   },
   delta: {
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(FONT.sm),
   },
   deltaPositive: {
     color: "#FF4F5F",

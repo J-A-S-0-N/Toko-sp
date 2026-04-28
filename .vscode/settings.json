@@ -5,5 +5,6 @@
     "source.sortMembers": "explicit",
     "cursor.chat.textSize": "medium",
     "window.zoomLevel": 1.2
-  }
+  },
+  "java.compile.nullAnalysis.mode": "automatic"
 }

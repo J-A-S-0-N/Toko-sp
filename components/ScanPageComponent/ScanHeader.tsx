@@ -1,4 +1,5 @@
 import { ThemedText as Text } from "@/components/themed-text";
+import { FONT } from '@/constants/theme';
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
@@ -22,11 +23,11 @@ const styles = StyleSheet.create({
   },
   title: {
     color: "#EFF2EE",
-    fontSize: moderateScale(25),
+    fontSize: moderateScale(FONT.xl),
   },
   subtitle: {
     color: "#5F6668",
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(FONT.xs),
   },
 });
 

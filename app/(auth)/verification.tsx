@@ -1,3 +1,4 @@
+import { FONT } from '@/constants/theme';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
@@ -73,8 +74,10 @@ export default function VerificationScreen() {
     }
   };
 
+  const submitting = useRef(false);
+
   const handleConfirm = async () => {
-    if (!isCodeValid) {
+    if (!isCodeValid || submitting.current) {
       return;
     }
 
@@ -83,6 +86,8 @@ export default function VerificationScreen() {
       router.replace('/(auth)/signup');
       return;
     }
+
+    submitting.current = true;
 
     try {
       const userCredential = await confirmCode(verificationId, codeDigits.join(''));
@@ -101,6 +106,7 @@ export default function VerificationScreen() {
       console.log("Logged in user:", userCredential.user.uid);
       router.push('/verifying');
     } catch (error) {
+      submitting.current = false;
       setCodeDigits(Array(CODE_LENGTH).fill(''));
       inputsRef.current[0]?.focus();
       console.log("Invalid code or error:", error);
@@ -208,7 +214,7 @@ const styles = StyleSheet.create({
   },
   backArrow: {
     color: '#E6ECEF',
-    fontSize: moderateScale(26),
+    fontSize: moderateScale(FONT.xl),
     fontFamily: 'Pretendard-Bold',
   },
   progressRow: {
@@ -232,18 +238,18 @@ const styles = StyleSheet.create({
   },
   title: {
     color: '#F4F7F6',
-    fontSize: moderateScale(25),
+    fontSize: moderateScale(FONT.xl),
   },
   description: {
     marginTop: moderateScale(8),
     color: '#656D73',
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(FONT.xs),
     fontFamily: 'Pretendard-Regular',
   },
   testCode: {
     marginTop: moderateScale(10),
     color: '#7A8389',
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(FONT.xxs),
     fontFamily: 'Pretendard-Regular',
   },
   testCodeAccent: {
@@ -266,7 +272,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#102018',
     color: '#EAF3EF',
     textAlign: 'center',
-    fontSize: moderateScale(26),
+    fontSize: moderateScale(FONT.xl),
     fontFamily: 'Pretendard-Bold',
   },
   resendButton: {
@@ -275,7 +281,7 @@ const styles = StyleSheet.create({
   },
   resendButtonText: {
     color: '#4FB78A',
-    fontSize: moderateScale(11),
+    fontSize: moderateScale(FONT.xxs),
     fontFamily: 'Pretendard-Regular',
     textAlign: 'center',
     textDecorationLine: 'underline',
@@ -297,7 +303,7 @@ const styles = StyleSheet.create({
   },
   submitText: {
     color: 'white',
-    fontSize: moderateScale(18),
+    fontSize: moderateScale(FONT.md),
     fontFamily: 'Pretendard-Bold',
   },
   submitTextDisabled: {

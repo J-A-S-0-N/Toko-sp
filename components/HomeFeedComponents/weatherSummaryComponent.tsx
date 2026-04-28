@@ -1,4 +1,5 @@
 import { ThemedText as Text } from "@/components/themed-text";
+import { FONT } from '@/constants/theme';
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { StyleSheet, View } from "react-native";
@@ -57,7 +58,7 @@ const styles = StyleSheet.create({
   },
   headerLabel: {
     color: "#58B9FF",
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(FONT.xxs),
     marginBottom: moderateScale(8),
   },
   tempRow: {
@@ -67,12 +68,12 @@ const styles = StyleSheet.create({
   },
   tempValue: {
     color: "#FFFFFF",
-    fontSize: moderateScale(45),
+    fontSize: moderateScale(FONT.h1),
   },
   detailText: {
     marginTop: moderateScale(6),
     color: "#7F91A7",
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(FONT.xxs),
   },
   recommendationCard: {
     borderRadius: moderateScale(18),
@@ -86,12 +87,12 @@ const styles = StyleSheet.create({
   },
   recommendationLabel: {
     color: "#53D2C0",
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(FONT.xxs),
     marginBottom: moderateScale(4),
   },
   recommendationValue: {
     color: "#FFFFFF",
-    fontSize: moderateScale(21),
+    fontSize: moderateScale(FONT.lg),
   },
 });
 

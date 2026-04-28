@@ -1,6 +1,10 @@
 import { ThemedText as Text } from "@/components/themed-text";
+import { db } from "@/config/firebase";
+import { FONT } from '@/constants/theme';
+import { useAuth } from "@/context/AuthContext";
 import { newRoundSignal } from "@/store/newRoundSignal";
 import { router } from "expo-router";
+import { collection, limit as fsLimit, getDocs, orderBy, query, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, TouchableOpacity, View } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
@@ -24,6 +28,7 @@ interface Round {
 }
 
 export default function RecentRoundComponent() {
+  const { user } = useAuth();
   const [recentRounds, setRecentRounds] = useState<Round[]>([]);
   const [loadingId, setLoadingId] = useState<string | null>(() => {
     const id = newRoundSignal.id;
@@ -43,46 +48,52 @@ export default function RecentRoundComponent() {
   }, [loadingId]);
 
   useEffect(() => {
-    //TODO: implement fetch recent rounds
-    setRecentRounds([
-      {
-        id: "1",
-        date: "2026-02-26",
-        score: 60,
-        coursePar: 72,
-        courseName: "나인브릿지",
-        location: "제주, 한국",
-        birdiesCnt: 3,
-        parsCnt: 6,
-        bogeyCnt: 3,
-        holeCnt: 18,
-      },
-      {
-        id: "2",
-        date: "2026-02-26",
-        score: 60,
-        coursePar: 72,
-        courseName: "나인브릿지",
-        location: "제주, 한국",
-        birdiesCnt: 3,
-        parsCnt: 6,
-        bogeyCnt: 3,
-        holeCnt: 18,
-      },
-      {
-        id: "3",
-        date: "2026-02-26",
-        score: 60,
-        coursePar: 72,
-        courseName: "나인브릿지",
-        location: "제주, 한국",
-        birdiesCnt: 3,
-        parsCnt: 6,
-        bogeyCnt: 3,
-        holeCnt: 18,
-      },
-    ]);
-  }, []);
+    const fetchRecentRounds = async () => {
+      try {
+        const scansRef = collection(db, "Scans");
+        const q = query(
+          scansRef,
+          where("userId", "==", user?.uid ?? ""),
+          where("status", "==", "completed"),
+          orderBy("playedAt", "desc"),
+          fsLimit(3)
+        );
+        const snapshot = await getDocs(q);
+
+        const fetched: Round[] = snapshot.docs.map((d) => {
+          const data = d.data();
+          const holeScores: { hole: number; score: number; par: number }[] = data.holeScores ?? [];
+
+          let birdies = 0, pars = 0, bogeys = 0;
+          for (const h of holeScores) {
+            const diff = h.score - h.par;
+            if (diff <= -1) birdies++;
+            else if (diff === 0) pars++;
+            else if (diff >= 1) bogeys++;
+          }
+
+          return {
+            id: d.id,
+            date: data.playedAt ?? new Date().toISOString(),
+            score: data.totalScore ?? 0,
+            coursePar: data.appliedPar ?? 0,
+            courseName: data.courseName ?? "코스명 없음",
+            location: data.location ?? "",
+            birdiesCnt: birdies,
+            parsCnt: pars,
+            bogeyCnt: bogeys,
+            holeCnt: data.holesCount ?? 18,
+          };
+        });
+
+        setRecentRounds(fetched);
+      } catch (error) {
+        console.error("Failed to fetch recent rounds:", error);
+      }
+    };
+
+    fetchRecentRounds();
+  }, [user?.uid]);
 
   const getScoreDelta = (score: number, coursePar: number) => {
     return score - coursePar;
@@ -108,75 +119,75 @@ export default function RecentRoundComponent() {
 
     return (
       <Animated.View entering={round.id === revealedId ? FadeIn.duration(400) : undefined}>
-      <TouchableOpacity
-        activeOpacity={1}
-        onPress={() => router.push(`/activityModal?id=${round.id}`)}
-        style={styles.roundContainer}
-      >
-        {/* Height 1 */}
-        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-          {/* Left Side */}
-          <View>
-            <Text type="barlowHard" style={{ fontSize: moderateScale(23), color: "white" }}>{round.courseName}</Text>
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                gap: moderateScale(5),
-              }}
-            >
-              {/* <ThemedText type="barlowLight" style={{ fontSize: moderateScale(11), color: "#6E7171" }}>{round.location}</ThemedText> */}
-              <Text style={{ fontSize: moderateScale(14), color: "#6E7171" }}>{round.location}</Text>
+        <TouchableOpacity
+          activeOpacity={1}
+          onPress={() => router.push(`/activityModal?id=${round.id}`)}
+          style={styles.roundContainer}
+        >
+          {/* Height 1 */}
+          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+            {/* Left Side */}
+            <View>
+              <Text type="barlowHard" style={{ fontSize: moderateScale(FONT.lg), color: "white" }}>{round.courseName}</Text>
               <View
-                style={{ width: moderateScale(2), height: moderateScale(2), borderRadius: moderateScale(5), backgroundColor: "#6E7171" }}
-              />
-              <Text style={{ fontSize: moderateScale(14), color: "#6E7171" }}>{formatDate(round.date)}</Text>
-            </View>
-          </View>
-
-          {/* Right Side */}
-          <Text type="barlowHard" style={{ fontSize: moderateScale(53), color: "#E83F40" }}>{round.score}</Text>
-        </View>
-        {/* Height 2 */}
-        {/* Score Delta */}
-        <View style={{ alignItems: "flex-end" }}>
-          <Text type="barlowLight" style={{ fontSize: moderateScale(14), color: "#E83F40" }}>{getScoreDelta(round.score, round.coursePar) > 0 ? "+" : ""}{getScoreDelta(round.score, round.coursePar)}</Text>
-        </View>
-        {/* Separator */}
-        <View
-          style={{ width: "100%", height: moderateScale(1), backgroundColor: "#353838", marginVertical: moderateScale(10) }}
-        />
-        {/* Stats */}
-        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-          {[
-            { value: round.birdiesCnt, label: "버디" },
-            { value: round.parsCnt, label: "파" },
-            { value: round.bogeyCnt, label: "보기" },
-            { value: round.holeCnt, label: "총홀수" },
-          ].map((stat, index) => (
-            <View key={stat.label} style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
-              {index > 0 && (
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: moderateScale(5),
+                }}
+              >
+                {/* <ThemedText type="barlowLight" style={{ fontSize: moderateScale(11), color: "#6E7171" }}>{round.location}</ThemedText> */}
+                <Text style={{ fontSize: moderateScale(FONT.xs), color: "#6E7171" }}>{round.location}</Text>
                 <View
-                  style={{
-                    width: moderateScale(0.5),
-                    height: moderateScale(30),
-                    backgroundColor: "#353838",
-                    marginHorizontal: moderateScale(4),
-                  }}
+                  style={{ width: moderateScale(2), height: moderateScale(2), borderRadius: moderateScale(5), backgroundColor: "#6E7171" }}
                 />
-              )}
-              <View style={{ flex: 1, alignItems: "center" }}>
-                <Text type="barlowHard" style={{ fontSize: moderateScale(29), color: "white" }}>
-                  {stat.value}
-                </Text>
-                <Text style={{ fontSize: moderateScale(16), color: "#6E7171", marginTop: moderateScale(2) }}>
-                  {stat.label}
-                </Text>
+                <Text style={{ fontSize: moderateScale(FONT.xs), color: "#6E7171" }}>{formatDate(round.date)}</Text>
               </View>
             </View>
-          ))}
-        </View>
-      </TouchableOpacity>
+
+            {/* Right Side */}
+            <Text type="barlowHard" style={{ fontSize: moderateScale(FONT.hero), color: "#E83F40" }}>{round.score}</Text>
+          </View>
+          {/* Height 2 */}
+          {/* Score Delta */}
+          <View style={{ alignItems: "flex-end" }}>
+            <Text type="barlowLight" style={{ fontSize: moderateScale(FONT.xs), color: "#E83F40" }}>{getScoreDelta(round.score, round.coursePar) > 0 ? "+" : ""}{getScoreDelta(round.score, round.coursePar)}</Text>
+          </View>
+          {/* Separator */}
+          <View
+            style={{ width: "100%", height: moderateScale(1), backgroundColor: "#353838", marginVertical: moderateScale(10) }}
+          />
+          {/* Stats */}
+          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+            {[
+              { value: round.birdiesCnt, label: "버디" },
+              { value: round.parsCnt, label: "파" },
+              { value: round.bogeyCnt, label: "보기" },
+              { value: round.holeCnt, label: "총홀수" },
+            ].map((stat, index) => (
+              <View key={stat.label} style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
+                {index > 0 && (
+                  <View
+                    style={{
+                      width: moderateScale(0.5),
+                      height: moderateScale(30),
+                      backgroundColor: "#353838",
+                      marginHorizontal: moderateScale(4),
+                    }}
+                  />
+                )}
+                <View style={{ flex: 1, alignItems: "center" }}>
+                  <Text type="barlowHard" style={{ fontSize: moderateScale(FONT.xxl), color: "white" }}>
+                    {stat.value}
+                  </Text>
+                  <Text style={{ fontSize: moderateScale(FONT.sm), color: "#6E7171", marginTop: moderateScale(2) }}>
+                    {stat.label}
+                  </Text>
+                </View>
+              </View>
+            ))}
+          </View>
+        </TouchableOpacity>
       </Animated.View>
     );
   };
@@ -225,11 +236,11 @@ const styles = StyleSheet.create({
     marginBottom: moderateScale(10),
   },
   title: {
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(FONT.sm),
     color: "#6E7171",
   },
   viewAllLink: {
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(FONT.xs),
     color: "#4CAE82",
   },
 });
