@@ -1,30 +1,74 @@
 import { ThemedText as Text } from "@/components/themed-text";
+import { db } from "@/config/firebase";
 import { FONT } from '@/constants/theme';
+import { useAuth } from "@/context/AuthContext";
 import Feather from "@expo/vector-icons/Feather";
 import { useRouter } from "expo-router";
-import React from "react";
-import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import { collection, getDocs, limit, orderBy, query, where } from "firebase/firestore";
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
 
 type RecentScan = {
+  id: string;
   date: string;
   course: string;
   score: number;
   diff: string;
+  holeCount: number;
 };
-
-const RECENT_SCANS: RecentScan[] = [
-  { date: "2월 22일", course: "페블 비치 골프 링크스", score: 78, diff: "+6" },
-  { date: "2월 15일", course: "오거스타 내셔널", score: 83, diff: "+11" },
-  { date: "2월 8일", course: "TPC 소그래스", score: 81, diff: "+9" },
-];
 
 type RecentScansSectionProps = {
   scans?: RecentScan[];
 };
 
-const RecentScansSection = ({ scans = [] }: RecentScansSectionProps) => {
+const RecentScansSection = ({ scans: propScans }: RecentScansSectionProps) => {
   const router = useRouter();
+  const { user } = useAuth();
+  const [scans, setScans] = useState<RecentScan[]>(propScans ?? []);
+  const [loading, setLoading] = useState(!propScans);
+
+  useEffect(() => {
+    if (propScans) return;
+
+    const fetchRecentScans = async () => {
+      try {
+        const scansRef = collection(db, "Scans");
+        const q = query(
+          scansRef,
+          where("userId", "==", user?.uid ?? ""),
+          where("status", "==", "completed"),
+          orderBy("playedAt", "desc"),
+          limit(6)
+        );
+        const snapshot = await getDocs(q);
+
+        const fetched: RecentScan[] = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          const playedAt = data.playedAt ? new Date(data.playedAt) : new Date();
+          const formattedDate = `${playedAt.getMonth() + 1}월 ${playedAt.getDate()}일`;
+          const diff = data.diff ?? 0;
+
+          return {
+            id: doc.id,
+            date: formattedDate,
+            course: data.courseName ?? "코스명 없음",
+            score: data.totalScore ?? 0,
+            diff: diff > 0 ? `+${diff}` : `${diff}`,
+            holeCount: data.holesCount ?? 18,
+          };
+        });
+
+        setScans(fetched);
+      } catch (error) {
+        console.error("Failed to fetch recent scans:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRecentScans();
+  }, [user?.uid, propScans]);
 
   return (
     <>
@@ -39,7 +83,11 @@ const RecentScansSection = ({ scans = [] }: RecentScansSectionProps) => {
         </TouchableOpacity>
       </View>
 
-      {scans.length === 0 ? (
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="small" color="#45BF8F" />
+        </View>
+      ) : scans.length === 0 ? (
         <View style={styles.emptyContainer}>
           <View style={styles.emptyCard}>
             <View style={styles.emptyIconCircle}>
@@ -61,7 +109,12 @@ const RecentScansSection = ({ scans = [] }: RecentScansSectionProps) => {
           style={styles.recentContainer}
         >
           {scans.map((item) => (
-            <View key={`${item.date}-${item.course}`} style={styles.recentCard}>
+            <TouchableOpacity
+              key={item.id}
+              style={styles.recentCard}
+              activeOpacity={0.8}
+              onPress={() => router.push(`/(modals)/activityModal?id=${item.id}`)}
+            >
               <Text type="barlowLight" style={styles.recentDate}>
                 {item.date}
               </Text>
@@ -69,14 +122,19 @@ const RecentScansSection = ({ scans = [] }: RecentScansSectionProps) => {
                 {item.course}
               </Text>
               <View style={styles.scoreRow}>
-                <Text type="barlowHard" style={styles.recentScore}>
-                  {item.score}
-                </Text>
-                <Text type="barlowLight" style={styles.recentDiff}>
-                  {item.diff}
+                <View style={styles.scoreLeft}>
+                  <Text type="barlowHard" style={styles.recentScore}>
+                    {item.score}
+                  </Text>
+                  <Text type="barlowLight" style={styles.recentDiff}>
+                    {item.diff}
+                  </Text>
+                </View>
+                <Text type="barlowLight" style={styles.holeCount}>
+                  {item.holeCount}홀
                 </Text>
               </View>
-            </View>
+            </TouchableOpacity>
           ))}
         </ScrollView>
       )}
@@ -127,8 +185,18 @@ const styles = StyleSheet.create({
   scoreRow: {
     flexDirection: "row",
     alignItems: "flex-end",
-    gap: moderateScale(4),
+    justifyContent: "space-between",
     marginTop: "auto",
+  },
+  scoreLeft: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    gap: moderateScale(4),
+  },
+  holeCount: {
+    color: "#636A6C",
+    fontSize: moderateScale(FONT.xs),
+    paddingBottom: moderateScale(6),
   },
   recentScore: {
     color: "#FF4E57",
@@ -168,6 +236,12 @@ const styles = StyleSheet.create({
   emptySubtitle: {
     color: "#454B4D",
     fontSize: moderateScale(FONT.xs),
+  },
+  loadingContainer: {
+    paddingHorizontal: moderateScale(10),
+    paddingVertical: moderateScale(40),
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
 

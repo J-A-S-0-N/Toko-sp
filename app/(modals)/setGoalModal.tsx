@@ -29,6 +29,14 @@ export default function SetGoalModal() {
           style={styles.screenGlow}
         />
 
+        <View style={styles.wip}>
+          <Text style={styles.wipText}>🚧 아직 완성 안된 기능입니다...</Text>
+          <TouchableOpacity onPress={() => router.back()} style={styles.wipBackButton} activeOpacity={0.7}>
+            <Ionicons name="chevron-back" size={moderateScale(20)} color="#FFFFFF" />
+            <Text style={styles.wipBackText}>뒤로가기</Text>
+          </TouchableOpacity>
+        </View>
+
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           <View style={styles.headerRow}>
             <TouchableOpacity onPress={() => router.back()} style={styles.backButton} activeOpacity={0.7}>
@@ -325,6 +333,34 @@ const styles = StyleSheet.create({
   },
   saveButtonText: {
     color: "#F4FFF9",
+    fontSize: moderateScale(FONT.sm),
+  },
+  wip: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 999,
+    backgroundColor: "rgba(15,15,15,0.96)",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: moderateScale(24),
+  },
+  wipText: {
+    color: "#F3A63F",
+    fontSize: moderateScale(FONT.md),
+    textAlign: "center",
+  },
+  wipBackButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: moderateScale(4),
+    backgroundColor: "#1F2222",
+    borderWidth: 1,
+    borderColor: "#2A3131",
+    borderRadius: moderateScale(22),
+    paddingVertical: moderateScale(12),
+    paddingHorizontal: moderateScale(20),
+  },
+  wipBackText: {
+    color: "#FFFFFF",
     fontSize: moderateScale(FONT.sm),
   },
 });
