@@ -1,8 +1,10 @@
 import GraphStat from "@/components/StatPageComponents/graphStat";
 import HandiCapGraph from "@/components/StatPageComponents/handiCapGraph";
+import HeaderStatPage from "@/components/StatPageComponents/HeaderStatPage";
 import HitProgressBar from "@/components/StatPageComponents/hitProgressBar";
 import LatestPool from "@/components/StatPageComponents/LatestPoll";
 import ParAnalysis from "@/components/StatPageComponents/parAnalysis";
+import RegionRanking from "@/components/StatPageComponents/RegionRanking";
 import ScoreDistribution from "@/components/StatPageComponents/scoreDistribution";
 import StatPageSkeleton from "@/components/StatPageComponents/StatPageSkeleton";
 import StreakCard from "@/components/StatPageComponents/StreakCard";
@@ -94,6 +96,10 @@ export default function StatsScreen() {
             <Text style={styles.pillText}>내 통계</Text>
           </View>
         </View>
+
+        <HeaderStatPage />
+
+        <RegionRanking />
 
         <View style={{ marginBottom: moderateScale(15) }}>
           <GraphStat headlineDelta={headlineDelta} trendLabels={trendLabels} />

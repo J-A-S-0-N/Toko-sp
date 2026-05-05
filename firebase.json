@@ -31,6 +31,26 @@
       "port": 8080
     }
   },
+  "firestore": {
+    "indexes": [
+      {
+        "collectionGroup": "RankingEntries",
+        "queryScope": "COLLECTION",
+        "fields": [
+          { "fieldPath": "city", "order": "ASCENDING" },
+          { "fieldPath": "averageDelta", "order": "ASCENDING" }
+        ]
+      },
+      {
+        "collectionGroup": "RankingEntries",
+        "queryScope": "COLLECTION",
+        "fields": [
+          { "fieldPath": "city", "order": "ASCENDING" },
+          { "fieldPath": "averageDelta", "order": "DESCENDING" }
+        ]
+      }
+    ]
+  },
   "storage": {
     "rules": "storage.rules"
   }

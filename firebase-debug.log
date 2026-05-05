@@ -1,0 +1,141 @@
+[debug] [2026-05-04T03:26:12.493Z] ----------------------------------------------------------------------
+[debug] [2026-05-04T03:26:12.498Z] Command:       /opt/homebrew/Cellar/node/25.2.1/bin/node /opt/homebrew/bin/firebase deploy --only firestore:indexes
+[debug] [2026-05-04T03:26:12.498Z] CLI Version:   15.2.0
+[debug] [2026-05-04T03:26:12.498Z] Platform:      darwin
+[debug] [2026-05-04T03:26:12.498Z] Node Version:  v25.2.1
+[debug] [2026-05-04T03:26:12.498Z] Time:          Mon May 04 2026 12:26:12 GMT+0900 (Korean Standard Time)
+[debug] [2026-05-04T03:26:12.498Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-05-04T03:26:12.500Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[debug] [2026-05-04T03:26:13.786Z] Field "/firestore/indexes" in "firebase.json" is possibly invalid: must be string
+[debug] [2026-05-04T03:26:13.786Z] Field "/firestore" in "firebase.json" is possibly invalid: must be array
+[debug] [2026-05-04T03:26:13.786Z] Field "/firestore" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[debug] [2026-05-04T03:26:13.792Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-05-04T03:26:13.792Z] > authorizing via signed-in user (jasonchae1404@gmail.com)
+[debug] [2026-05-04T03:26:13.792Z] [iam] checking project toko-sp for permissions ["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get"]
+[debug] [2026-05-04T03:26:13.792Z] Checked if tokens are valid: false, expires at: 1774432003232
+[debug] [2026-05-04T03:26:13.792Z] Checked if tokens are valid: false, expires at: 1774432003232
+[debug] [2026-05-04T03:26:13.793Z] > refreshing access token with scopes: []
+[debug] [2026-05-04T03:26:13.793Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-05-04T03:26:13.793Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-05-04T03:26:14.117Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-05-04T03:26:14.117Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-05-04T03:26:14.144Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/toko-sp:testIamPermissions [none]
+[debug] [2026-05-04T03:26:14.144Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/toko-sp:testIamPermissions x-goog-quota-user=projects/toko-sp
+[debug] [2026-05-04T03:26:14.144Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/toko-sp:testIamPermissions {"permissions":["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get"]}
+[debug] [2026-05-04T03:26:14.208Z] <<< [apiv2][status] GET https://firebase-public.firebaseio.com/cli.json 200
+[debug] [2026-05-04T03:26:14.208Z] <<< [apiv2][body] GET https://firebase-public.firebaseio.com/cli.json {"cloudBuildErrorAfter":1594252800000,"cloudBuildWarnAfter":1590019200000,"defaultNode10After":1594252800000,"minVersion":"3.0.5","node8DeploysDisabledAfter":1613390400000,"node8RuntimeDisabledAfter":1615809600000,"node8WarnAfter":1600128000000}
+[debug] [2026-05-04T03:26:14.396Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/toko-sp:testIamPermissions 200
+[debug] [2026-05-04T03:26:14.396Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/toko-sp:testIamPermissions {"permissions":["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get"]}
+[info] 
+[info] === Deploying to 'toko-sp'...
+[info] 
+[info] i  deploying firestore 
+[info] i  firestore: ensuring required API firestore.googleapis.com is enabled... 
+[debug] [2026-05-04T03:26:14.402Z] Checked if tokens are valid: true, expires at: 1777868773117
+[debug] [2026-05-04T03:26:14.402Z] Checked if tokens are valid: true, expires at: 1777868773117
+[debug] [2026-05-04T03:26:14.402Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/toko-sp/services/firestore.googleapis.com [none]
+[debug] [2026-05-04T03:26:14.402Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/toko-sp/services/firestore.googleapis.com x-goog-quota-user=projects/toko-sp
+[debug] [2026-05-04T03:26:16.143Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/toko-sp/services/firestore.googleapis.com 200
+[debug] [2026-05-04T03:26:16.143Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/toko-sp/services/firestore.googleapis.com [omitted]
+[info] ✔  firestore: required API firestore.googleapis.com is enabled 
+[info] i  firestore: ensuring required API firestore.googleapis.com is enabled... 
+[debug] [2026-05-04T03:26:16.155Z] Checked if tokens are valid: true, expires at: 1777868773117
+[debug] [2026-05-04T03:26:16.155Z] Checked if tokens are valid: true, expires at: 1777868773117
+[debug] [2026-05-04T03:26:16.155Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/toko-sp/databases/(default) [none]
+[debug] [2026-05-04T03:26:16.317Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/toko-sp/databases/(default) 200
+[debug] [2026-05-04T03:26:16.318Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/toko-sp/databases/(default) {"name":"projects/toko-sp/databases/(default)","uid":"0765fc18-55d8-40d1-a696-fcdcbcae110e","createTime":"2026-03-05T08:01:08.584185Z","updateTime":"2026-03-05T08:01:08.584185Z","locationId":"asia-northeast3","type":"FIRESTORE_NATIVE","concurrencyMode":"PESSIMISTIC","versionRetentionPeriod":"3600s","earliestVersionTime":"2026-05-04T02:26:16.315576Z","appEngineIntegrationMode":"DISABLED","keyPrefix":"v","pointInTimeRecoveryEnablement":"POINT_IN_TIME_RECOVERY_DISABLED","deleteProtectionState":"DELETE_PROTECTION_DISABLED","databaseEdition":"STANDARD","freeTier":true,"realtimeUpdatesMode":"REALTIME_UPDATES_MODE_ENABLED","etag":"ILLpq/LXnpQDMKb7hOWliJMD"}
+[debug] [2026-05-04T03:26:16.610Z] TypeError [ERR_INVALID_ARG_TYPE]: The "path" argument must be of type string. Received an instance of Array
+    at Object.isAbsolute (node:path:1323:5)
+    at Config.path (/opt/homebrew/lib/node_modules/firebase-tools/lib/config.js:136:18)
+    at prepareIndexes (/opt/homebrew/lib/node_modules/firebase-tools/lib/deploy/firestore/prepare.js:23:40)
+    at default_1 (/opt/homebrew/lib/node_modules/firebase-tools/lib/deploy/firestore/prepare.js:104:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async chain (/opt/homebrew/lib/node_modules/firebase-tools/lib/deploy/index.js:43:9)
+    at async deploy (/opt/homebrew/lib/node_modules/firebase-tools/lib/deploy/index.js:122:9)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2026-05-04T03:31:46.476Z] ----------------------------------------------------------------------
+[debug] [2026-05-04T03:31:46.481Z] Command:       /opt/homebrew/Cellar/node/25.2.1/bin/node /opt/homebrew/bin/firebase deploy --only firestore:indexes
+[debug] [2026-05-04T03:31:46.481Z] CLI Version:   15.2.0
+[debug] [2026-05-04T03:31:46.481Z] Platform:      darwin
+[debug] [2026-05-04T03:31:46.481Z] Node Version:  v25.2.1
+[debug] [2026-05-04T03:31:46.482Z] Time:          Mon May 04 2026 12:31:46 GMT+0900 (Korean Standard Time)
+[debug] [2026-05-04T03:31:46.482Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-05-04T03:31:47.648Z] Field "/firestore/indexes" in "firebase.json" is possibly invalid: must be string
+[debug] [2026-05-04T03:31:47.648Z] Field "/firestore" in "firebase.json" is possibly invalid: must be array
+[debug] [2026-05-04T03:31:47.648Z] Field "/firestore" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[debug] [2026-05-04T03:31:47.651Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-05-04T03:31:47.651Z] > authorizing via signed-in user (jasonchae1404@gmail.com)
+[debug] [2026-05-04T03:31:47.651Z] [iam] checking project toko-sp for permissions ["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get"]
+[debug] [2026-05-04T03:31:47.652Z] Checked if tokens are valid: true, expires at: 1777868773117
+[debug] [2026-05-04T03:31:47.652Z] Checked if tokens are valid: true, expires at: 1777868773117
+[debug] [2026-05-04T03:31:47.652Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/toko-sp:testIamPermissions [none]
+[debug] [2026-05-04T03:31:47.652Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/toko-sp:testIamPermissions x-goog-quota-user=projects/toko-sp
+[debug] [2026-05-04T03:31:47.652Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/toko-sp:testIamPermissions {"permissions":["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get"]}
+[debug] [2026-05-04T03:31:47.982Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/toko-sp:testIamPermissions 200
+[debug] [2026-05-04T03:31:47.982Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/toko-sp:testIamPermissions {"permissions":["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get"]}
+[info] 
+[info] === Deploying to 'toko-sp'...
+[info] 
+[info] i  deploying firestore 
+[info] i  firestore: ensuring required API firestore.googleapis.com is enabled... 
+[info] i  firestore: ensuring required API firestore.googleapis.com is enabled... 
+[debug] [2026-05-04T03:31:47.989Z] Checked if tokens are valid: true, expires at: 1777868773117
+[debug] [2026-05-04T03:31:47.990Z] Checked if tokens are valid: true, expires at: 1777868773117
+[debug] [2026-05-04T03:31:47.990Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/toko-sp/databases/(default) [none]
+[debug] [2026-05-04T03:31:48.162Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/toko-sp/databases/(default) 200
+[debug] [2026-05-04T03:31:48.163Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/toko-sp/databases/(default) {"name":"projects/toko-sp/databases/(default)","uid":"0765fc18-55d8-40d1-a696-fcdcbcae110e","createTime":"2026-03-05T08:01:08.584185Z","updateTime":"2026-03-05T08:01:08.584185Z","locationId":"asia-northeast3","type":"FIRESTORE_NATIVE","concurrencyMode":"PESSIMISTIC","versionRetentionPeriod":"3600s","earliestVersionTime":"2026-05-04T02:31:48.161283Z","appEngineIntegrationMode":"DISABLED","keyPrefix":"v","pointInTimeRecoveryEnablement":"POINT_IN_TIME_RECOVERY_DISABLED","deleteProtectionState":"DELETE_PROTECTION_DISABLED","databaseEdition":"STANDARD","freeTier":true,"realtimeUpdatesMode":"REALTIME_UPDATES_MODE_ENABLED","etag":"IKqIypDZnpQDMKb7hOWliJMD"}
+[debug] [2026-05-04T03:31:48.533Z] TypeError [ERR_INVALID_ARG_TYPE]: The "path" argument must be of type string. Received an instance of Array
+    at Object.isAbsolute (node:path:1323:5)
+    at Config.path (/opt/homebrew/lib/node_modules/firebase-tools/lib/config.js:136:18)
+    at prepareIndexes (/opt/homebrew/lib/node_modules/firebase-tools/lib/deploy/firestore/prepare.js:23:40)
+    at default_1 (/opt/homebrew/lib/node_modules/firebase-tools/lib/deploy/firestore/prepare.js:104:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async chain (/opt/homebrew/lib/node_modules/firebase-tools/lib/deploy/index.js:43:9)
+    at async deploy (/opt/homebrew/lib/node_modules/firebase-tools/lib/deploy/index.js:122:9)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2026-05-04T03:32:26.192Z] ----------------------------------------------------------------------
+[debug] [2026-05-04T03:32:26.194Z] Command:       /opt/homebrew/Cellar/node/25.2.1/bin/node /opt/homebrew/bin/firebase deploy --only firestore:indexes
+[debug] [2026-05-04T03:32:26.194Z] CLI Version:   15.16.0
+[debug] [2026-05-04T03:32:26.194Z] Platform:      darwin
+[debug] [2026-05-04T03:32:26.194Z] Node Version:  v25.2.1
+[debug] [2026-05-04T03:32:26.194Z] Time:          Mon May 04 2026 12:32:26 GMT+0900 (Korean Standard Time)
+[debug] [2026-05-04T03:32:26.194Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-05-04T03:32:27.070Z] Field "/firestore/indexes" in "firebase.json" is possibly invalid: must be string
+[debug] [2026-05-04T03:32:27.070Z] Field "/firestore" in "firebase.json" is possibly invalid: must be array
+[debug] [2026-05-04T03:32:27.070Z] Field "/firestore" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[debug] [2026-05-04T03:32:27.074Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-05-04T03:32:27.074Z] > authorizing via signed-in user (jasonchae1404@gmail.com)
+[debug] [2026-05-04T03:32:27.074Z] [iam] checking project toko-sp for permissions ["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get"]
+[debug] [2026-05-04T03:32:27.075Z] Checked if tokens are valid: true, expires at: 1777868773117
+[debug] [2026-05-04T03:32:27.075Z] Checked if tokens are valid: true, expires at: 1777868773117
+[debug] [2026-05-04T03:32:27.075Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/toko-sp:testIamPermissions [none]
+[debug] [2026-05-04T03:32:27.075Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/toko-sp:testIamPermissions  x-goog-user-project=toko-sp
+[debug] [2026-05-04T03:32:27.075Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/toko-sp:testIamPermissions {"permissions":["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get"]}
+[debug] [2026-05-04T03:32:27.353Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/toko-sp:testIamPermissions 200
+[debug] [2026-05-04T03:32:27.354Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/toko-sp:testIamPermissions {"permissions":["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get"]}
+[info] 
+[info] === Deploying to 'toko-sp'...
+[info] 
+[info] i  deploying firestore 
+[info] i  firestore: ensuring required API firestore.googleapis.com is enabled... 
+[info] i  firestore: ensuring required API firestore.googleapis.com is enabled... 
+[debug] [2026-05-04T03:32:27.357Z] Checked if tokens are valid: true, expires at: 1777868773117
+[debug] [2026-05-04T03:32:27.357Z] Checked if tokens are valid: true, expires at: 1777868773117
+[debug] [2026-05-04T03:32:27.357Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/toko-sp/databases/(default) [none]
+[debug] [2026-05-04T03:32:27.489Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/toko-sp/databases/(default) 200
+[debug] [2026-05-04T03:32:27.489Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/toko-sp/databases/(default) {"name":"projects/toko-sp/databases/(default)","uid":"0765fc18-55d8-40d1-a696-fcdcbcae110e","createTime":"2026-03-05T08:01:08.584185Z","updateTime":"2026-03-05T08:01:08.584185Z","locationId":"asia-northeast3","type":"FIRESTORE_NATIVE","concurrencyMode":"PESSIMISTIC","versionRetentionPeriod":"3600s","earliestVersionTime":"2026-05-04T02:32:27.485269Z","appEngineIntegrationMode":"DISABLED","keyPrefix":"v","pointInTimeRecoveryEnablement":"POINT_IN_TIME_RECOVERY_DISABLED","deleteProtectionState":"DELETE_PROTECTION_DISABLED","databaseEdition":"STANDARD","freeTier":true,"realtimeUpdatesMode":"REALTIME_UPDATES_MODE_ENABLED","etag":"IO6bqqPZnpQDMKb7hOWliJMD"}
+[debug] [2026-05-04T03:32:27.727Z] TypeError [ERR_INVALID_ARG_TYPE]: The "path" argument must be of type string. Received an instance of Array
+    at Object.isAbsolute (node:path:1323:5)
+    at Config.path (/opt/homebrew/lib/node_modules/firebase-tools/lib/config.js:136:18)
+    at prepareIndexes (/opt/homebrew/lib/node_modules/firebase-tools/lib/deploy/firestore/prepare.js:23:40)
+    at default_1 (/opt/homebrew/lib/node_modules/firebase-tools/lib/deploy/firestore/prepare.js:121:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async chain (/opt/homebrew/lib/node_modules/firebase-tools/lib/deploy/index.js:45:9)
+    at async deploy (/opt/homebrew/lib/node_modules/firebase-tools/lib/deploy/index.js:124:9)
+[error] 
+[error] Error: An unexpected error has occurred.

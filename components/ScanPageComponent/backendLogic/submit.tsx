@@ -1,5 +1,6 @@
+import { incrementUserStats } from "@/app/(auth)/functions/updateUserStats";
 import { db } from "@/config/firebase";
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 
 export type SubmitHoleScore = {
   hole: number;
@@ -9,6 +10,7 @@ export type SubmitHoleScore = {
 
 export type SubmitScanPayload = {
   scanDocId: string;
+  userId: string;
   holesCount: number;
   courseName: string;
   playedAt: string;
@@ -23,6 +25,7 @@ export type SubmitScanPayload = {
 
 export async function submit({
   scanDocId,
+  userId,
   holesCount,
   courseName,
   playedAt,
@@ -38,6 +41,7 @@ export async function submit({
 
   await updateDoc(scanDocRef, {
     holesCount,
+    userId,
     courseName,
     playedAt,
     parInputEnabled,
@@ -49,6 +53,19 @@ export async function submit({
     holeScores,
     status: "completed",
   });
+
+  // Read user profile for ranking context
+  const userSnap = await getDoc(doc(db, "Users", userId));
+  const userData = userSnap.data();
+  const city = userData?.city ?? null;
+  const username = typeof userData?.name === "string" ? userData.name : "";
+
+  // Update user stats incrementally
+  await incrementUserStats(userId, {
+    totalScore,
+    playedAt,
+    holeScores,
+  }, { city, username });
 
   return { id: scanDocId };
 }

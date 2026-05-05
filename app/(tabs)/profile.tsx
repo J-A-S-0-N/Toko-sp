@@ -23,7 +23,7 @@ export default function ProfileScreen() {
   const { user, username } = useAuth();
   const initial = (username ?? '').slice(0, 1);
 
-  const [handicap, setHandicap] = useState<number | null>(null);
+  const [averageDelta, setAverageDelta] = useState<number | null>(null);
   const [memberSince, setMemberSince] = useState<string | null>(null);
   const [rounds, setRounds] = useState<RoundData[]>([]);
 
@@ -36,7 +36,6 @@ export default function ProfileScreen() {
         const userDoc = await getDoc(doc(db, 'Users', user.uid));
         if (userDoc.exists()) {
           const data = userDoc.data();
-          setHandicap(data?.handicap ?? null);
           const ts = data?.createdAt;
           if (ts?.toDate) {
             const d = ts.toDate() as Date;
@@ -45,6 +44,13 @@ export default function ProfileScreen() {
             const d = new Date(ts);
             setMemberSince(`${d.getFullYear()}년 ${d.getMonth() + 1}월부터 회원`);
           }
+        }
+
+        // Fetch averageDelta from Stats
+        const statsDoc = await getDoc(doc(db, 'Users', user.uid, 'Stats', 'AllTimeScore'));
+        if (statsDoc.exists()) {
+          const statsData = statsDoc.data();
+          setAverageDelta(statsData?.averageDelta ?? null);
         }
 
         // Fetch completed rounds
@@ -172,7 +178,7 @@ export default function ProfileScreen() {
           <View style={styles.handicapChip}>
             <Ionicons name="flag-outline" size={moderateScale(16)} color="#49C895" />
             <Text type="barlowLight" style={styles.handicapText}>
-              {handicap != null ? `${handicap} 핸디캡` : '- 핸디캡'}
+              {averageDelta != null ? `${averageDelta >= 0 ? '+' : ''}${averageDelta} 평타` : '- 평타'}
             </Text>
           </View>
         </View>

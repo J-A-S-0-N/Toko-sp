@@ -129,7 +129,7 @@ export default function LoginScreen() {
 
             <View style={styles.content}>
               <Text type="barlowHard" style={styles.title}>
-                전화번호 입력
+                로그인 인증
               </Text>
               <Text style={styles.description}>인증 코드를 문자로 발송합니다</Text>
 

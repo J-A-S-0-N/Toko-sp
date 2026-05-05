@@ -2,6 +2,7 @@ import HoleEditorModal from "@/components/ScanPageComponent/HoleEditorModal";
 import { submit } from "@/components/ScanPageComponent/backendLogic/submit";
 import { ThemedText as Text } from "@/components/themed-text";
 import { FONT } from '@/constants/theme';
+import { useAuth } from "@/context/AuthContext";
 import { newRoundSignal } from "@/store/newRoundSignal";
 import Feather from "@expo/vector-icons/Feather";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -40,6 +41,7 @@ const HoleScoreTemplate: HoleScore[] = [
 
 export default function ResultPreviewScreen() {
   const router = useRouter();
+  const { user } = useAuth();
   const { holes, scores, courseName, scanDocId } = useLocalSearchParams<{ holes?: string; scores?: string; courseName?: string; scanDocId?: string }>();
 
   const holesCount = holes === "18" ? 18 : 9;
@@ -143,8 +145,14 @@ export default function ResultPreviewScreen() {
         return;
       }
 
+      if (!user?.uid) {
+        Alert.alert("오류", "사용자 인증 정보가 없어요. 다시 로그인해 주세요.");
+        return;
+      }
+
       const result = await submit({
         scanDocId,
+        userId: user.uid,
         holesCount,
         courseName: courseName?.trim() || "코스명 없음",
         playedAt: new Date().toISOString(),

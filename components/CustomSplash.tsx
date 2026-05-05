@@ -1,15 +1,18 @@
+import { ThemedText } from '@/components/themed-text';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, {
-  Easing,
-  FadeOut,
-  useAnimatedStyle,
-  useSharedValue,
-  withDelay,
-  withSpring,
-  withTiming
+    Easing,
+    FadeOut,
+    useAnimatedStyle,
+    useSharedValue,
+    withDelay,
+    withSpring,
+    withTiming
 } from 'react-native-reanimated';
+
+const AnimatedThemedText = Animated.createAnimatedComponent(ThemedText);
 
 export default function CustomSplash({ onComplete }: { onComplete?: () => void }) {
   const titleOpacity = useSharedValue(0);
@@ -72,15 +75,15 @@ export default function CustomSplash({ onComplete }: { onComplete?: () => void }
       />
 
       <View style={styles.content}>
-        <Animated.Text style={[styles.title, titleStyle]}>
+        <AnimatedThemedText type="barlowMedium" style={[styles.title, titleStyle]}>
           토코스포츠
-        </Animated.Text>
+        </AnimatedThemedText>
 
         <Animated.View style={[styles.line, lineStyle]} />
 
-        <Animated.Text style={[styles.subtitle, subtitleStyle]}>
+        <AnimatedThemedText type="barlowMedium" style={[styles.subtitle, subtitleStyle]}>
           대한민국 1등 파크골프 스토어 AI 기록기
-        </Animated.Text>
+        </AnimatedThemedText>
       </View>
     </Animated.View>
   );
@@ -115,7 +118,6 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   title: {
-    fontFamily: 'BarlowCondensed_900Black_Italic',
     fontSize: 50,
     color: '#FFFFFF',
     letterSpacing: 3,
@@ -126,7 +128,6 @@ const styles = StyleSheet.create({
     borderRadius: 1,
   },
   subtitle: {
-    fontFamily: 'BarlowCondensed_900Black_Italic',
     fontSize: 14,
     color: '#9BA1A6',
     letterSpacing: 2,

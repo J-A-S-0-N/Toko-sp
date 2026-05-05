@@ -32,7 +32,7 @@ SETUP
 
 4. setup for firestore
   ```
-  GCP — Enabled reCAPTCHA Enterprise API, created an iOS key with your bundle ID, got the site key
+  GCP — Enabled reCAPTCHA Enterprise API, created an iOS key with your bundle ID, get the site key
   Firebase Console — Enabled reCAPTCHA under Authentication → Settings → reCAPTCHA (Fraud prevention)
   Re-downloaded GoogleService-Info.plist and replaced the old one
   Xcode — Added REVERSED_CLIENT_ID from GoogleService-Info.plist as a URL Scheme under Target → Info → URL Types

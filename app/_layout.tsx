@@ -7,7 +7,7 @@ import 'react-native-reanimated';
 import { AuthProvider } from '@/context/AuthContext';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
-import { BarlowCondensed_400Regular, BarlowCondensed_900Black_Italic, useFonts } from '@expo-google-fonts/barlow-condensed';
+import { BarlowCondensed_400Regular, BarlowCondensed_500Medium_Italic, BarlowCondensed_900Black_Italic, useFonts } from '@expo-google-fonts/barlow-condensed';
 import { useEffect } from 'react';
 import { Text } from 'react-native';
 
@@ -32,6 +32,7 @@ export default function RootLayout() {
 
   const [loadedBarlow, errorBarlow] = useFonts({
     BarlowCondensed_400Regular,
+    BarlowCondensed_500Medium_Italic,
     BarlowCondensed_900Black_Italic,
   });
 
@@ -88,6 +89,14 @@ export default function RootLayout() {
               title: 'Activity', 
               headerShown: false, 
             }} 
+          />
+          <Stack.Screen name="(modals)/rankingModal"
+            options={{
+              presentation: 'modal',
+              animation: 'slide_from_bottom',
+              title: 'Ranking',
+              headerShown: false,
+            }}
           />
         </Stack>
       <StatusBar style="light" />

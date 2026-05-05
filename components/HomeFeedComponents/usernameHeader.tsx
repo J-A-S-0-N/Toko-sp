@@ -10,7 +10,7 @@ import { moderateScale } from "react-native-size-matters";
 const UsernameHeader = () => {
   const { user, username } = useAuth();
   const [stats, setStats] = useState({
-    handi: 0,
+    averageDelta: 0,
     rounds: 0,
   });
 
@@ -19,10 +19,10 @@ const UsernameHeader = () => {
 
     const fetchStats = async () => {
       try {
-        // Fetch handicap from user document
-        const userDocRef = doc(db, 'Users', user.uid);
-        const userDoc = await getDoc(userDocRef);
-        const handicap = userDoc.exists() ? (userDoc.data()?.handicap ?? 0) : 0;
+        // Fetch averageDelta from Stats subcollection
+        const statsDocRef = doc(db, 'Users', user.uid, 'Stats', 'AllTimeScore');
+        const statsDoc = await getDoc(statsDocRef);
+        const averageDelta = statsDoc.exists() ? (statsDoc.data()?.averageDelta ?? 0) : 0;
 
         // Count completed rounds
         const scansRef = collection(db, 'Scans');
@@ -34,7 +34,7 @@ const UsernameHeader = () => {
         const snapshot = await getDocs(q);
 
         setStats({
-          handi: handicap,
+          averageDelta,
           rounds: snapshot.size,
         });
       } catch (error) {
@@ -70,7 +70,7 @@ const UsernameHeader = () => {
         <View style={{flexDirection: 'row', alignItems: 'center', gap: moderateScale(5)}}>
           <Text
           style={{fontSize: moderateScale(FONT.xs), color: "#6E7171"}}
-          >+{stats.handi} 핸디캡</Text>
+          >{stats.averageDelta >= 0 ? '+' : ''}{stats.averageDelta} 평타</Text>
          <View
           style={{width: moderateScale(4), height: moderateScale(4), borderRadius: moderateScale(5), backgroundColor: "#6E7171"}}
           ></View>

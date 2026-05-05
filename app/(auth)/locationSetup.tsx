@@ -1,24 +1,137 @@
+import { getCurrentUid } from '@/app/(auth)/functions/loginFetchUserFunction';
+import { db } from '@/config/firebase';
 import { FONT } from '@/constants/theme';
 import * as Location from 'expo-location';
 import { router } from 'expo-router';
+import { doc, updateDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import Animated, {
-    Easing,
-    useAnimatedStyle,
-    useSharedValue,
-    withRepeat,
-    withSpring,
-    withTiming,
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSpring,
+  withTiming,
 } from 'react-native-reanimated';
 import { moderateScale } from 'react-native-size-matters';
 
 import { ThemedText as Text } from '@/components/themed-text';
 
 const POPULAR_CITIES = [
-  '서울', '부산', '인천', '대구', '대전', 
-  '광주', '수원', '제주', '울산', '창원'
+  '서울', '부산', '인천', '대구', '대전',
+  '광주', '수원', '제주', '울산', '창원',
 ];
+
+const ALL_CITIES = [
+  '서울', '부산', '인천', '대구', '대전', '광주', '울산', '세종',
+  '수원', '고양', '성남', '용인', '부천', '안산', '안양', '남양주',
+  '화성', '평택', '의정부', '시흥', '파주', '김포', '광명', '군포',
+  '이천', '오산', '하남', '구리', '양주', '안성', '포천', '의왕',
+  '여주', '동두천', '과천',
+  '청주', '충주', '제천',
+  '천안', '아산', '서산', '논산', '계룡', '당진', '공주', '보령',
+  '전주', '익산', '군산', '정읍', '남원', '김제',
+  '여수', '순천', '목포', '광양', '나주',
+  '포항', '경주', '구미', '안동', '영주', '영천', '상주', '문경', '경산',
+  '창원', '진주', '김해', '거제', '양산', '통영', '사천', '밀양', '의령',
+  '제주', '서귀포',
+  '춘천', '원주', '강릉', '동해', '태백', '속초', '삼척',
+];
+
+const GPS_NORMALIZE_MAP: Record<string, string> = {
+  '서울특별시': '서울', '서울시': '서울', 'Seoul': '서울',
+  '부산광역시': '부산', '부산시': '부산', 'Busan': '부산',
+  '인천광역시': '인천', '인천시': '인천', 'Incheon': '인천',
+  '대구광역시': '대구', '대구시': '대구', 'Daegu': '대구',
+  '대전광역시': '대전', '대전시': '대전', 'Daejeon': '대전',
+  '광주광역시': '광주', 'Gwangju': '광주',
+  '울산광역시': '울산', '울산시': '울산', 'Ulsan': '울산',
+  '세종특별자치시': '세종', '세종시': '세종', 'Sejong': '세종',
+  '수원시': '수원', 'Suwon': '수원',
+  '고양시': '고양', 'Goyang': '고양',
+  '성남시': '성남', 'Seongnam': '성남',
+  '용인시': '용인', 'Yongin': '용인',
+  '부천시': '부천', 'Bucheon': '부천',
+  '안산시': '안산', 'Ansan': '안산',
+  '안양시': '안양', 'Anyang': '안양',
+  '남양주시': '남양주', 'Namyangju': '남양주',
+  '화성시': '화성', 'Hwaseong': '화성',
+  '평택시': '평택', 'Pyeongtaek': '평택',
+  '의정부시': '의정부', 'Uijeongbu': '의정부',
+  '시흥시': '시흥', 'Siheung': '시흥',
+  '파주시': '파주', 'Paju': '파주',
+  '김포시': '김포', 'Gimpo': '김포',
+  '광명시': '광명', 'Gwangmyeong': '광명',
+  '군포시': '군포', 'Gunpo': '군포',
+  '이천시': '이천', 'Icheon': '이천',
+  '오산시': '오산', 'Osan': '오산',
+  '하남시': '하남', 'Hanam': '하남',
+  '구리시': '구리', 'Guri': '구리',
+  '양주시': '양주', 'Yangju': '양주',
+  '안성시': '안성', 'Anseong': '안성',
+  '포천시': '포천', 'Pocheon': '포천',
+  '의왕시': '의왕', 'Uiwang': '의왕',
+  '여주시': '여주', 'Yeoju': '여주',
+  '동두천시': '동두천', 'Dongducheon': '동두천',
+  '과천시': '과천', 'Gwacheon': '과천',
+  '청주시': '청주', 'Cheongju': '청주',
+  '충주시': '충주', 'Chungju': '충주',
+  '제천시': '제천', 'Jecheon': '제천',
+  '천안시': '천안', 'Cheonan': '천안',
+  '아산시': '아산', 'Asan': '아산',
+  '서산시': '서산', 'Seosan': '서산',
+  '논산시': '논산', 'Nonsan': '논산',
+  '계룡시': '계룡', 'Gyeryong': '계룡',
+  '당진시': '당진', 'Dangjin': '당진',
+  '공주시': '공주', 'Gongju': '공주',
+  '보령시': '보령', 'Boryeong': '보령',
+  '전주시': '전주', 'Jeonju': '전주',
+  '익산시': '익산', 'Iksan': '익산',
+  '군산시': '군산', 'Gunsan': '군산',
+  '정읍시': '정읍', 'Jeongeup': '정읍',
+  '남원시': '남원', 'Namwon': '남원',
+  '김제시': '김제', 'Gimje': '김제',
+  '여수시': '여수', 'Yeosu': '여수',
+  '순천시': '순천', 'Suncheon': '순천',
+  '목포시': '목포', 'Mokpo': '목포',
+  '광양시': '광양', 'Gwangyang': '광양',
+  '나주시': '나주', 'Naju': '나주',
+  '포항시': '포항', 'Pohang': '포항',
+  '경주시': '경주', 'Gyeongju': '경주',
+  '구미시': '구미', 'Gumi': '구미',
+  '안동시': '안동', 'Andong': '안동',
+  '영주시': '영주', 'Yeongju': '영주',
+  '영천시': '영천', 'Yeongcheon': '영천',
+  '상주시': '상주', 'Sangju': '상주',
+  '문경시': '문경', 'Mungyeong': '문경',
+  '경산시': '경산', 'Gyeongsan': '경산',
+  '창원시': '창원', 'Changwon': '창원',
+  '진주시': '진주', 'Jinju': '진주',
+  '김해시': '김해', 'Gimhae': '김해',
+  '거제시': '거제', 'Geoje': '거제',
+  '양산시': '양산', 'Yangsan': '양산',
+  '통영시': '통영', 'Tongyeong': '통영',
+  '사천시': '사천', 'Sacheon': '사천',
+  '밀양시': '밀양', 'Miryang': '밀양',
+  '의령군': '의령',
+  '제주시': '제주', 'Jeju': '제주', '제주특별자치도': '제주', '제주도': '제주',
+  '서귀포시': '서귀포', 'Seogwipo': '서귀포',
+  '춘천시': '춘천', 'Chuncheon': '춘천',
+  '원주시': '원주', 'Wonju': '원주',
+  '강릉시': '강릉', 'Gangneung': '강릉',
+  '동해시': '동해', 'Donghae': '동해',
+  '태백시': '태백', 'Taebaek': '태백',
+  '속초시': '속초', 'Sokcho': '속초',
+  '삼척시': '삼척', 'Samcheok': '삼척',
+};
+
+const normalizeCity = (raw: string): string | null => {
+  const direct = GPS_NORMALIZE_MAP[raw];
+  if (direct) return direct;
+  if (ALL_CITIES.includes(raw)) return raw;
+  return null;
+};
 
 export default function LocationSetupScreen() {
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
@@ -35,8 +148,16 @@ export default function LocationSetupScreen() {
 
   const isNextEnabled = selectedLocation !== null || isUsingCurrentLocation || detected !== null;
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!isNextEnabled) return;
+    const uid = getCurrentUid();
+    if (uid && selectedLocation) {
+      try {
+        await updateDoc(doc(db, 'Users', uid), { city: selectedLocation });
+      } catch (e) {
+        console.error('Failed to save city:', e);
+      }
+    }
     router.push('/(auth)/courseSelection');
   };
 
@@ -53,37 +174,29 @@ export default function LocationSetupScreen() {
     setSelectedLocation(null);
 
     try {
-      // Request permission
       const { status } = await Location.requestForegroundPermissionsAsync();
       
       if (status === 'granted') {
-        // Get current position
         const location = await Location.getCurrentPositionAsync({});
-        
-        // Reverse geocode to get city name
         const geocoded = await Location.reverseGeocodeAsync(location.coords);
         
-        if (geocoded.length > 0 && geocoded[0].city) {
-          const city = geocoded[0].city;
-          setDetected(city);
-          setSelectedLocation(city);
+        const rawCity = geocoded[0]?.city ?? geocoded[0]?.region ?? null;
+        const normalized = rawCity ? normalizeCity(rawCity) : null;
+
+        if (normalized) {
+          setDetected(normalized);
+          setSelectedLocation(normalized);
           setIsUsingCurrentLocation(true);
         } else {
-          // Fallback if no city found
-          throw new Error('No city found');
+          throw new Error('No matching city');
         }
       } else {
-        // Permission denied, use fallback
         throw new Error('Permission denied');
       }
     } catch (error) {
-      // Fallback to mock location
       setTimeout(() => {
-        setDetected('서울');
-        setSelectedLocation('서울');
-        setIsUsingCurrentLocation(true);
         setDetecting(false);
-      }, 1600);
+      }, 1000);
       return;
     }
 
@@ -224,9 +337,12 @@ export default function LocationSetupScreen() {
             />
           </View>
 
-          {/* Popular Cities Grid */}
+          {/* Cities Grid */}
           <View style={styles.citiesGrid}>
-            {POPULAR_CITIES.map((city) => {
+            {(searchQuery.trim() === ''
+              ? POPULAR_CITIES
+              : ALL_CITIES.filter((city) => city.includes(searchQuery.trim()))
+            ).map((city) => {
               const isSelected = selectedLocation === city;
               return (
                 <Pressable

@@ -3,7 +3,9 @@ import GoalSetupPromptComponent from '@/components/HomeFeedComponents/goalSetupP
 import HomeFeedHeader from '@/components/HomeFeedComponents/homeFeedHeader';
 import HomeFeedSkeleton from '@/components/HomeFeedComponents/HomeFeedSkeleton';
 import NearbyCoursesComponent from '@/components/HomeFeedComponents/nearbyCoursesComponent';
+import PromoAdComponent from '@/components/HomeFeedComponents/promoAdComponent';
 import RecentRoundComponent from '@/components/HomeFeedComponents/recentRoundComponent';
+import SponsoredAdComponent from '@/components/HomeFeedComponents/sponsoredAdComponent';
 import UsernameHeader from '@/components/HomeFeedComponents/usernameHeader';
 import UserStatComponent from '@/components/HomeFeedComponents/userStatComponent';
 import WeatherSummaryComponent from '@/components/HomeFeedComponents/weatherSummaryComponent';
@@ -87,7 +89,15 @@ export default function HomeScreen() {
         </View>
 
         <View style={{marginBottom: moderateScale(25)}}>
+          <PromoAdComponent/>
+        </View>
+
+        <View style={{marginBottom: moderateScale(25)}}>
           <RecentRoundComponent/>
+        </View>
+
+        <View style={{marginBottom: moderateScale(15)}}>
+          <SponsoredAdComponent/>
         </View>
 
         <View style={{marginBottom: moderateScale(25)}}>
