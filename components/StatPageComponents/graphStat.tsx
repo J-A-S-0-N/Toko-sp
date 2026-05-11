@@ -5,30 +5,35 @@ import { Dimensions, StyleSheet, View } from "react-native";
 import { LineChart } from "react-native-gifted-charts";
 import { moderateScale } from "react-native-size-matters";
 
+type TrendPoint = {
+  label: string;
+  value: number | null;
+};
+
 type GraphStatProps = {
   headlineDelta: string;
   trendLabels: string[];
+  startValue: string;
+  currentValue: string;
+  data: TrendPoint[];
 };
 
-const data = [
-  { label: "1월", value: 12 },
-  { value: 18 }, { value: 15 }, { value: 19 }, { value: 20 },
-  { label: "2월", value: 17 },
-  { value: 21 }, { value: 22 }, { value: 20 }, { value: 23 },
-  { label: "3월", value: 22 },
-  { value: 24 }, { value: 21 }, { value: 25 },
-  { label: "4월", value: 18 },
-  { value: 26 }, { value: 28 }, { value: 27 }, { value: 29 },
-  { label: "5월", value: 25 },
-  { value: 30 }, { value: 31 }, { value: 32 }, { value: 37 },
-];
-
-
-export default function GraphStat({ headlineDelta, trendLabels }: GraphStatProps) {
+export default function GraphStat({
+  headlineDelta,
+  trendLabels,
+  startValue,
+  currentValue,
+  data,
+}: GraphStatProps) {
   const chartWidth = Dimensions.get("window").width * 0.85;
   const chartAccentColor = "#3CC06E";
   const chartAccentGlow = "#3CC06E";
-  //const [graphData, setGraphData] =  useState();
+
+  // Convert null values to undefined for chart library compatibility
+  const chartData = data.map((d) => ({
+    label: d.label,
+    value: d.value === null ? undefined : d.value,
+  }));
   
   /*
   not used right now 
@@ -57,20 +62,36 @@ export default function GraphStat({ headlineDelta, trendLabels }: GraphStatProps
         스코어 트렌드
       </Text>
       <View style={styles.trendCard}>
-        <Text type="barlowLight" style={styles.trendMeta}>
-          7개월 추이
-        </Text>
-        <Text type="barlowHard" style={styles.trendHeadline}>
-          {headlineDelta}
-        </Text>
-        <Text type="barlowLight" style={styles.trendSub}>2025년 8월 이후</Text>
+        <View style={styles.headerRow}>
+          <View>
+            <Text type="barlowMedium" style={styles.trendHeadline}>
+              {headlineDelta}
+            </Text>
+            <Text type="barlowLight" style={styles.trendMeta}>
+              6개월 추이
+            </Text>
+          </View>
+          <View>
+            <Text type="barlowLight" style={styles.trendSub}>2025년 8월 이후</Text>
+            <View style={styles.rightStatsRow}>
+              <View style={styles.rightStatItem}>
+                <Text type="barlowHard" style={styles.rightStatValueMuted}>{startValue}</Text>
+                <Text type="barlowLight" style={styles.rightStatLabel}>시작</Text>
+              </View>
+              <View style={styles.rightStatItem}>
+                <Text type="barlowHard" style={styles.rightStatValueActive}>{currentValue}</Text>
+                <Text type="barlowLight" style={styles.rightStatLabel}>현재</Text>
+              </View>
+            </View>
+          </View>
+        </View>
         <View style={styles.chartWrap}>
           <LineChart
-            data={data}
+            data={chartData}
             yAxisLabelWidth={0}
             disableScroll
             adjustToWidth
-            rulesThickness={2}
+            rulesThickness={1.2}
             hideRules={false}
             // Line
             color={chartAccentColor}
@@ -83,7 +104,7 @@ export default function GraphStat({ headlineDelta, trendLabels }: GraphStatProps
             startOpacity={0.4}
             endOpacity={0}
             // Dots
-            dataPointsColor={chartAccentColor}
+            dataPointsColor="rgba(60, 192, 110, 0.60)"
             dataPointsRadius={3}
             // Y-axis (right side)
             hideYAxisText
@@ -96,19 +117,19 @@ export default function GraphStat({ headlineDelta, trendLabels }: GraphStatProps
             // X-axis labels
             xAxisLabelTextStyle={{
               color: "#999",
-              fontSize: moderateScale(FONT.sm),
+              fontSize: moderateScale(FONT.xs),
               fontFamily: "BarlowCondensed_400Regular",
-              width: 28,
               textAlign: "center",
             }}
             yAxisTextStyle={{ color: "#999", fontSize: moderateScale(FONT.sm) }}
             // Grid
-            rulesColor="#414141"
-            rulesType="solid"
+            rulesColor="#555555"
+            rulesType="dotted"
             // Size
             width={chartWidth}
             height={130}
-            initialSpacing={10}
+            initialSpacing={6}
+            endSpacing={6}
           />
         </View>
         {/*
@@ -144,9 +165,14 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   trendMeta: {
-    color: "#ffffff",
+    color: "#7E8784",
     letterSpacing: 1.2,
-    fontSize: moderateScale(FONT.sm),
+    fontSize: moderateScale(FONT.xs),
+  },
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
   },
   trendHeadline: {
     color: "#4DAE82",
@@ -155,13 +181,37 @@ const styles = StyleSheet.create({
   },
   trendSub: {
     color: "#7E8784",
-    fontSize: moderateScale(FONT.md),
+    fontSize: moderateScale(FONT.xs),
     marginTop: moderateScale(2),
-    marginBottom: moderateScale(8),
+    marginBottom: moderateScale(4),
+    textAlign: "right",
+  },
+  rightStatsRow: {
+    flexDirection: "row",
+    columnGap: moderateScale(20),
+    justifyContent: "flex-end",
+  },
+  rightStatItem: {
+    alignItems: "center",
+  },
+  rightStatValueMuted: {
+    color: "#9B9C9B",
+    fontSize: moderateScale(FONT.xl),
+    lineHeight: moderateScale(26),
+  },
+  rightStatValueActive: {
+    color: "#3CC06E",
+    fontSize: moderateScale(FONT.xl),
+    lineHeight: moderateScale(26),
+  },
+  rightStatLabel: {
+    color: "#7E8784",
+    fontSize: moderateScale(FONT.xs),
   },
   chartWrap: {
     alignSelf: "center",
     marginHorizontal: moderateScale(10),
+    paddingHorizontal: moderateScale(4),
   },
   chartLabelsRow: {
     marginTop: moderateScale(8),

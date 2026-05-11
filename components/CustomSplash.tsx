@@ -1,15 +1,15 @@
 import { ThemedText } from '@/components/themed-text';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
 import Animated, {
-    Easing,
-    FadeOut,
-    useAnimatedStyle,
-    useSharedValue,
-    withDelay,
-    withSpring,
-    withTiming
+  Easing,
+  FadeOut,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withSpring,
+  withTiming
 } from 'react-native-reanimated';
 
 const AnimatedThemedText = Animated.createAnimatedComponent(ThemedText);
@@ -85,6 +85,22 @@ export default function CustomSplash({ onComplete }: { onComplete?: () => void }
           대한민국 1등 파크골프 스토어 AI 기록기
         </AnimatedThemedText>
       </View>
+
+      <View style={styles.imageWrapper}>
+        <Image
+          source={require('@/assets/images/splash-parkgolf.png')}
+          style={styles.promoImage}
+          resizeMode="cover"
+        />
+        <LinearGradient
+          colors={['#0F1010', 'transparent']}
+          style={styles.imageFadeTop}
+        />
+        <LinearGradient
+          colors={['transparent', '#0F1010']}
+          style={styles.imageFade}
+        />
+      </View>
     </Animated.View>
   );
 }
@@ -116,6 +132,7 @@ const styles = StyleSheet.create({
   content: {
     alignItems: 'center',
     gap: 12,
+    marginBottom: 180,
   },
   title: {
     fontSize: 50,
@@ -131,5 +148,30 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#9BA1A6',
     letterSpacing: 2,
+  },
+  imageWrapper: {
+    position: 'absolute',
+    bottom: 60,
+    left: 0,
+    right: 0,
+    height: 220,
+  },
+  promoImage: {
+    width: '100%',
+    height: '100%',
+  },
+  imageFadeTop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 80,
+  },
+  imageFade: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 160,
   },
 });

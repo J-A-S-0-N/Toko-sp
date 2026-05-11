@@ -395,7 +395,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     color: "#818E95",
-    fontSize: moderateScale(FONT.md),
+    fontSize: moderateScale(FONT.sm),
   },
   centerSection: {
     flex: 1,

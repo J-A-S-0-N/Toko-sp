@@ -4,50 +4,51 @@ import React from "react";
 import { StyleSheet, View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
 
-const STREAK_SEGMENTS = [
-  true,
-  true,
-  true,
-  false,
-  true,
-  true,
-  true,
-  true,
-  true,
-  true,
-  false,
-  false,
-];
+interface StreakCardProps {
+  currentStreak: number;
+  longestStreak: number;
+}
 
-export default function StreakCard() {
+export default function StreakCard({ currentStreak, longestStreak }: StreakCardProps) {
+  // Generate streak segments based on actual streak
+  const totalSegments = 12;
+  const segments = Array(totalSegments).fill(false).map((_, i) => {
+    // Most recent segments show current streak
+    const fromEnd = totalSegments - 1 - i;
+    return fromEnd < currentStreak;
+  });
+
   return (
     <View style={styles.streakCard}>
       <View style={styles.streakTopRow}>
         <View>
           <Text type="barlowLight" style={styles.streakHeading}>현제 연속</Text>
           <Text type="barlowHard" style={[styles.streakValue, styles.currentStreakValue]}>
-            3
+            {currentStreak}
           </Text>
         </View>
 
         <View style={styles.streakRightBlock}>
           <Text type="barlowLight" style={styles.streakHeading}>최고 기록</Text>
           <Text type="barlowHard" style={styles.streakValue}>
-            6
+            {longestStreak}
           </Text>
         </View>
       </View>
 
       <View style={styles.segmentRow}>
-        {STREAK_SEGMENTS.map((isActive, index) => (
+        {segments.map((active, index) => (
           <View
-            key={`segment-${index}`}
-            style={[styles.segmentPill, isActive ? styles.segmentPillActive : styles.segmentPillInactive]}
+            key={index}
+            style={[
+              styles.segmentPill,
+              active ? styles.segmentPillActive : styles.segmentPillInactive,
+            ]}
           />
         ))}
       </View>
 
-      <Text style={styles.lastRoundsText}>지난 12 라운드</Text>
+      <Text style={styles.streakSubText}>지난 12 라운드</Text>
     </View>
   );
 }

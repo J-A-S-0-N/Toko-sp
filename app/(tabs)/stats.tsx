@@ -1,5 +1,6 @@
+import StatAdBanner from "@/components/ads/StatAdBanner";
+import BirdieTrendGraph from "@/components/StatPageComponents/BirdieTrendGraph";
 import GraphStat from "@/components/StatPageComponents/graphStat";
-import HandiCapGraph from "@/components/StatPageComponents/handiCapGraph";
 import HeaderStatPage from "@/components/StatPageComponents/HeaderStatPage";
 import HitProgressBar from "@/components/StatPageComponents/hitProgressBar";
 import LatestPool from "@/components/StatPageComponents/LatestPoll";
@@ -10,74 +11,36 @@ import StatPageSkeleton from "@/components/StatPageComponents/StatPageSkeleton";
 import StreakCard from "@/components/StatPageComponents/StreakCard";
 import { ThemedText as Text } from "@/components/themed-text";
 import { FONT } from '@/constants/theme';
-import React, { useEffect, useRef, useState } from "react";
+import { useComputedStats } from '@/hooks/useComputedStats';
+import { useRounds } from '@/hooks/useRounds';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import React from "react";
 import { StyleSheet, View } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
 
-const TREND = [
-  { month: "8월", value: 85 },
-  { month: "9월", value: 82 },
-  { month: "10월", value: 80 },
-  { month: "11월", value: 83 },
-  { month: "12월", value: 79 },
-  { month: "1월", value: 81 },
-  { month: "2월", value: 78 },
-];
-
-const ROUND_STATS = [
-  { label: "라운드당 버디", value: 1.8, max: 3, color: "#45D07F" },
-  { label: "라운드당 파", value: 8.3, max: 15, color: "#B7BCB9" },
-  { label: "라운드당 보기", value: 6.9, max: 12, color: "#55BE96" },
-  { label: "라운드당 더블보기+", value: 1.0, max: 5, color: "#FF4F5F" },
-];
-
-/*
-const data = TREND.map((point, index) => ({
-  x: index + 1,
-  y: point.value,
-}));
-*/
-const data = [
-  { value: 0.032 },
-  { value: 0.055 },
-  { value: 0.048 },
-  { value: 0.064 },
-  { value: 0.038 },
-  { value: 0.030 },
-  { value: 0.017 },
-  { value: 0.025 },
-];
-
 export default function StatsScreen() {
-  const trendLabels = TREND.map((point) => point.month);
+  const tabBarHeight = useBottomTabBarHeight();
+  const { rounds, loading: roundsLoading } = useRounds();
+  const { stats, trend, birdieTrend, parAnalysis, scoreDistribution, perRoundStats } = useComputedStats(rounds);
 
-  const firstScore = TREND[0]?.value ?? 0;
-  const lastScore = TREND[TREND.length - 1]?.value ?? 0;
+  // Compute headline delta from trend
+  const trendData = trend.map((t) => ({ label: t.month, value: t.value }));
+  const firstScore = trend[0]?.value ?? 0;
+  const lastScore = trend[trend.length - 1]?.value ?? 0;
   const totalDelta = lastScore - firstScore;
   const headlineDelta = `${totalDelta > 0 ? "+" : ""}${totalDelta}타`;
 
-  const [showSkeleton, setShowSkeleton] = useState(true);
-  const hasLoaded = useRef(false);
-
-  useEffect(() => {
-    if (hasLoaded.current) {
-      setShowSkeleton(false);
-      return;
-    }
-    hasLoaded.current = true;
-
-    const timer = setTimeout(() => {
-      setShowSkeleton(false);
-    }, 2000);
-
-    return () => clearTimeout(timer);
-  }, []);
+  // Compute birdie trend stats
+  const birdieData = birdieTrend.map((t) => ({ label: t.month, value: t.value }));
+  const firstBirdies = birdieTrend[0]?.value ?? 0;
+  const lastBirdies = birdieTrend[birdieTrend.length - 1]?.value ?? 0;
+  const birdieDelta = lastBirdies - firstBirdies;
 
   return (
     <SafeAreaView edges={["top"]} style={styles.safeArea}>
-      {showSkeleton ? (
+      {roundsLoading ? (
         <Animated.View
           exiting={FadeOut.duration(400)}
           style={styles.skeletonContainer}
@@ -89,43 +52,51 @@ export default function StatsScreen() {
         entering={FadeIn.duration(400)}
         style={styles.container}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, { paddingBottom: tabBarHeight + moderateScale(48) }]}
       >
-        <View style={styles.header}>
-          <View style={styles.pill}>
-            <Text style={styles.pillText}>내 통계</Text>
+        <View>
+          <View style={styles.header}>
+            <View style={styles.pill}>
+              <Text style={styles.pillText}>내 통계</Text>
+            </View>
           </View>
-        </View>
 
-        <HeaderStatPage />
+          <HeaderStatPage />
+        </View>
 
         <RegionRanking />
 
-        <View style={{ marginBottom: moderateScale(15) }}>
-          <GraphStat headlineDelta={headlineDelta} trendLabels={trendLabels} />
-        </View>
+        <GraphStat
+          headlineDelta={headlineDelta}
+          trendLabels={trend.map(t => t.month)}
+          startValue={firstScore.toFixed(1)}
+          currentValue={lastScore.toFixed(1)}
+          data={trendData}
+        />
 
-        <StreakCard />
+        <StreakCard
+          currentStreak={stats.currentStreak}
+          longestStreak={stats.longestStreak}
+        />
 
-        <View style={{ marginBottom: moderateScale(15) }}>
-          <ParAnalysis/>
-        </View>
+        <StatAdBanner />
 
-        <View style={{ marginBottom: moderateScale(15) }}>
-          <ScoreDistribution />
-        </View>
+        <ParAnalysis data={parAnalysis} />
 
-        <View
-          style={{marginBottom: moderateScale(15)}}
-        >
-          <HandiCapGraph headlineDelta={headlineDelta} trendLabels={trendLabels} />
-        </View>
+        <ScoreDistribution items={scoreDistribution} />
 
-        <View style={{marginBottom: moderateScale(15)}}>
-          <LatestPool />
-        </View>
+        <StatAdBanner />
 
-        <HitProgressBar roundStats={ROUND_STATS} />
+        <BirdieTrendGraph
+          data={birdieData}
+          startValue={String(firstBirdies)}
+          currentValue={String(lastBirdies)}
+          deltaValue={`${birdieDelta > 0 ? "+" : ""}${birdieDelta}`}
+        />
+
+        <LatestPool />
+
+        <HitProgressBar roundStats={perRoundStats} />
       </Animated.ScrollView>
       )}
     </SafeAreaView>
@@ -144,7 +115,7 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: moderateScale(10),
     paddingBottom: moderateScale(24),
-    gap: moderateScale(12),
+    gap: moderateScale(25),
   },
   header: {
     marginTop: moderateScale(4),

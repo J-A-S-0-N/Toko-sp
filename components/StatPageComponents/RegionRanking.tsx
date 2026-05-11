@@ -3,22 +3,111 @@ import { ThemedText as Text } from "@/components/themed-text";
 import { db } from "@/config/firebase";
 import { FONT } from "@/constants/theme";
 import { useAuth } from "@/context/AuthContext";
+import { useIsFocused } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import {
-  collection,
-  doc,
-  getCountFromServer,
-  getDoc,
-  query,
-  where,
+    collection,
+    doc,
+    getCountFromServer,
+    getDoc,
+    query,
+    where,
 } from "firebase/firestore";
-import React, { useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { ActivityIndicator, Animated, Easing, StyleSheet, TouchableOpacity, View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
+
+const DIGITS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+const DIGIT_HEIGHT = moderateScale(28);
+
+interface RollingDigitProps {
+  targetDigit: string;
+  delay: number;
+  trigger: number;
+}
+
+const RollingDigit = ({ targetDigit, delay, trigger }: RollingDigitProps) => {
+  const animValue = useRef(new Animated.Value(0)).current;
+  const targetIndex = DIGITS.indexOf(targetDigit);
+  const validTarget = targetIndex !== -1;
+
+  useEffect(() => {
+    if (!validTarget) return;
+
+    animValue.setValue(0);
+
+    if (trigger > 0) {
+      Animated.timing(animValue, {
+        toValue: targetIndex,
+        duration: 800,
+        delay,
+        easing: Easing.bezier(0.22, 1, 0.36, 1),
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [trigger, targetIndex, delay, validTarget]);
+
+  if (!validTarget) {
+    return <Text style={styles.rollingText}>{targetDigit}</Text>;
+  }
+
+  const translateY = animValue.interpolate({
+    inputRange: [0, DIGITS.length - 1],
+    outputRange: [0, -(DIGITS.length - 1) * DIGIT_HEIGHT],
+  });
+
+  return (
+    <View style={styles.digitContainer}>
+      <Animated.View style={{ transform: [{ translateY }] }}>
+        {DIGITS.map((d, i) => (
+          <Text key={i} type="barlowHard" style={styles.rollingText}>{d}</Text>
+        ))}
+      </Animated.View>
+    </View>
+  );
+};
+
+interface RollingNumberProps {
+  value: string | number;
+  style?: object;
+  delay?: number;
+  trigger: number;
+}
+
+const RollingNumber = ({ value, style, delay = 0, trigger }: RollingNumberProps) => {
+  const strValue = String(value);
+  const chars = strValue.split('');
+
+  const hasOnlyDigitsAndDecimal = /^[0-9.]+$/.test(strValue);
+
+  if (!hasOnlyDigitsAndDecimal) {
+    return <Text type="barlowHard" style={[styles.rollingText, style]}>{value}</Text>;
+  }
+
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      {chars.map((char, index) => {
+        if (char === '.') {
+          return <Text key={`dot-${index}`} type="barlowHard" style={[styles.rollingText, style]}>.</Text>;
+        }
+        return (
+          <RollingDigit
+            key={`digit-${index}`}
+            targetDigit={char}
+            delay={delay + index * 80}
+            trigger={trigger}
+          />
+        );
+      })}
+    </View>
+  );
+};
 
 export default function RegionRanking() {
   const router = useRouter();
   const { user } = useAuth();
+  const isFocused = useIsFocused();
+  const [animationTrigger, setAnimationTrigger] = useState(0);
 
   const [myRank, setMyRank] = useState<number | null>(null);
   const [totalMembers, setTotalMembers] = useState<number | null>(null);
@@ -85,12 +174,20 @@ export default function RegionRanking() {
     fetchRankingSummary();
   }, [user?.uid]);
 
-  const topPercent =
-    myRank != null && totalMembers != null && totalMembers > 0
-      ? Math.round((myRank / totalMembers) * 1000) / 10
-      : null;
+  const topPercent = useMemo(() => {
+    if (myRank != null && totalMembers != null && totalMembers > 0) {
+      return Math.round((myRank / totalMembers) * 1000) / 10;
+    }
+    return null;
+  }, [myRank, totalMembers]);
 
   const hasRankingData = myRank != null && totalMembers != null && city != null;
+
+  useEffect(() => {
+    if (isFocused) {
+      setAnimationTrigger(prev => prev + 1);
+    }
+  }, [isFocused]);
 
   return (
     <View style={styles.wrapper}>
@@ -120,9 +217,13 @@ export default function RegionRanking() {
               </View>
 
               <View style={styles.percentBlock}>
-                <Text type="barlowHard" style={styles.percentValue}>
-                  {topPercent}%
-                </Text>
+                <RollingNumber
+                  style={styles.percentValue}
+                  value={topPercent ?? '-'}
+                  delay={0}
+                  trigger={animationTrigger}
+                />
+                <Text type="barlowHard" style={styles.percentSuffix}>%</Text>
               </View>
             </View>
 
@@ -283,6 +384,22 @@ const styles = StyleSheet.create({
     color: "#6F7775",
     fontSize: moderateScale(FONT.xxs),
     textAlign: "right",
+  },
+  percentSuffix: {
+    color: "#FFFFFF",
+    fontSize: moderateScale(FONT.xxl),
+    lineHeight: moderateScale(FONT.xxl) * 1.1,
+  },
+  digitContainer: {
+    height: DIGIT_HEIGHT,
+    overflow: 'hidden',
+  },
+  rollingText: {
+    fontSize: moderateScale(FONT.xxl),
+    lineHeight: DIGIT_HEIGHT,
+    height: DIGIT_HEIGHT,
+    textAlign: 'center',
+    color: '#FFFFFF',
   },
   /* Leaderboard */
   leaderCard: {

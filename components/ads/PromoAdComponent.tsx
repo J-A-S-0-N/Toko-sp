@@ -12,7 +12,7 @@ export default function PromoAdComponent() {
       <View style={styles.topRow}>
         <View style={styles.textSection}>
           <ThemedText type="barlowLight" style={styles.sponsoredLabel}>
-            SPONSORED
+            광고
           </ThemedText>
           <ThemedText type="barlowHard" style={styles.title}>
             당신의 게임을 형상해보세요!
@@ -60,11 +60,11 @@ const styles = StyleSheet.create({
   textSection: {
     flex: 1,
     paddingRight: moderateScale(12),
-    gap: moderateScale(6),
+    gap: moderateScale(4),
   },
   sponsoredLabel: {
     color: "#6E7171",
-    fontSize: moderateScale(FONT.xs),
+    fontSize: moderateScale(FONT.xxs),
     letterSpacing: 1,
   },
   title: {

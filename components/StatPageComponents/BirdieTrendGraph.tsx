@@ -10,68 +10,41 @@ type TrendPoint = {
   value: number | null;
 };
 
-type GraphStatProps = {
-  headlineDelta: string;
-  trendLabels: string[];
+type BirdieTrendGraphProps = {
   data: TrendPoint[];
   startValue: string;
   currentValue: string;
   deltaValue: string;
 };
 
-export default function HandiCapGraph({
-  headlineDelta,
-  trendLabels,
+export default function BirdieTrendGraph({
   data,
   startValue,
   currentValue,
   deltaValue,
-}: GraphStatProps) {
+}: BirdieTrendGraphProps) {
   const chartWidth = Dimensions.get("window").width * 0.85;
-  const chartAccentColor = "#3CC06E";
-  const chartAccentGlow = "#3CC06E";
+  const chartAccentColor = "#45D07F";
 
   // Convert null values to undefined for chart library compatibility
   const chartData = data.map((d) => ({
     label: d.label,
     value: d.value === null ? undefined : d.value,
   }));
-  
-  /*
-  not used right now 
 
-  useEffect(() => {
-    const valueShifting = () => {
-      let lowest = Infinity;
-      for (let i = 0; i < data.length; i++) {
-        if (data[i].value < lowest) {
-          lowest = data[i].value;
-        }
-      }
-
-      for (let i = 0; i < data.length; i++) {
-        data[i].value -= (lowest+1);
-      }
-    };
-
-    valueShifting();
-  }, [])
-  */
+  // Compute max value for chart scaling
+  const maxVal = Math.max(...data.map((d) => d.value ?? 0), 1);
+  const chartMax = Math.ceil(maxVal * 1.3);
 
   return (
     <>
       <Text type="barlowLight" style={styles.sectionTitle}>
-        핸디캡 트렌드
+        버디 트렌드
       </Text>
       <View style={styles.trendCard}>
         <Text type="barlowLight" style={styles.trendMeta}>
-          7개월 추이
+          6개월 추이
         </Text>
-        {/*
-        <Text type="barlowHard" style={styles.trendHeadline}>
-          {headlineDelta}
-        </Text>
-        */}
         <View style={styles.chartWrap}>
           <LineChart
             data={chartData}
@@ -86,21 +59,20 @@ export default function HandiCapGraph({
             curved={false}
             // Area fill
             areaChart
-            startFillColor={chartAccentGlow}
+            startFillColor={chartAccentColor}
             endFillColor="#ffffff"
             startOpacity={0.4}
             endOpacity={0}
             // Dots
-            dataPointsColor="rgba(60, 192, 110, 0.60)"
+            dataPointsColor="rgba(69, 208, 127, 0.60)"
             dataPointsRadius={3}
-            // Y-axis (right side)
+            // Y-axis
             hideYAxisText
-            yAxisLabelSuffix=" mi"
             yAxisColor="transparent"
             xAxisThickness={2}
             xAxisColor="#414141"
             noOfSections={2}
-            maxValue={37}
+            maxValue={chartMax}
             // X-axis labels
             xAxisLabelTextStyle={{
               color: "#999",
@@ -120,9 +92,7 @@ export default function HandiCapGraph({
           />
         </View>
         {/*stats*/}
-        <View
-          style={styles.statsWrap}
-        >
+        <View style={styles.statsWrap}>
           <View style={styles.statsFirstItem}>
             <Text type="barlowHard" style={styles.statsValue}>{startValue}</Text>
             <Text style={styles.statsLabel}>
@@ -132,7 +102,7 @@ export default function HandiCapGraph({
           <View>
             <Text type="barlowHard" style={styles.statsValueSpecial}>{currentValue}</Text>
             <Text style={styles.statsLabel}>
-              현제
+              현재
             </Text>
           </View>
           <View>
@@ -142,15 +112,6 @@ export default function HandiCapGraph({
             </Text>
           </View>
         </View>
-        {/*
-        <View style={styles.chartLabelsRow}>
-          {trendLabels.map((label) => (
-            <Text key={label} style={styles.chartLabel}>
-              {label}
-            </Text>
-          ))}
-        </View>
-        */}
       </View>
     </>
   );
@@ -176,16 +137,6 @@ const styles = StyleSheet.create({
     letterSpacing: 1.2,
     fontSize: moderateScale(FONT.sm),
   },
-  trendHeadline: {
-    color: "#4DAE82",
-    fontSize: moderateScale(FONT.h2),
-  },
-  trendSub: {
-    color: "#7E8784",
-    fontSize: moderateScale(FONT.sm),
-    marginTop: moderateScale(2),
-    marginBottom: moderateScale(8),
-  },
   chartWrap: {
     alignSelf: "center",
     marginHorizontal: moderateScale(10),
@@ -205,21 +156,11 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(FONT.xxl),
   },
   statsValueSpecial: {
-    color: "#3CC06E",
+    color: "#45D07F",
     fontSize: moderateScale(FONT.xxl),
   },
   statsLabel: {
     color: "#6E7271",
-    fontSize: moderateScale(FONT.xs),
-  },
-  chartLabelsRow: {
-    marginTop: moderateScale(8),
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: moderateScale(2),
-  },
-  chartLabel: {
-    color: "#6F7775",
     fontSize: moderateScale(FONT.xs),
   },
 });

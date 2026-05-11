@@ -2,37 +2,100 @@ import { ThemedText as Text } from '@/components/themed-text';
 import { db } from '@/config/firebase';
 import { FONT } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
+import { useComputedStats } from '@/hooks/useComputedStats';
+import { useRounds } from '@/hooks/useRounds';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { getAuth, signOut } from '@react-native-firebase/auth';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import { useIsFocused } from '@react-navigation/native';
 import { router } from 'expo-router';
-import { collection, doc, getDoc, getDocs, orderBy, query, where } from 'firebase/firestore';
-import { useEffect, useMemo, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { doc, getDoc } from 'firebase/firestore';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Alert, Animated, Easing, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { moderateScale } from 'react-native-size-matters';
 
-interface RoundData {
-  totalScore: number;
-  holesCount: number;
-  courseName: string;
-  playedAt: string;
-  holeScores: { hole: number; score: number; par: number }[];
+interface AnimatedNumberProps {
+  value: string | number;
+  style?: object;
+  delay?: number;
+  duration?: number;
+  trigger: number;
 }
 
+const AnimatedNumber = ({ value, style, delay = 0, duration = 1000, trigger }: AnimatedNumberProps) => {
+  const animValue = useRef(new Animated.Value(0)).current;
+  const [displayValue, setDisplayValue] = useState('0');
+
+  const numericValue = useMemo(() => {
+    const num = typeof value === 'string' ? parseFloat(value) : value;
+    return isNaN(num) ? 0 : num;
+  }, [value]);
+
+  const isDecimal = useMemo(() => {
+    return numericValue % 1 !== 0;
+  }, [numericValue]);
+
+  useEffect(() => {
+    animValue.setValue(0);
+    setDisplayValue(isDecimal ? '0.0' : '0');
+
+    const timeoutId = setTimeout(() => {
+      if (trigger > 0) {
+        Animated.timing(animValue, {
+          toValue: numericValue,
+          duration,
+          delay,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: false,
+        }).start(({ finished }) => {
+          if (finished) {
+            setDisplayValue(String(value));
+          }
+        });
+      }
+    }, 10);
+
+    return () => clearTimeout(timeoutId);
+  }, [trigger, numericValue, delay, duration, isDecimal, value, animValue]);
+
+  useEffect(() => {
+    const listener = animValue.addListener(({ value: v }) => {
+      if (isDecimal) {
+        setDisplayValue(v.toFixed(1));
+      } else {
+        setDisplayValue(Math.round(v).toString());
+      }
+    });
+
+    return () => animValue.removeListener(listener);
+  }, [animValue, isDecimal]);
+
+  if (typeof value === 'string' && isNaN(parseFloat(value))) {
+    return <Text type="barlowHard" style={style}>{value}</Text>;
+  }
+
+  return <Text type="barlowHard" style={style}>{displayValue}</Text>;
+};
+
 export default function ProfileScreen() {
+  const tabBarHeight = useBottomTabBarHeight();
   const { user, username } = useAuth();
   const initial = (username ?? '').slice(0, 1);
+  const isFocused = useIsFocused();
+  const [animationTrigger, setAnimationTrigger] = useState(0);
 
-  const [averageDelta, setAverageDelta] = useState<number | null>(null);
   const [memberSince, setMemberSince] = useState<string | null>(null);
-  const [rounds, setRounds] = useState<RoundData[]>([]);
+  
+  // Use cached rounds
+  const { rounds, loading: roundsLoading, clearRounds } = useRounds();
+  const { stats } = useComputedStats(rounds);
 
   useEffect(() => {
     if (!user?.uid) return;
 
-    const fetchData = async () => {
+    const fetchMemberSince = async () => {
       try {
-        // Fetch user doc
         const userDoc = await getDoc(doc(db, 'Users', user.uid));
         if (userDoc.exists()) {
           const data = userDoc.data();
@@ -45,43 +108,16 @@ export default function ProfileScreen() {
             setMemberSince(`${d.getFullYear()}년 ${d.getMonth() + 1}월부터 회원`);
           }
         }
-
-        // Fetch averageDelta from Stats
-        const statsDoc = await getDoc(doc(db, 'Users', user.uid, 'Stats', 'AllTimeScore'));
-        if (statsDoc.exists()) {
-          const statsData = statsDoc.data();
-          setAverageDelta(statsData?.averageDelta ?? null);
-        }
-
-        // Fetch completed rounds
-        const q = query(
-          collection(db, 'Scans'),
-          where('userId', '==', user.uid),
-          where('status', '==', 'completed'),
-          orderBy('playedAt', 'desc'),
-        );
-        const snap = await getDocs(q);
-        setRounds(
-          snap.docs.map((d) => {
-            const data = d.data();
-            return {
-              totalScore: data.totalScore ?? 0,
-              holesCount: data.holesCount ?? 18,
-              courseName: data.courseName ?? '',
-              playedAt: data.playedAt ?? '',
-              holeScores: data.holeScores ?? [],
-            };
-          }),
-        );
       } catch (e) {
-        console.error('Failed to fetch profile data:', e);
+        console.error('Failed to fetch member since:', e);
       }
     };
 
-    fetchData();
+    fetchMemberSince();
   }, [user?.uid]);
 
-  const stats = useMemo(() => {
+  // Compute profile-specific stats from rounds
+  const profileStats = useMemo(() => {
     const roundCount = rounds.length;
     const uniqueCourses = new Set(rounds.map((r) => r.courseName).filter(Boolean)).size;
 
@@ -90,44 +126,22 @@ export default function ProfileScreen() {
       .map((r) => r.totalScore);
     const bestRound = eighteenHoleScores.length > 0 ? Math.min(...eighteenHoleScores) : null;
 
-    const avgScore =
-      roundCount > 0
-        ? Math.round((rounds.reduce((s, r) => s + r.totalScore, 0) / roundCount) * 10) / 10
-        : null;
+    const avgScore = stats.averageScore;
 
-    const totalBirdies = rounds.reduce((sum, r) => {
-      return sum + r.holeScores.filter((h) => h.score < h.par).length;
-    }, 0);
+    return { roundCount, uniqueCourses, bestRound, avgScore, totalBirdies: stats.totalBirdies, longestStreak: stats.longestStreak };
+  }, [rounds, stats]);
 
-    // Longest streak: consecutive unique days with rounds
-    const uniqueDays = [
-      ...new Set(
-        rounds
-          .map((r) => r.playedAt.slice(0, 10))
-          .filter(Boolean),
-      ),
-    ].sort();
-    let longestStreak = uniqueDays.length > 0 ? 1 : 0;
-    let current = 1;
-    for (let i = 1; i < uniqueDays.length; i++) {
-      const prev = new Date(uniqueDays[i - 1]);
-      const curr = new Date(uniqueDays[i]);
-      const diffMs = curr.getTime() - prev.getTime();
-      if (diffMs === 86400000) {
-        current++;
-        if (current > longestStreak) longestStreak = current;
-      } else {
-        current = 1;
-      }
+  useEffect(() => {
+    if (isFocused) {
+      setAnimationTrigger(prev => prev + 1);
     }
+  }, [isFocused]);
 
-    return { roundCount, uniqueCourses, bestRound, avgScore, totalBirdies, longestStreak };
-  }, [rounds]);
   return (
     <SafeAreaView edges={['top']} style={styles.safeArea}>
       <ScrollView
         style={styles.container}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, { paddingBottom: tabBarHeight + moderateScale(48) }]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.topBar}>
@@ -147,6 +161,9 @@ export default function ProfileScreen() {
                   text: '로그아웃',
                   style: 'destructive',
                   onPress: async () => {
+                    if (user?.uid) {
+                      await clearRounds();
+                    }
                     await signOut(getAuth());
                     router.replace('/(auth)');
                   },
@@ -178,7 +195,7 @@ export default function ProfileScreen() {
           <View style={styles.handicapChip}>
             <Ionicons name="flag-outline" size={moderateScale(16)} color="#49C895" />
             <Text type="barlowLight" style={styles.handicapText}>
-              {averageDelta != null ? `${averageDelta >= 0 ? '+' : ''}${averageDelta} 평타` : '- 평타'}
+              {stats.averageDelta != null ? `${stats.averageDelta >= 0 ? '+' : ''}${stats.averageDelta} 평타` : '- 평타'}
             </Text>
           </View>
         </View>
@@ -187,54 +204,78 @@ export default function ProfileScreen() {
 
         <View style={styles.statsGrid}>
           <View style={styles.statCard}>
-            <Text type="barlowHard" style={styles.roundStatValue}>
-              {stats.roundCount}
-            </Text>
+            <AnimatedNumber
+              style={styles.roundStatValue}
+              value={profileStats.roundCount}
+              delay={0}
+              duration={1000}
+              trigger={animationTrigger}
+            />
             <Text type="barlowLight" style={styles.statLabel}>
               라운드 수
             </Text>
           </View>
 
           <View style={styles.statCard}>
-            <Text type="barlowHard" style={styles.statValue}>
-              {stats.uniqueCourses}
-            </Text>
+            <AnimatedNumber
+              style={styles.statValue}
+              value={profileStats.uniqueCourses}
+              delay={100}
+              duration={1000}
+              trigger={animationTrigger}
+            />
             <Text type="barlowLight" style={styles.statLabel}>
               코스
             </Text>
           </View>
 
           <View style={styles.statCard}>
-            <Text type="barlowHard" style={styles.statValue}>
-              {stats.bestRound ?? '-'}
-            </Text>
+            <AnimatedNumber
+              style={styles.statValue}
+              value={profileStats.bestRound ?? '-'}
+              delay={200}
+              duration={1000}
+              trigger={animationTrigger}
+            />
             <Text type="barlowLight" style={styles.statLabel}>
               최저타 라운드
             </Text>
           </View>
 
           <View style={styles.statCard}>
-            <Text type="barlowHard" style={styles.statValue}>
-              {stats.avgScore ?? '-'}
-            </Text>
+            <AnimatedNumber
+              style={styles.statValue}
+              value={profileStats.avgScore ?? '-'}
+              delay={300}
+              duration={1000}
+              trigger={animationTrigger}
+            />
             <Text type="barlowLight" style={styles.statLabel}>
               평균 스코어
             </Text>
           </View>
 
           <View style={styles.statCard}>
-            <Text type="barlowHard" style={styles.statValue}>
-              {stats.totalBirdies}
-            </Text>
+            <AnimatedNumber
+              style={styles.statValue}
+              value={profileStats.totalBirdies}
+              delay={400}
+              duration={1000}
+              trigger={animationTrigger}
+            />
             <Text type="barlowLight" style={styles.statLabel}>
               총 버디
             </Text>
           </View>
 
           <View style={styles.statCard}>
-            <Text type="barlowHard" style={styles.statValue}>
-              {stats.longestStreak}
-            </Text>
+            <AnimatedNumber
+              style={styles.statValue}
+              value={profileStats.longestStreak}
+              delay={500}
+              duration={1000}
+              trigger={animationTrigger}
+            />
             <Text type="barlowLight" style={styles.statLabel}>
               최장 연속
             </Text>
@@ -248,11 +289,11 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#090B0C',
+    backgroundColor: '#0F1010',
   },
   container: {
     flex: 1,
-    backgroundColor: '#090B0C',
+    backgroundColor: '#0F1010',
   },
   content: {
     paddingHorizontal: moderateScale(18),
@@ -331,7 +372,7 @@ const styles = StyleSheet.create({
   divider: {
     marginTop: moderateScale(30),
     height: 1,
-    backgroundColor: '#1A1F22',
+    backgroundColor: '#2B3230',
   },
   statsGrid: {
     marginTop: moderateScale(18),
@@ -345,8 +386,8 @@ const styles = StyleSheet.create({
     minHeight: moderateScale(86),
     borderRadius: moderateScale(18),
     borderWidth: 1,
-    borderColor: '#2A2F33',
-    backgroundColor: '#1A1E20',
+    borderColor: '#2B3230',
+    backgroundColor: '#1F2222',
     paddingHorizontal: moderateScale(16),
     paddingVertical: moderateScale(15),
     justifyContent: 'space-between',

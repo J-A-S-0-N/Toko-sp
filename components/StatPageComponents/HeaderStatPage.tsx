@@ -2,8 +2,9 @@ import { ThemedText } from "@/components/themed-text";
 import { db } from "@/config/firebase";
 import { FONT } from "@/constants/theme";
 import { useAuth } from "@/context/AuthContext";
+import { useFocusEffect } from "expo-router";
 import { doc, getDoc } from "firebase/firestore";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Animated, Text, TouchableOpacity, View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
 
@@ -21,9 +22,10 @@ interface StatCardProps {
     subStats: { label: string; value: string; color: string }[];
     isCollapsed: boolean;
     onToggle: () => void;
+    animatedStyle?: object;
 }
 
-const StatCard = ({ label, value, valueColor, subStats, isCollapsed, onToggle }: StatCardProps) => {
+const StatCard = ({ label, value, valueColor, subStats, isCollapsed, onToggle, animatedStyle }: StatCardProps) => {
     const borderAnim = useRef(new Animated.Value(isCollapsed ? 0 : 1)).current;
 
     useEffect(() => {
@@ -40,6 +42,7 @@ const StatCard = ({ label, value, valueColor, subStats, isCollapsed, onToggle }:
     });
 
     return (
+        <Animated.View style={animatedStyle}>
         <Animated.View
             style={{
                 backgroundColor: "#202222",
@@ -98,6 +101,7 @@ const StatCard = ({ label, value, valueColor, subStats, isCollapsed, onToggle }:
             )}
         </TouchableOpacity>
         </Animated.View>
+        </Animated.View>
     );
 };
 
@@ -109,6 +113,41 @@ const HeaderStatPage = () => {
     const [statBisCollapsed, setIsBCollapsed] = useState(true); // Best Score
     const [statCisCollapsed, setIsCCollapsed] = useState(true); // Activity Count
     const [statDisCollapsed, setIsDCollapsed] = useState(true); // Average Delta
+
+    const cardAnims = useRef(
+        Array.from({ length: 4 }, () => ({
+            opacity: new Animated.Value(0),
+            translateY: new Animated.Value(16),
+        }))
+    ).current;
+
+    useFocusEffect(
+        useCallback(() => {
+            cardAnims.forEach(({ opacity, translateY }) => {
+                opacity.setValue(0);
+                translateY.setValue(16);
+            });
+
+            const animations = cardAnims.map(({ opacity, translateY }, i) =>
+                Animated.parallel([
+                    Animated.timing(opacity, {
+                        toValue: 1,
+                        duration: 420,
+                        delay: i * 100,
+                        useNativeDriver: true,
+                    }),
+                    Animated.timing(translateY, {
+                        toValue: 0,
+                        duration: 420,
+                        delay: i * 100,
+                        useNativeDriver: true,
+                    }),
+                ])
+            );
+
+            Animated.parallel(animations).start();
+        }, [])
+    );
 
     // Stats data
     const [allTimeStats, setAllTimeStats] = useState<StatsData | null>(null);
@@ -158,6 +197,7 @@ const HeaderStatPage = () => {
                 ]}
                 isCollapsed={statAisCollapsed}
                 onToggle={() => setIsACollapsed((v) => !v)}
+                animatedStyle={{ opacity: cardAnims[0].opacity, transform: [{ translateY: cardAnims[0].translateY }] }}
             />
 
             {/* Best Score */}
@@ -171,6 +211,7 @@ const HeaderStatPage = () => {
                 ]}
                 isCollapsed={statBisCollapsed}
                 onToggle={() => setIsBCollapsed((v) => !v)}
+                animatedStyle={{ opacity: cardAnims[1].opacity, transform: [{ translateY: cardAnims[1].translateY }] }}
             />
 
             {/* Activity Count */}
@@ -184,6 +225,7 @@ const HeaderStatPage = () => {
                 ]}
                 isCollapsed={statCisCollapsed}
                 onToggle={() => setIsCCollapsed((v) => !v)}
+                animatedStyle={{ opacity: cardAnims[2].opacity, transform: [{ translateY: cardAnims[2].translateY }] }}
             />
 
             {/* Average Delta */}
@@ -198,6 +240,7 @@ const HeaderStatPage = () => {
                 ]}
                 isCollapsed={statDisCollapsed}
                 onToggle={() => setIsDCollapsed((v) => !v)}
+                animatedStyle={{ opacity: cardAnims[3].opacity, transform: [{ translateY: cardAnims[3].translateY }] }}
             />
         </View>
     );

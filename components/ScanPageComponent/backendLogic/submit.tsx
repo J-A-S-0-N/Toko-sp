@@ -1,5 +1,6 @@
 import { incrementUserStats } from "@/app/(auth)/functions/updateUserStats";
 import { db } from "@/config/firebase";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 
 export type SubmitHoleScore = {
@@ -22,6 +23,8 @@ export type SubmitScanPayload = {
   doubleCount: number;
   holeScores: SubmitHoleScore[];
 };
+
+const getCacheKey = (uid: string) => `rounds_${uid}`;
 
 export async function submit({
   scanDocId,
@@ -66,6 +69,26 @@ export async function submit({
     playedAt,
     holeScores,
   }, { city, username });
+
+  // Add to local cache
+  const cacheKey = getCacheKey(userId);
+  const roundData = {
+    id: scanDocId,
+    courseName,
+    totalScore,
+    holesCount,
+    playedAt,
+    appliedPar,
+    diff,
+    holeScores,
+    birdieCount,
+    doubleCount,
+  };
+
+  const cached = await AsyncStorage.getItem(cacheKey);
+  const rounds = cached ? JSON.parse(cached) : [];
+  rounds.push(roundData);
+  await AsyncStorage.setItem(cacheKey, JSON.stringify(rounds));
 
   return { id: scanDocId };
 }

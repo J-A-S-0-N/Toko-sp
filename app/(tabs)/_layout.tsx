@@ -1,113 +1,242 @@
 import { ThemedText as Text } from '@/components/themed-text';
+import Feather from '@expo/vector-icons/Feather';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import Octicons from '@expo/vector-icons/Octicons';
+import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { View } from 'react-native';
-
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-//Used icons
-import Feather from '@expo/vector-icons/Feather';
-import Fontisto from '@expo/vector-icons/Fontisto';
-import Octicons from '@expo/vector-icons/Octicons';
-
-import { FONT } from '@/constants/theme';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Shadow } from 'react-native-shadow-2';
 import { moderateScale } from 'react-native-size-matters';
 
-const TAB_BAR_BG = '#191919';
+const ACTIVE = '#3CC06E';
+const INACTIVE = '#7A8482';
+const BAR_BG = '#161717';
+const SELECTED_BG = '#262828';
+const SELECTED_BORDER = '#383B3B';
+const BORDER = '#22262A';
+
+type TabKey = 'index' | 'stats' | 'scan' | 'profile' | 'notice';
+
+type TabItem = {
+  key: TabKey;
+  label: string;
+  isCenter?: boolean;
+  disabled?: boolean;
+  renderIcon?: (color: string) => React.ReactNode;
+};
+
+const ITEMS: TabItem[] = [
+  {
+    key: 'index',
+    label: '피드',
+    renderIcon: (color) => <Octicons name="home" size={moderateScale(20)} color={color} />,
+  },
+  {
+    key: 'stats',
+    label: '통계',
+    renderIcon: (color) => (
+      <MaterialCommunityIcons name="waves" size={moderateScale(22)} color={color} />
+    ),
+  },
+  { key: 'scan', label: '스캔', isCenter: true },
+  {
+    key: 'profile',
+    label: '내 정보',
+    renderIcon: (color) => <Feather name="disc" size={moderateScale(20)} color={color} />,
+  },
+  {
+    key: 'notice',
+    label: '공지글',
+    renderIcon: (color) => <Feather name="menu" size={moderateScale(20)} color={color} />,
+  },
+];
+
+function CustomTabBar({ state, navigation }: BottomTabBarProps) {
+  const insets = useSafeAreaInsets();
+  const focusedRouteName = state.routes[state.index]?.name;
+
+  const handlePress = (item: TabItem) => {
+    if (item.disabled) return;
+    if (focusedRouteName === item.key) return;
+    navigation.navigate(item.key as never);
+  };
+
+  return (
+    <View
+      pointerEvents="box-none"
+      style={[
+        styles.outer,
+        { paddingBottom: Math.max(insets.bottom - moderateScale(10), moderateScale(4)) },
+      ]}
+    >
+      <Shadow
+        distance={moderateScale(28)}
+        startColor="rgba(0,0,0,0.55)"
+        endColor="rgba(0,0,0,0)"
+        offset={[0, moderateScale(10)]}
+        stretch
+        style={styles.shadowWrap}
+        containerStyle={{ alignSelf: 'stretch' }}
+      >
+      <View style={styles.bar}>
+        {ITEMS.map((item) => {
+          const focused = focusedRouteName === item.key;
+
+          if (item.isCenter) {
+            return (
+              <Pressable
+                key={item.key}
+                onPress={() => handlePress(item)}
+                style={styles.centerWrap}
+                hitSlop={moderateScale(8)}
+                android_ripple={{ color: 'transparent', borderless: true }}
+              >
+                <View style={styles.scanBtn}>
+                  <MaterialCommunityIcons
+                    name="record-circle-outline"
+                    size={moderateScale(28)}
+                    color="#0F1010"
+                  />
+                </View>
+                <Text
+                  type="barlowLight"
+                  style={[
+                    styles.label,
+                    { color: focused ? ACTIVE : INACTIVE, marginTop: moderateScale(6) },
+                  ]}
+                >
+                  {item.label}
+                </Text>
+              </Pressable>
+            );
+          }
+
+          const color = item.disabled ? INACTIVE : focused ? ACTIVE : INACTIVE;
+
+          return (
+            <Pressable
+              key={item.key}
+              onPress={() => handlePress(item)}
+              style={styles.tab}
+              hitSlop={moderateScale(6)}
+              android_ripple={{ color: 'transparent', borderless: true }}
+            >
+              <View style={styles.iconWrap}>
+                <View style={[styles.iconWrapInner, focused && styles.iconWrapFocused]}>
+                  {item.renderIcon?.(color)}
+                </View>
+              </View>
+              <Text type="barlowLight" style={[styles.label, { color }]}>
+                {item.label}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+      </Shadow>
+    </View>
+  );
+}
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <View style={{ flex: 1, backgroundColor: '#0F0F0F' }}>
       <Tabs
         screenOptions={{
-          animation: 'fade',
-          tabBarActiveTintColor: Colors.dark.tabIconSelected,
           headerShown: false,
+          animation: 'fade',
           tabBarStyle: {
-            backgroundColor: TAB_BAR_BG,
+            position: 'absolute',
+            backgroundColor: 'transparent',
             borderTopWidth: 0,
-            borderTopColor: 'transparent',
-            borderTopLeftRadius: moderateScale(15),
-            borderTopRightRadius: moderateScale(15),
-            height: moderateScale(80),
-            paddingTop: moderateScale(10),
+            elevation: 0,
           },
-        }}>
-        <Tabs.Screen
-          name="index"
-          options={{
-            tabBarLabel: ({ color }) => <Text style={{ color, fontSize: moderateScale(FONT.xxs) }}>피드</Text>,
-            tabBarIcon: ({ color }) => <Octicons name="home" size={20} color={color} />,
-          }}
-        />
-        <Tabs.Screen
-          name="stats"
-          options={{
-            tabBarLabel: ({ color }) => <Text style={{ color, fontSize: moderateScale(FONT.xxs) }}>통계</Text>,
-            tabBarIcon: ({ color }) => <Fontisto name="heartbeat-alt" size={20} color={color} />,
-          }}
-        />
-        <Tabs.Screen
-          name="scan"
-          options={{
-            tabBarLabel: ({ focused }) => (
-              <Text
-                style={{
-                  color: focused ? Colors.dark.tabIconSelected : '#FFFFFF',
-                  fontSize: moderateScale(FONT.xxs),
-                }}>
-                스캔
-              </Text>
-            ),
-            tabBarIcon: ({ focused }) => (
-              <Feather name="camera" size={20} color={focused ? Colors.dark.tabIconSelected : '#FFFFFF'} />
-            ),
-/*             tabBarButton: (props) => (
-              <View style={[props.style, { justifyContent: 'center', alignItems: 'center' }]}>
-                <Pressable
-                  onPress={props.onPress}
-                  style={{ justifyContent: 'center', alignItems: 'center' }}
-                >
-                  <View
-                    style={{
-                      paddingHorizontal: moderateScale(15),
-                      paddingVertical: moderateScale(14),
-                      //backgroundColor: '#4CAE82',
-                      backgroundColor: "white",
-                      paddingTop: moderateScale(8),
-                      borderRadius: moderateScale(15),
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      flexDirection: 'row',
-                      gap: moderateScale(10),
-                    }}
-                  >
-                    <Ionicons name="camera" size={moderateScale(20)} color="black" />
-                    <Text
-                      style={{
-                        color: 'black',
-                        fontSize: moderateScale(FONT.xxs),
-                      }}
-                    >
-                      스 캔
-                    </Text>
-                  </View>
-                </Pressable>
-              </View>
-            ), */
-          }}
-        />
-        <Tabs.Screen
-          name="profile"
-          options={{
-            tabBarLabel: ({ color }) => <Text style={{ color, fontSize: moderateScale(FONT.xxs) }}>내 정보</Text>,
-            tabBarIcon: ({ color }) => <Feather name="users" size={20} color={color} />,
-          }}
-        />
+        }}
+        tabBar={(props) => <CustomTabBar {...props} />}
+      >
+        <Tabs.Screen name="index" />
+        <Tabs.Screen name="stats" />
+        <Tabs.Screen name="scan" />
+        <Tabs.Screen name="profile" />
+        <Tabs.Screen name="notice" />
       </Tabs>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  outer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'transparent',
+    paddingHorizontal: moderateScale(4),
+    paddingTop: moderateScale(8),
+  },
+  shadowWrap: {
+    width: '100%',
+    borderRadius: moderateScale(28),
+  },
+  bar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: BAR_BG,
+    borderRadius: moderateScale(28),
+    borderWidth: 1,
+    borderColor: BORDER,
+    paddingHorizontal: moderateScale(8),
+    paddingTop: moderateScale(10),
+    paddingBottom: moderateScale(10),
+  },
+  tab: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: moderateScale(4),
+  },
+  iconWrap: {
+    width: moderateScale(40),
+    height: moderateScale(40),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconWrapInner: {
+    width: moderateScale(40),
+    height: moderateScale(40),
+    borderRadius: moderateScale(12),
+    alignItems: 'center',
+    justifyContent: 'center',
+    //overflow: 'hidden',
+  },
+  iconWrapFocused: {
+    backgroundColor: SELECTED_BG,
+    borderWidth: 1,
+    borderColor: SELECTED_BORDER,
+  },
+  label: {
+    fontSize: moderateScale(9),
+  },
+  centerWrap: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    //marginTop: moderateScale(-18),
+  },
+  scanBtn: {
+    width: moderateScale(50),
+    height: moderateScale(50),
+    borderRadius: moderateScale(14),
+    backgroundColor: ACTIVE,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: ACTIVE,
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 6,
+  },
+});

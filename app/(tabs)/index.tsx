@@ -1,11 +1,11 @@
+import PromoAdComponent from '@/components/ads/PromoAdComponent';
+import SponsoredAdComponent from '@/components/ads/SponsoredAdComponent';
 import DailyTipComponent from '@/components/HomeFeedComponents/dailyTipComponent';
 import GoalSetupPromptComponent from '@/components/HomeFeedComponents/goalSetupPromptComponent';
 import HomeFeedHeader from '@/components/HomeFeedComponents/homeFeedHeader';
 import HomeFeedSkeleton from '@/components/HomeFeedComponents/HomeFeedSkeleton';
 import NearbyCoursesComponent from '@/components/HomeFeedComponents/nearbyCoursesComponent';
-import PromoAdComponent from '@/components/HomeFeedComponents/promoAdComponent';
 import RecentRoundComponent from '@/components/HomeFeedComponents/recentRoundComponent';
-import SponsoredAdComponent from '@/components/HomeFeedComponents/sponsoredAdComponent';
 import UsernameHeader from '@/components/HomeFeedComponents/usernameHeader';
 import UserStatComponent from '@/components/HomeFeedComponents/userStatComponent';
 import WeatherSummaryComponent from '@/components/HomeFeedComponents/weatherSummaryComponent';
@@ -14,6 +14,7 @@ import { ThemedText as Text } from '@/components/themed-text';
 import db from '@/config/firebase';
 import { FONT } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useRouter } from 'expo-router';
 import { collection, getCountFromServer, query, where } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
@@ -25,6 +26,7 @@ import { moderateScale } from 'react-native-size-matters';
 export default function HomeScreen() {
   const router = useRouter();
   const { user } = useAuth();
+  const tabBarHeight = useBottomTabBarHeight();
   const [showSkeleton, setShowSkeleton] = useState(true);
   const [roundCount, setRoundCount] = useState<number | null>(null);
 
@@ -66,6 +68,7 @@ export default function HomeScreen() {
       <Animated.ScrollView
         entering={FadeIn.duration(400)}
         style={styles.container}
+        contentContainerStyle={{ paddingBottom: tabBarHeight + moderateScale(32) }}
       >
 
         <View style={{marginBottom: moderateScale(15)}}>

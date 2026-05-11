@@ -8,7 +8,10 @@ const HomeFeedHeader = () => {
     <View
       style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}
     >
-      <Text type="barlowHard" style={{fontSize: moderateScale(FONT.lg), color: "white"}}>이름 아직 미정임</Text>
+      <View>
+        <Text type="barlowHard" style={{fontSize: moderateScale(FONT.lg), color: "white"}}>파크필드</Text>
+        <Text type="barlowLight" style={{fontSize: moderateScale(10), color: "#9BA1A6"}}>토고코포츠 - 대한민국 1위 파크골프 기록기</Text>
+      </View>
       <View
         style={{
           paddingHorizontal: moderateScale(15),

@@ -4,37 +4,36 @@ import React from "react";
 import { StyleSheet, View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
 
-type ParItem = {
-  parLabel: string;
-  average: number;
+type ScoreCountItem = {
+  label: string;
+  count: number;
+  prevMonthCount: number;
   delta: number;
   valueColor: string;
 };
 
-const PAR_ANALYSIS_DATA: ParItem[] = [
-  { parLabel: "파 3", average: 3.2, delta: 0.2, valueColor: "#45D07F" },
-  { parLabel: "파 4", average: 4.6, delta: 0.6, valueColor: "#55BE96" },
-  { parLabel: "파 5", average: 5.4, delta: 0.4, valueColor: "#F2C233" },
-];
+interface ParAnalysisProps {
+  data: ScoreCountItem[];
+}
 
-export default function ParAnalysis() {
+export default function ParAnalysis({ data }: ParAnalysisProps) {
   return (
     <View style={styles.container}>
       <Text type="barlowLight" style={styles.sectionTitle}>
-        파 분석
+        스코어 분석 (전 월대비)
       </Text>
 
       <View style={styles.cardsRow}>
-        {PAR_ANALYSIS_DATA.map((item) => (
-          <View key={item.parLabel} style={styles.card}>
+        {data.map((item) => (
+          <View key={item.label} style={styles.card}>
             <Text type="barlowLight" style={styles.parLabel}>
-              {item.parLabel}
+              {item.label}
             </Text>
-            <Text type="barlowHard" style={[styles.averageValue, { color: item.valueColor }]}>
-              {item.average.toFixed(1)}
+            <Text type="barlowHard" style={[styles.countValue, { color: item.valueColor }]}>
+              {item.count}
             </Text>
-            <Text type="barlowLight" style={[styles.deltaText, { color: item.valueColor }]}>
-              +{item.delta.toFixed(1)} 평균
+            <Text type="barlowLight" style={[styles.deltaText, { color: item.delta >= 0 ? '#45D07F' : '#FF4F5F' }]}>
+              {item.delta > 0 ? `+${item.delta}` : item.delta}
             </Text>
           </View>
         ))}
@@ -63,11 +62,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#1F2222",
     borderWidth: 1,
     borderColor: "#2B3230",
-    borderRadius: moderateScale(28),
+    borderRadius: moderateScale(20),
     //minHeight: moderateScale(138),
-    alignItems: "center",
+    alignItems: "flex-start",
     justifyContent: "center",
-    paddingHorizontal: moderateScale(10),
+    paddingHorizontal: moderateScale(15),
     paddingVertical: moderateScale(14),
     gap: moderateScale(4),
   },
@@ -77,9 +76,8 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(FONT.sm),
     letterSpacing: 0.8,
   },
-  averageValue: {
-    fontSize: moderateScale(FONT.xl),
-    //lineHeight: moderateScale(64),
+  countValue: {
+    fontSize: moderateScale(FONT.xxl),
     paddingVertical: moderateScale(4),
   },
   deltaText: {

@@ -8,16 +8,16 @@ import { Platform } from 'react-native';
 const tintColor = '#49DF80';
 
 export const FONT = {
-  xxs: 11,
-  xs: 13,
-  sm: 15,
-  md: 17,
-  lg: 20,
-  xl: 24,
-  xxl: 28,
-  h2: 36,
-  h1: 45,
-  hero: 54,
+  xxs: 10,
+  xs: 12,
+  sm: 14,
+  md: 16,
+  lg: 19,
+  xl: 22,
+  xxl: 26,
+  h2: 34,
+  h1: 42,
+  hero: 50,
 };
 
 export const Colors = {

@@ -3,20 +3,23 @@ import {
     ScanFrameSection,
     ScanGuideSection
 } from "@/components/ScanPageComponent";
+import PromoAdComponent from "@/components/ads/PromoAdComponent";
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import React from "react";
-import { ScrollView, StyleSheet } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
 import HoleSelectionModal from "../(scan)/holeSelectionModal";
 
 export default function ScanScreen() {
+  const tabBarHeight = useBottomTabBarHeight();
   const [isHoleModalVisible, setIsHoleModalVisible] = React.useState(false);
 
   return (
     <SafeAreaView edges={["top"]} style={styles.safeArea}>
       <ScrollView
         style={styles.container}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, { paddingBottom: tabBarHeight + moderateScale(48) }]}
         showsVerticalScrollIndicator={false}
       >
         {/*
@@ -30,6 +33,9 @@ export default function ScanScreen() {
           onGalleryPress={() => {}} 
           onFramePress={() => {}} 
         />
+        <View style={styles.adContainer}>
+          <PromoAdComponent />
+        </View>
         <ScanGuideSection />
       </ScrollView>
 
@@ -53,5 +59,8 @@ const styles = StyleSheet.create({
   content: {
     paddingBottom: moderateScale(30),
     gap: moderateScale(14),
+  },
+  adContainer: {
+    paddingHorizontal: moderateScale(10),
   },
 });

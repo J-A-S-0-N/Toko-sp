@@ -18,69 +18,80 @@ type HitProgressBarProps = {
 
 export default function HitProgressBar({ roundStats, headerTitle = "타수 통계" }: HitProgressBarProps) {
   return (
-    <>
+    <View style={styles.wrapper}>
       <Text type="barlowLight" style={styles.headerTitle}>
         {headerTitle}
       </Text>
-      {roundStats.map((stat) => {
+      <View style={styles.card}>
+      {roundStats.map((stat, index) => {
         const progress = Math.max(0, Math.min(1, stat.value / stat.max));
+        const isLast = index === roundStats.length - 1;
 
         return (
           <View
             key={stat.label}
-            style={styles.metricCard}
+            style={[styles.row, !isLast && styles.rowDivider]}
           >
-            <View style={styles.metricHeader}>
-              <Text style={styles.metricLabel}>{stat.label}</Text>
-              <Text type="barlowHard" style={[styles.metricValue, { color: stat.color }]}>
-                {stat.value.toFixed(1)}
-              </Text>
+            <Text style={styles.metricLabel}>{stat.label}</Text>
+            <View style={styles.trackWrap}>
+              <View style={styles.track}>
+                <View
+                  style={[
+                    styles.fill,
+                    {
+                      width: `${progress * 100}%`,
+                      backgroundColor: stat.color,
+                    },
+                  ]}
+                />
+              </View>
             </View>
-            <View style={styles.track}>
-              <View
-                style={[
-                  styles.fill,
-                  {
-                    width: `${progress * 100}%`,
-                    backgroundColor: stat.color,
-                  },
-                ]}
-              />
-            </View>
+            <Text type="barlowHard" style={[styles.metricValue, { color: stat.color }]}>
+              {stat.value.toFixed(1)}
+            </Text>
           </View>
         );
       })}
-    </>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  wrapper: {
+    gap: moderateScale(8),
+  },
   headerTitle: {
     color: "#6F7775",
     fontSize: moderateScale(FONT.sm),
     letterSpacing: 1.2,
-    marginBottom: moderateScale(10),
+    marginBottom: moderateScale(0),
   },
-  metricCard: {
+  card: {
     backgroundColor: "#1F2222",
     borderRadius: moderateScale(18),
     borderWidth: 1,
     borderColor: "#2B3230",
-    paddingHorizontal: moderateScale(12),
-    paddingVertical: moderateScale(12),
+    overflow: "hidden",
   },
-  metricHeader: {
+  row: {
+    paddingVertical: moderateScale(10),
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: moderateScale(10),
+    paddingHorizontal: moderateScale(16),
+  },
+  rowDivider: {
+    borderBottomWidth: 1,
+    borderBottomColor: "#2B3230",
   },
   metricLabel: {
+    flex: 1.45,
     color: "#8A9290",
     fontSize: moderateScale(FONT.sm),
   },
-  metricValue: {
-    fontSize: moderateScale(FONT.lg),
+  trackWrap: {
+    flex: 1,
+    paddingHorizontal: moderateScale(8),
   },
   track: {
     height: moderateScale(3),
@@ -91,5 +102,10 @@ const styles = StyleSheet.create({
   fill: {
     height: "100%",
     borderRadius: 99,
+  },
+  metricValue: {
+    flex: 0.55,
+    textAlign: "right",
+    fontSize: moderateScale(FONT.xl),
   },
 });

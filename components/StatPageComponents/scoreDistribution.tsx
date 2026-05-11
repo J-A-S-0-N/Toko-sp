@@ -16,11 +16,11 @@ type ScoreDistributionProps = {
 };
 
 const DEFAULT_ITEMS: DistributionItem[] = [
-  { label: "<75", count: 1, barColor: "#4B5452" },
-  { label: "75-79", count: 4, barColor: "#44BE74" },
-  { label: "80-84", count: 11, barColor: "#54B387" },
-  { label: "85-89", count: 6, barColor: "#4A5050" },
-  { label: "90+", count: 2, barColor: "#404746" },
+  { label: "<66", count: 1, barColor: "#4B5452" },
+  { label: "66", count: 4, barColor: "#44BE74" },
+  { label: "67-69", count: 11, barColor: "#54B387" },
+  { label: "70-72", count: 6, barColor: "#4A5050" },
+  { label: "73+", count: 2, barColor: "#404746" },
 ];
 
 const MAX_BAR_HEIGHT = moderateScale(78);

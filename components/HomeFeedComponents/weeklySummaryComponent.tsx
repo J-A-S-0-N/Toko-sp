@@ -2,10 +2,11 @@ import { ThemedText as Text } from "@/components/themed-text";
 import { db } from "@/config/firebase";
 import { FONT } from '@/constants/theme';
 import { useAuth } from "@/context/AuthContext";
+import { useIsFocused } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
-import { useEffect, useMemo, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Animated, Easing, StyleSheet, View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
 
 interface RoundRow {
@@ -27,9 +28,77 @@ function formatMonthDay(d: Date): string {
   return `${d.getMonth() + 1}월 ${d.getDate()}일`;
 }
 
+interface AnimatedNumberProps {
+  value: string | number;
+  style?: object;
+  delay?: number;
+  duration?: number;
+  trigger: number;
+}
+
+const AnimatedNumber = ({ value, style, delay = 0, duration = 1000, trigger }: AnimatedNumberProps) => {
+  const animValue = useRef(new Animated.Value(0)).current;
+  const [displayValue, setDisplayValue] = useState('0');
+  
+  const numericValue = useMemo(() => {
+    const num = typeof value === 'string' ? parseFloat(value) : value;
+    return isNaN(num) ? 0 : num;
+  }, [value]);
+  
+  const isDecimal = useMemo(() => {
+    return numericValue % 1 !== 0;
+  }, [numericValue]);
+
+  useEffect(() => {
+    // Always reset first
+    animValue.setValue(0);
+    setDisplayValue(isDecimal ? '0.0' : '0');
+    
+    // Small timeout to ensure reset is applied before animation starts
+    const timeoutId = setTimeout(() => {
+      if (trigger > 0) {
+        Animated.timing(animValue, {
+          toValue: numericValue,
+          duration,
+          delay,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: false,
+        }).start(({ finished }) => {
+          if (finished) {
+            setDisplayValue(String(value));
+          }
+        });
+      }
+    }, 10);
+    
+    return () => clearTimeout(timeoutId);
+  }, [trigger, numericValue, delay, duration, isDecimal, value, animValue]);
+
+  useEffect(() => {
+    const listener = animValue.addListener(({ value: v }) => {
+      if (isDecimal) {
+        setDisplayValue(v.toFixed(1));
+      } else {
+        setDisplayValue(Math.round(v).toString());
+      }
+    });
+    
+    return () => animValue.removeListener(listener);
+  }, [animValue, isDecimal]);
+
+  // Handle non-numeric values (like "-")
+  if (typeof value === 'string' && isNaN(parseFloat(value))) {
+    return <Text type="barlowLight" style={style}>{value}</Text>;
+  }
+
+  return <Text type="barlowLight" style={style}>{displayValue}</Text>;
+};
+
 const WeeklySummaryComponent = () => {
   const { user } = useAuth();
   const [rounds, setRounds] = useState<RoundRow[]>([]);
+  const isFocused = useIsFocused();
+  const [animationTrigger, setAnimationTrigger] = useState(0);
 
   useEffect(() => {
     if (!user?.uid) return;
@@ -141,6 +210,13 @@ const WeeklySummaryComponent = () => {
     };
   }, [rounds]);
 
+  // Trigger animation when tab is focused
+  useEffect(() => {
+    if (isFocused) {
+      setAnimationTrigger(prev => prev + 1);
+    }
+  }, [isFocused]);
+
   return (
     <LinearGradient
       colors={["#082017", "#062016", "#0E2E20"]}
@@ -165,34 +241,46 @@ const WeeklySummaryComponent = () => {
 
       <View style={styles.statsRow}>
         <View style={styles.statItem}>
-          <Text type="barlowHard" style={styles.statValue}>
-            {roundCount}
-          </Text>
+          <AnimatedNumber 
+            style={styles.statValue}
+            value={roundCount}
+            delay={0}
+            duration={1000}
+            trigger={animationTrigger}
+          />
           <Text style={styles.statLabel}>라운드</Text>
         </View>
 
         <View style={styles.separator} />
 
         <View style={styles.statItem}>
-          <Text type="barlowHard" style={styles.statValue}>
-            {avg}
-          </Text>
+          <AnimatedNumber 
+            style={styles.statValue}
+            value={avg}
+            delay={150}
+            duration={1000}
+            trigger={animationTrigger}
+          />
           <Text style={styles.statLabel}>평균</Text>
         </View>
 
         <View style={styles.separator} />
 
         <View style={styles.statItem}>
-          <Text type="barlowHard" style={styles.statValueAccent}>
-            {best}
-          </Text>
+          <AnimatedNumber 
+            style={styles.statValueAccent}
+            value={best}
+            delay={300}
+            duration={1000}
+            trigger={animationTrigger}
+          />
           <Text style={styles.statLabel}>최고</Text>
         </View>
 
         <View style={styles.separator} />
 
         <View style={[styles.statItem, styles.comparisonStatItem]}>
-          <Text type="barlowHard" style={styles.statValueAccentKor}>
+          <Text type="barlowLight" style={styles.statValueAccentKor}>
             {compLabel}
           </Text>
           <Text style={styles.statLabel}>{deltaLabel}</Text>
@@ -222,7 +310,7 @@ const styles = StyleSheet.create({
   },
   weekRange: {
     color: "#FFFFFF",
-    fontSize: moderateScale(FONT.xl),
+    fontSize: moderateScale(FONT.lg),
   },
   deltaBadge: {
     backgroundColor: "#174D37",
