@@ -2,7 +2,7 @@
   "expo": {
     "name": "toko-sp",
     "backgroundColor": "#0D0D0D",
-    "slug": "toko-sp",
+    "slug": "파크필드",
     "version": "0.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -28,10 +28,8 @@
       "versionCode": 6,
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "backgroundColor": "#FFFFFF",
+        "foregroundImage": "./assets/images/icon.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false

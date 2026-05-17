@@ -7,17 +7,30 @@ import { Platform } from 'react-native';
 
 const tintColor = '#49DF80';
 
+// export const FONT = {
+//   xxs: 10,
+//   xs: 12,
+//   sm: 14,
+//   md: 16,
+//   lg: 19,
+//   xl: 22,
+//   xxl: 26,
+//   h2: 34,
+//   h1: 42,
+//   hero: 50,
+// };
+
 export const FONT = {
-  xxs: 10,
-  xs: 12,
-  sm: 14,
-  md: 16,
-  lg: 19,
-  xl: 22,
-  xxl: 26,
-  h2: 34,
-  h1: 42,
-  hero: 50,
+  xxs: 13,
+  xs: 15,
+  sm: 17,
+  md: 19,
+  lg: 22,
+  xl: 25,
+  xxl: 29,
+  h2: 37,
+  h1: 45,
+  hero: 53,
 };
 
 export const Colors = {

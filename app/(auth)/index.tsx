@@ -1,6 +1,6 @@
 import { FONT } from '@/constants/theme';
 import { router } from 'expo-router';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
 import { moderateScale } from 'react-native-size-matters';
 
 import { ThemedText as Text } from '@/components/themed-text';
@@ -11,7 +11,7 @@ export default function AuthEntryScreen() {
     <View style={styles.container}>
       <View style={styles.content}>
         <View style={styles.logoWrap}>
-          <Text style={styles.logoEmoji}>⛳️</Text>
+          <Image source={require('@/assets/images/icon.png')} style={styles.logoImage} resizeMode="contain" />
         </View>
 
         <Text type="barlowHard" style={styles.title}>
@@ -71,9 +71,9 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   logoWrap: {
-    width: moderateScale(80),
-    height: moderateScale(80),
-    borderRadius: moderateScale(24),
+    width: moderateScale(92),
+    height: moderateScale(92),
+    borderRadius: moderateScale(28),
     backgroundColor: '#00BA87',
     alignItems: 'center',
     justifyContent: 'center',
@@ -82,8 +82,10 @@ const styles = StyleSheet.create({
     shadowRadius: 28,
     shadowOffset: { width: 0, height: 10 },
   },
-  logoEmoji: {
-    fontSize: moderateScale(FONT.hero),
+  logoImage: {
+    width: moderateScale(84),
+    height: moderateScale(84),
+    borderRadius: moderateScale(24),
   },
   title: {
     marginTop: 10,

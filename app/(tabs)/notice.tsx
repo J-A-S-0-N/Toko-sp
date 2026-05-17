@@ -9,14 +9,14 @@ import { useLocalSearchParams } from "expo-router";
 import { addDoc, collection, doc, getDoc, getDocs, query, serverTimestamp, where } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  Modal,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  View
+    ActivityIndicator,
+    Modal,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    TextInput,
+    TouchableOpacity,
+    View
 } from "react-native";
 import Animated, { FadeIn, FadeOut, SlideInDown, SlideOutDown } from "react-native-reanimated";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
@@ -440,12 +440,6 @@ export default function NoticeScreen() {
             <ThemedText type="barlowLight" style={styles.sectionLabel}>
               최근 공지
             </ThemedText>
-            <TouchableOpacity activeOpacity={0.7} style={styles.viewAllBtn}>
-              <ThemedText type="barlowLight" style={styles.viewAllText}>
-                전체 보기
-              </ThemedText>
-              <Feather name="arrow-right" size={moderateScale(12)} color="#3CC06E" />
-            </TouchableOpacity>
           </View>
 
           <View style={styles.noticeList}>

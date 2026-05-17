@@ -260,9 +260,11 @@ export default function HoleSelectionModal({
             </Animated.View>
           </View>
 
-          <Pressable style={styles.button} onPress={routeToScreen}>
-            <Text style={styles.buttonText}>카메라 열기</Text>
-          </Pressable>
+          <SafeAreaView edges={['bottom']} style={styles.safeArea}>
+            <Pressable style={styles.button} onPress={routeToScreen}>
+              <Text style={styles.buttonText}>카메라 열기</Text>
+            </Pressable>
+          </SafeAreaView>
         </Animated.View>
       </View>
     </Modal>
@@ -273,6 +275,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'flex-end',
+  },
+  safeArea: {
+    width: '100%',
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,

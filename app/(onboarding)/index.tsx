@@ -2,6 +2,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useEffect, useRef } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText as Text } from '@/components/themed-text';
 import { FONT } from '@/constants/theme';
@@ -31,6 +32,7 @@ export default function OnboardingFirstScreen() {
         end={{ x: 0.6, y: 0.7 }}
         style={styles.topGlow}
       />
+      <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
 
       <View style={styles.content}>
         <View style={styles.badge}>
@@ -72,6 +74,7 @@ export default function OnboardingFirstScreen() {
           <Text type="barlowHard" style={styles.ctaText}>다음</Text>
         </Pressable>
       </View>
+      </SafeAreaView>
     </LinearGradient>
   );
 }
@@ -79,7 +82,6 @@ export default function OnboardingFirstScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#0F0F0F',
   },
   container: {
     flex: 1,
@@ -200,7 +202,6 @@ const styles = StyleSheet.create({
   },
   footer: {
     gap: 18,
-    paddingBottom: 10,
   },
   progressIndicator: {
     alignSelf: 'center',

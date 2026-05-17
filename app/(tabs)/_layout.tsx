@@ -68,7 +68,7 @@ function CustomTabBar({ state, navigation }: BottomTabBarProps) {
       pointerEvents="box-none"
       style={[
         styles.outer,
-        { paddingBottom: Math.max(insets.bottom - moderateScale(10), moderateScale(4)) },
+        { paddingBottom: Math.max(insets.bottom + moderateScale(4), moderateScale(4)) },
       ]}
     >
       <Shadow
