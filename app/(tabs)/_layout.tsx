@@ -199,18 +199,19 @@ const styles = StyleSheet.create({
     gap: moderateScale(4),
   },
   iconWrap: {
-    width: moderateScale(40),
-    height: moderateScale(40),
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  iconWrapInner: {
-    width: moderateScale(40),
-    height: moderateScale(40),
+    width: moderateScale(45),
+    height: moderateScale(45),
     borderRadius: moderateScale(12),
     alignItems: 'center',
     justifyContent: 'center',
-    //overflow: 'hidden',
+    overflow: 'hidden',
+  },
+  iconWrapInner: {
+    width: moderateScale(45),
+    height: moderateScale(45),
+    borderRadius: moderateScale(12),
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   iconWrapFocused: {
     backgroundColor: SELECTED_BG,

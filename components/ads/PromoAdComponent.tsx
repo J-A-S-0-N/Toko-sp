@@ -1,30 +1,40 @@
 import { ThemedText } from "@/components/themed-text";
 import { FONT } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React from "react";
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
 
 export default function PromoAdComponent() {
+  const router = useRouter();
+
+  const handlePress = () => {
+    router.push({
+      pathname: "/(tabs)/notice",
+      params: { showGiveaway: "true" }
+    });
+  };
+
   return (
     <View style={styles.container}>
       {/* Top Row: Text + Image */}
       <View style={styles.topRow}>
         <View style={styles.textSection}>
           <ThemedText type="barlowLight" style={styles.sponsoredLabel}>
-            광고
+            이벤트
           </ThemedText>
           <ThemedText type="barlowHard" style={styles.title}>
-            당신의 게임을 형상해보세요!
+            스코어 디스크 무료 증정 이벤트
           </ThemedText>
           <ThemedText type="barlowLight" style={styles.description}>
-            20% 활인을 당장 받아보세요
+            파크필드 스코어 어플 출시 기념 이벤트
           </ThemedText>
         </View>
 
         <View style={styles.imageContainer}>
           <Image
-            source={{ uri: "https://via.placeholder.com/80x80/FFFFFF/000000?text=⛳" }}
+            source={{ uri: "https://via.placeholder.com/80x80/4CAE82/FFFFFF?text=⛳" }}
             style={styles.productImage}
             resizeMode="cover"
           />
@@ -32,11 +42,11 @@ export default function PromoAdComponent() {
       </View>
 
       {/* Bottom: Full-width CTA Button */}
-      <TouchableOpacity style={styles.ctaButton}>
+      <TouchableOpacity style={styles.ctaButton} onPress={handlePress}>
         <ThemedText type="barlowHard" style={styles.ctaText}>
-          자세히 보기
+          이벤트 보기
         </ThemedText>
-        <Ionicons name="arrow-forward" size={moderateScale(16)} color="#FFFFFF" />
+        <Ionicons name="arrow-forward" size={moderateScale(16)} color="#4CAE82" />
       </TouchableOpacity>
     </View>
   );
@@ -89,18 +99,19 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   ctaButton: {
-    borderWidth: 1,
-    borderColor: "#45D07F",
-    borderRadius: moderateScale(20),
-    paddingVertical: moderateScale(14),
+    borderWidth: moderateScale(0.5),
+    borderColor: "#4CAE82",
+    borderRadius: moderateScale(14),
+    paddingVertical: moderateScale(12),
     paddingHorizontal: moderateScale(16),
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: moderateScale(8),
+    gap: moderateScale(6),
+    backgroundColor: "#163429",
   },
   ctaText: {
-    color: "#45D07F",
+    color: "#4CAE82",
     fontSize: moderateScale(FONT.sm),
   },
 });

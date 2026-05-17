@@ -314,7 +314,7 @@ const styles = StyleSheet.create({
   optionCard: {
     flex: 1,
     borderRadius: moderateScale(16),
-    borderWidth: 1,
+    borderWidth: moderateScale(0.5),
     overflow: 'hidden',
   },
   optionPressable: {
@@ -324,7 +324,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   optionValue: {
-    fontSize: moderateScale(FONT.xl),
+    fontSize: moderateScale(FONT.lg),
     fontWeight: '800',
     marginBottom: 3,
   },
@@ -339,7 +339,7 @@ const styles = StyleSheet.create({
   button: {
     width: '100%',
     borderRadius: 14,
-    borderWidth: 1,
+    borderWidth: moderateScale(0.5),
     borderColor: '#3A3F45',
     alignItems: 'center',
     justifyContent: 'center',

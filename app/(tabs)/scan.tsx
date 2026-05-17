@@ -26,12 +26,14 @@ export default function ScanScreen() {
         <ScanHeader />
         */}
         <RecentScansSection />
-        <ScanFrameSection 
+        <ScanFrameSection
           onCameraPress={() => {
             setIsHoleModalVisible(true);
-          }} 
-          onGalleryPress={() => {}} 
-          onFramePress={() => {}} 
+          }}
+          onGalleryPress={() => {}}
+          onFramePress={() => {
+            setIsHoleModalVisible(true);
+          }}
         />
         <View style={styles.adContainer}>
           <PromoAdComponent />

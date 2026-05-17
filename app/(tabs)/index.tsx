@@ -4,7 +4,7 @@ import DailyTipComponent from '@/components/HomeFeedComponents/dailyTipComponent
 import GoalSetupPromptComponent from '@/components/HomeFeedComponents/goalSetupPromptComponent';
 import HomeFeedHeader from '@/components/HomeFeedComponents/homeFeedHeader';
 import HomeFeedSkeleton from '@/components/HomeFeedComponents/HomeFeedSkeleton';
-import NearbyCoursesComponent from '@/components/HomeFeedComponents/nearbyCoursesComponent';
+import HottestLocationsComponent from '@/components/HomeFeedComponents/hottestLocationsComponent';
 import RecentRoundComponent from '@/components/HomeFeedComponents/recentRoundComponent';
 import UsernameHeader from '@/components/HomeFeedComponents/usernameHeader';
 import UserStatComponent from '@/components/HomeFeedComponents/userStatComponent';
@@ -18,7 +18,7 @@ import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useRouter } from 'expo-router';
 import { collection, getCountFromServer, query, where } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Linking, Pressable, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { moderateScale } from 'react-native-size-matters';
@@ -104,7 +104,9 @@ export default function HomeScreen() {
         </View>
 
         <View style={{marginBottom: moderateScale(25)}}>
-          <NearbyCoursesComponent/>
+          <HottestLocationsComponent
+            onPressViewAll={() => Linking.openURL('https://www.kpga7330.com/park-golf/courses')}
+          />
         </View>
 
         <View style={{marginBottom: moderateScale(15)}}>

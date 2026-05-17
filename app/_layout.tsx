@@ -4,7 +4,9 @@ import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 
+import OfflineBlocker from '@/components/OfflineBlocker';
 import { AuthProvider } from '@/context/AuthContext';
+import { NetworkProvider } from '@/context/NetworkContext';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 import { BarlowCondensed_400Regular, BarlowCondensed_500Medium_Italic, BarlowCondensed_900Black_Italic, useFonts } from '@expo-google-fonts/barlow-condensed';
@@ -51,8 +53,10 @@ export default function RootLayout() {
 
   return (
     <AuthProvider>
+    <NetworkProvider>
     <ThemeProvider value={DarkTheme}>
       <GestureHandlerRootView style={{ flex: 1 }}>
+        <OfflineBlocker />
         <Stack
           screenOptions={{
             contentStyle: { backgroundColor: '#0F0F0F' }
@@ -102,6 +106,7 @@ export default function RootLayout() {
       <StatusBar style="light" />
       </GestureHandlerRootView>
     </ThemeProvider>
+    </NetworkProvider>
     </AuthProvider>
   );
 }

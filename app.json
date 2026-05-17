@@ -3,7 +3,7 @@
     "name": "toko-sp",
     "backgroundColor": "#0D0D0D",
     "slug": "toko-sp",
-    "version": "1.0.0",
+    "version": "0.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "tokosp",
@@ -25,6 +25,7 @@
     },
     "android": {
       "package": "com.tokosp.app",
+      "versionCode": 6,
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
@@ -44,8 +45,6 @@
       [
         "expo-splash-screen",
         {
-          "image": null,
-          "resizeMode": "contain",
           "backgroundColor": "#0F1010",
           "dark": {
             "backgroundColor": "#0F1010"
@@ -71,6 +70,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "87f305de-539c-4f5a-b16c-f550ff3cce8b"
+      }
     }
   }
 }
