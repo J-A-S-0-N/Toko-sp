@@ -238,7 +238,7 @@ export default function ProfileScreen() {
               trigger={animationTrigger}
             />
             <Text type="barlowLight" style={styles.statLabel}>
-              최저타 라운드
+              최저타 라운드 (18홀)
             </Text>
           </View>
 

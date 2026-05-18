@@ -2,6 +2,7 @@ import { FONT } from '@/constants/theme';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { moderateScale } from 'react-native-size-matters';
 
 import { ThemedText as Text } from '@/components/themed-text';
@@ -128,7 +129,7 @@ export default function CourseSelectionScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView edges={['top']} style={styles.container}>
       <View style={styles.content}>
         <View style={styles.headerWrap}>
           <Pressable style={styles.iconButton} onPress={() => router.back()}>
@@ -176,7 +177,7 @@ export default function CourseSelectionScreen() {
           다음
         </Text>
       </Pressable>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -185,7 +186,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#05080B',
     paddingHorizontal: moderateScale(14),
-    paddingTop: moderateScale(50),
     paddingBottom: moderateScale(28),
   },
   content: {

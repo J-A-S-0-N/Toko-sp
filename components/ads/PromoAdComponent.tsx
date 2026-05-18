@@ -79,8 +79,8 @@ const styles = StyleSheet.create({
   },
   title: {
     color: "#FFFFFF",
-    fontSize: moderateScale(FONT.lg),
-    lineHeight: moderateScale(24),
+    fontSize: moderateScale(FONT.md),
+    lineHeight: moderateScale(22),
   },
   description: {
     color: "#9BA1A6",

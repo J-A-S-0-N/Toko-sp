@@ -3,6 +3,7 @@ import { FONT } from '@/constants/theme';
 import { router } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Modal, Pressable, StyleSheet, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { moderateScale } from 'react-native-size-matters';
 
 type HoleSelectionModalProps = {

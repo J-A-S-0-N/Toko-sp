@@ -7,13 +7,14 @@ import { doc, updateDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import Animated, {
-  Easing,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withSpring,
-  withTiming,
+    Easing,
+    useAnimatedStyle,
+    useSharedValue,
+    withRepeat,
+    withSpring,
+    withTiming,
 } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { moderateScale } from 'react-native-size-matters';
 
 import { ThemedText as Text } from '@/components/themed-text';
@@ -256,7 +257,7 @@ export default function LocationSetupScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView edges={['top']} style={styles.container}>
       <View style={styles.content}>
         <View style={styles.headerWrap}>
           <Pressable style={styles.iconButton} onPress={() => router.back()}>
@@ -373,7 +374,7 @@ export default function LocationSetupScreen() {
       >
         <Text style={[styles.nextText, !isNextEnabled && styles.nextTextDisabled]}>다음</Text>
       </Pressable>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -382,7 +383,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#05080B',
     paddingHorizontal: moderateScale(14),
-    paddingTop: moderateScale(50),
     paddingBottom: moderateScale(28),
   },
   content: {

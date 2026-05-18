@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import type { UserCredential } from 'firebase/auth';
 import { useMemo, useRef, useState } from 'react';
 import { Alert, Animated, Keyboard, Pressable, StyleSheet, TextInput, TouchableWithoutFeedback, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { moderateScale } from 'react-native-size-matters';
 import { saveUserInfo } from './functions/saveUserFunction';
 import { clearPendingUserCredential, getPendingUserCredential } from './functions/userCredentialStore';
@@ -112,7 +113,7 @@ export default function ProfileSetupScreen() {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-    <View style={styles.container}>
+    <SafeAreaView edges={['top']} style={styles.container}>
       <View style={styles.content}>
         <View style={styles.headerWrap}>
           <Pressable style={styles.iconButton} onPress={() => router.back()}>
@@ -215,7 +216,7 @@ export default function ProfileSetupScreen() {
       >
         <Text style={[styles.nextText, !isNextEnabled && styles.nextTextDisabled]}>다음</Text>
       </Pressable>
-    </View>
+    </SafeAreaView>
     </TouchableWithoutFeedback>
   );
 }
@@ -225,7 +226,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#05080B',
     paddingHorizontal: moderateScale(14),
-    paddingTop: moderateScale(50),
     paddingBottom: moderateScale(28),
   },
   content: {

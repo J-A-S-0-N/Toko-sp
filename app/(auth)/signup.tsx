@@ -2,6 +2,7 @@
 import { router } from 'expo-router';
 import { useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Animated, Keyboard, Pressable, StyleSheet, TextInput, TouchableWithoutFeedback, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 // recaptcha function
 
@@ -117,7 +118,7 @@ export default function SignupScreen() {
         attemptInvisibleVerification={false}
       /> */}
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <View style={styles.container}>
+      <SafeAreaView edges={['top']} style={styles.container}>
           <View style={styles.mainArea}>
             <View style={styles.header}>
               <Pressable style={styles.iconButton} onPress={() => router.back()}>
@@ -176,7 +177,7 @@ export default function SignupScreen() {
               인증번호 받기
             </Text>
           </Pressable>
-      </View>
+      </SafeAreaView>
       </TouchableWithoutFeedback>
 
       {isSubmitting && (
@@ -194,7 +195,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#05080B',
     paddingHorizontal: moderateScale(10),
-    paddingTop: moderateScale(50),
     paddingBottom: moderateScale(28),
   },
   mainArea: {

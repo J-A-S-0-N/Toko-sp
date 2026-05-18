@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
   metricLabel: {
     flex: 1.45,
     color: "#8A9290",
-    fontSize: moderateScale(FONT.sm),
+    fontSize: moderateScale(FONT.xs),
   },
   trackWrap: {
     flex: 1,
