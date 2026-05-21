@@ -6,7 +6,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { moderateScale } from 'react-native-size-matters';
 
 import { ThemedText as Text } from '@/components/themed-text';
-import auth from '@react-native-firebase/auth';
+// import auth from '@react-native-firebase/auth';
+import { getAuth, signOut } from '@react-native-firebase/auth';
 import { confirmCode } from './functions/authFunctions';
 import { checkUserExistsByUid } from './functions/loginFetchUserFunction';
 import { setPendingUserCredential } from './functions/userCredentialStore';
@@ -94,7 +95,8 @@ export default function LoginVerificationScreen() {
       const existingUser = await checkUserExistsByUid(uid);
 
       if (!existingUser) {
-        await auth().signOut();
+        // await auth().signOut();
+        await signOut(getAuth());
         Alert.alert('가입된 계정이 없어요', '회원가입 후 로그인 해주세요.');
         router.replace('/(auth)/signup');
         return;
@@ -109,6 +111,7 @@ export default function LoginVerificationScreen() {
       Alert.alert('잘못된 인증번호', '다시 시도해주세요');
     }
   };
+
 
   const handleResendCode = () => {
     if (resendSeconds > 0) {
