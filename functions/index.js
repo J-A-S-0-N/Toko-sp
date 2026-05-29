@@ -76,91 +76,105 @@ Rules:
 
 export const onNewDocument = onDocumentCreated({
       document: "Scans/{docId}",
-      secrets: [GEMINI_API_KEY] 
+      secrets: [GEMINI_API_KEY],
+      memory: "1GiB",
+      timeoutSeconds: 50,
     }, async (event) => {
+  const docId = event.params.docId;
+  const docRef = db.collection("Scans").doc(docId);
 
-  const snapshot = event.data;
-  const photoUrls = snapshot.get("photoUrls");
-  const imageLinks = Array.isArray(photoUrls) ? photoUrls.filter((url) => typeof url === "string" && url.trim() !== "") : [];
+  try {
+    const snapshot = event.data;
+    const photoUrls = snapshot.get("photoUrls");
+    const imageLinks = Array.isArray(photoUrls) ? photoUrls.filter((url) => typeof url === "string" && url.trim() !== "") : [];
 
-  if (typeof imageLinks[0] !== "string" || imageLinks[0].trim() === "") {
-    throw new Error("imageLink is not a valid string");
-  }
-
-  async function processImage(imageUrl) {
-    const res = await fetch(imageUrl);
-    if (!res.ok) {
-      throw new Error(`Failed to fetch image (${res.status}): ${imageUrl}`);
+    if (typeof imageLinks[0] !== "string" || imageLinks[0].trim() === "") {
+      throw new Error("imageLink is not a valid string");
     }
-    const arrayBuffer = await res.arrayBuffer();
-    const originalBuffer = Buffer.from(arrayBuffer);
-    const unwrappedBuffer = await polarUnwrap(originalBuffer);
-    const imageBase64 = unwrappedBuffer.toString("base64");
-    return await main(imageBase64);
-  }
 
-  console.error("docId: " + event.params.docId);
-
-  //front 9 (holes 1-9)
-  const frontResponse = await processImage(imageLinks[0]);
-  const frontHits = {};
-  for (const pair of frontResponse) {
-    if (pair.hole >= 1 && pair.hole <= 9) {
-      frontHits[pair.hole] = pair.hit;
+    async function processImage(imageUrl) {
+      const res = await fetch(imageUrl);
+      if (!res.ok) {
+        throw new Error(`Failed to fetch image (${res.status}): ${imageUrl}`);
+      }
+      const arrayBuffer = await res.arrayBuffer();
+      const originalBuffer = Buffer.from(arrayBuffer);
+      const unwrappedBuffer = await polarUnwrap(originalBuffer);
+      const imageBase64 = unwrappedBuffer.toString("base64");
+      return await main(imageBase64);
     }
-  }
-  console.error("frontHits: " + JSON.stringify(frontHits));
 
-  //back 9 (holes 10-18) — only if a second image exists
-  const backHits = {};
-  if (imageLinks[1]) {
-    const backResponse = await processImage(imageLinks[1]);
-    for (const pair of backResponse) {
+    console.error("docId: " + docId);
+
+    //front 9 (holes 1-9)
+    const frontResponse = await processImage(imageLinks[0]);
+    const frontHits = {};
+    for (const pair of frontResponse) {
       if (pair.hole >= 1 && pair.hole <= 9) {
-        backHits[pair.hole + 9] = pair.hit;
+        frontHits[pair.hole] = pair.hit;
       }
     }
-    console.error("backHits: " + JSON.stringify(backHits));
-  }
+    console.error("frontHits: " + JSON.stringify(frontHits));
 
-  const updateData_Nine = {
-    hole1_raw: frontHits[1] ?? null,
-    hole2_raw: frontHits[2] ?? null,
-    hole3_raw: frontHits[3] ?? null,
-    hole4_raw: frontHits[4] ?? null,
-    hole5_raw: frontHits[5] ?? null,
-    hole6_raw: frontHits[6] ?? null,
-    hole7_raw: frontHits[7] ?? null,
-    hole8_raw: frontHits[8] ?? null,
-    hole9_raw: frontHits[9] ?? null,
-    status: "done",
-  };
+    //back 9 (holes 10-18) — only if a second image exists
+    const backHits = {};
+    if (imageLinks[1]) {
+      const backResponse = await processImage(imageLinks[1]);
+      for (const pair of backResponse) {
+        if (pair.hole >= 1 && pair.hole <= 9) {
+          backHits[pair.hole + 9] = pair.hit;
+        }
+      }
+      console.error("backHits: " + JSON.stringify(backHits));
+    }
 
-  const updateData_Eighteen = {
-    hole1_raw: frontHits[1] ?? null,
-    hole2_raw: frontHits[2] ?? null,
-    hole3_raw: frontHits[3] ?? null,
-    hole4_raw: frontHits[4] ?? null,
-    hole5_raw: frontHits[5] ?? null,
-    hole6_raw: frontHits[6] ?? null,
-    hole7_raw: frontHits[7] ?? null,
-    hole8_raw: frontHits[8] ?? null,
-    hole9_raw: frontHits[9] ?? null,
-    hole10_raw: backHits[10] ?? null,
-    hole11_raw: backHits[11] ?? null,
-    hole12_raw: backHits[12] ?? null,
-    hole13_raw: backHits[13] ?? null,
-    hole14_raw: backHits[14] ?? null,
-    hole15_raw: backHits[15] ?? null,
-    hole16_raw: backHits[16] ?? null,
-    hole17_raw: backHits[17] ?? null,
-    hole18_raw: backHits[18] ?? null,
-    status: "done",
-  };
+    const updateData_Nine = {
+      hole1_raw: frontHits[1] ?? null,
+      hole2_raw: frontHits[2] ?? null,
+      hole3_raw: frontHits[3] ?? null,
+      hole4_raw: frontHits[4] ?? null,
+      hole5_raw: frontHits[5] ?? null,
+      hole6_raw: frontHits[6] ?? null,
+      hole7_raw: frontHits[7] ?? null,
+      hole8_raw: frontHits[8] ?? null,
+      hole9_raw: frontHits[9] ?? null,
+      status: "done",
+    };
 
-  if (imageLinks[1]) {
-    await db.collection("Scans").doc(event.params.docId).update(updateData_Eighteen);
-  } else {
-    await db.collection("Scans").doc(event.params.docId).update(updateData_Nine);
+    const updateData_Eighteen = {
+      hole1_raw: frontHits[1] ?? null,
+      hole2_raw: frontHits[2] ?? null,
+      hole3_raw: frontHits[3] ?? null,
+      hole4_raw: frontHits[4] ?? null,
+      hole5_raw: frontHits[5] ?? null,
+      hole6_raw: frontHits[6] ?? null,
+      hole7_raw: frontHits[7] ?? null,
+      hole8_raw: frontHits[8] ?? null,
+      hole9_raw: frontHits[9] ?? null,
+      hole10_raw: backHits[10] ?? null,
+      hole11_raw: backHits[11] ?? null,
+      hole12_raw: backHits[12] ?? null,
+      hole13_raw: backHits[13] ?? null,
+      hole14_raw: backHits[14] ?? null,
+      hole15_raw: backHits[15] ?? null,
+      hole16_raw: backHits[16] ?? null,
+      hole17_raw: backHits[17] ?? null,
+      hole18_raw: backHits[18] ?? null,
+      status: "done",
+    };
+
+    if (imageLinks[1]) {
+      await docRef.update(updateData_Eighteen);
+    } else {
+      await docRef.update(updateData_Nine);
+    }
+  } catch (error) {
+    console.error(`Processing failed for ${docId}:`, error);
+    await docRef.update({
+      status: "error",
+      errorMessage: error.message || "Processing failed",
+      errorTimestamp: new Date().toISOString(),
+    });
+    // Function completes gracefully - don't re-throw
   }
 });

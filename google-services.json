@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "815485205204-t2ve5fogemcasrjkc8kcr315j4c7c7je.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tokosp.app",
+            "certificate_hash": "37ff123843e1d203200061bc62d4e14e075874ae"
+          }
+        },
+        {
           "client_id": "815485205204-0dc9he3a432md3dov360he3bs507o08a.apps.googleusercontent.com",
           "client_type": 3
         }

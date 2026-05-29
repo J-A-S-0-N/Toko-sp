@@ -4,15 +4,15 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import Animated, {
-    Easing,
-    type SharedValue,
-    interpolateColor,
-    useAnimatedStyle,
-    useSharedValue,
-    withRepeat,
-    withSequence,
-    withSpring,
-    withTiming,
+  Easing,
+  type SharedValue,
+  interpolateColor,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withSpring,
+  withTiming,
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
@@ -138,16 +138,21 @@ export default function RoundInfoScreen() {
 
         unsubscribe = onSnapshot(docRef, (snap) => {
           const data = snap.data();
-          if (data?.status !== "done") return;
-
-          const s: number[] = [];
-          for (let i = 1; i <= holesCount; i++) s.push(data[`hole${i}`] ?? 0);
-          if (isActive) {
-            setScores(s);
-            setUploadPhase("done");
-            activate();
+          if (data?.status === "done") {
+            const s: number[] = [];
+            for (let i = 1; i <= holesCount; i++) s.push(data[`hole${i}_raw`] ?? 0);
+            if (isActive) {
+              setScores(s);
+              setUploadPhase("done");
+              activate();
+            }
+            unsubscribe?.();
+          } else if (data?.status === "error") {
+            if (isActive) {
+              setUploadPhase("error");
+            }
+            unsubscribe?.();
           }
-          unsubscribe?.();
         });
       } catch (error) {
         console.error("Background upload failed:", error);
@@ -160,6 +165,18 @@ export default function RoundInfoScreen() {
       unsubscribe?.();
     };
   }, [holesCount, parsedPhotos, activate]);
+
+  // Safety net: client-side timeout for OOM cases where server can't update status
+  useEffect(() => {
+    if (uploadPhase !== "analyzing") return;
+
+    const safetyTimer = setTimeout(() => {
+      // If still analyzing after 60s, force error state
+      setUploadPhase("error");
+    }, 60000);
+
+    return () => clearTimeout(safetyTimer);
+  }, [uploadPhase]);
 
   const buttonAnimStyle = useAnimatedStyle(() => ({
     transform: [{ scale: buttonScale.value }],
@@ -200,6 +217,33 @@ export default function RoundInfoScreen() {
         },
       });
     }
+  };
+
+  const handleRetake = () => {
+    if (scanDocId) deletePendingScan(scanDocId);
+    router.replace({
+      pathname: "./capture",
+      params: {
+        holes: String(holesCount),
+        shotIndex: "1",
+        photos: JSON.stringify([]),
+      },
+    });
+  };
+
+  const handleManualEntry = () => {
+    const effectiveScanDocId = scanDocRefLocal.current?.id ?? scanDocId;
+    // All scores set to 1, par defaults to 3 in resultPreview
+    const defaultScores = Array(holesCount).fill(1);
+    router.replace({
+      pathname: "./resultPreview",
+      params: {
+        holes: String(holesCount),
+        scores: JSON.stringify(defaultScores),
+        courseName: courseName.trim(),
+        ...(effectiveScanDocId ? { scanDocId: effectiveScanDocId } : {}),
+      },
+    });
   };
 
   return (
@@ -247,61 +291,80 @@ export default function RoundInfoScreen() {
         </View>
 
         <View style={styles.content}>
-          <Text type="barlowLight" style={styles.sectionLabel}>
-            라운드 정보
-          </Text>
-          <Text type="barlowHard" style={styles.title}>
-            어디서 치셨나요?
-          </Text>
-          <Text type="barlowLight" style={styles.subtitle}>
-            분석하는 동안 입력해 주세요
-          </Text>
+          {uploadPhase === "error" ? (
+            <View style={styles.errorContainer}>
+              <Text type="barlowHard" style={styles.errorTitle}>분석에 실패했습니다</Text>
+              <Text type="barlowLight" style={styles.errorSubtitle}>
+                메모리 부족 또는 시간 초과로 분석을 완료할 수 없습니다
+              </Text>
 
-          <View style={styles.inputGroup}>
-            <Animated.View style={[styles.inputRow, courseRowStyle]}>
-              <Text style={styles.inputIcon}>⛳</Text>
-              <TextInput
-                style={styles.textInput}
-                placeholder="코스명"
-                placeholderTextColor="#5C6366"
-                value={courseName}
-                onChangeText={setCourseName}
-                onFocus={() => glowIn(courseGlow)}
-                onBlur={() => glowOut(courseGlow)}
-                returnKeyType="next"
-              />
-            </Animated.View>
+              <Pressable style={styles.errorButtonSecondary} onPress={handleRetake}>
+                <Text type="barlowHard" style={styles.errorButtonTextSecondary}>📷 사진 다시 찍기</Text>
+              </Pressable>
 
-            <Animated.View style={[styles.inputRow, locationRowStyle]}>
-              <Text style={styles.inputIcon}>📍</Text>
-              <TextInput
-                style={styles.textInput}
-                placeholder="위치 (예: 제주도, 경기도)"
-                placeholderTextColor="#5C6366"
-                value={location}
-                onChangeText={setLocation}
-                onFocus={() => glowIn(locationGlow)}
-                onBlur={() => glowOut(locationGlow)}
-                returnKeyType="next"
-              />
-            </Animated.View>
+              <Pressable style={styles.errorButtonPrimary} onPress={handleManualEntry}>
+                <Text type="barlowHard" style={styles.errorButtonTextPrimary}>✏️ 수동으로 입력하기</Text>
+              </Pressable>
+            </View>
+          ) : (
+            <>
+              <Text type="barlowLight" style={styles.sectionLabel}>
+                라운드 정보
+              </Text>
+              <Text type="barlowHard" style={styles.title}>
+                어디서 치셨나요?
+              </Text>
+              <Text type="barlowLight" style={styles.subtitle}>
+                분석하는 동안 입력해 주세요
+              </Text>
 
-            <Animated.View style={[styles.inputRow, styles.memoRow, memoRowStyle]}>
-              <Text style={[styles.inputIcon, styles.memoIcon]}>✏️</Text>
-              <TextInput
-                style={[styles.textInput, styles.memoInput]}
-                placeholder="메모 (선택사항)"
-                placeholderTextColor="#5C6366"
-                value={memo}
-                onChangeText={setMemo}
-                onFocus={() => glowIn(memoGlow)}
-                onBlur={() => glowOut(memoGlow)}
-                multiline
-                textAlignVertical="top"
-                returnKeyType="default"
-              />
-            </Animated.View>
-          </View>
+              <View style={styles.inputGroup}>
+                <Animated.View style={[styles.inputRow, courseRowStyle]}>
+                  <Text style={styles.inputIcon}>⛳</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    placeholder="코스명"
+                    placeholderTextColor="#5C6366"
+                    value={courseName}
+                    onChangeText={setCourseName}
+                    onFocus={() => glowIn(courseGlow)}
+                    onBlur={() => glowOut(courseGlow)}
+                    returnKeyType="next"
+                  />
+                </Animated.View>
+
+                <Animated.View style={[styles.inputRow, locationRowStyle]}>
+                  <Text style={styles.inputIcon}>📍</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    placeholder="위치 (예: 제주도, 경기도)"
+                    placeholderTextColor="#5C6366"
+                    value={location}
+                    onChangeText={setLocation}
+                    onFocus={() => glowIn(locationGlow)}
+                    onBlur={() => glowOut(locationGlow)}
+                    returnKeyType="next"
+                  />
+                </Animated.View>
+
+                <Animated.View style={[styles.inputRow, styles.memoRow, memoRowStyle]}>
+                  <Text style={[styles.inputIcon, styles.memoIcon]}>✏️</Text>
+                  <TextInput
+                    style={[styles.textInput, styles.memoInput]}
+                    placeholder="메모 (선택사항)"
+                    placeholderTextColor="#5C6366"
+                    value={memo}
+                    onChangeText={setMemo}
+                    onFocus={() => glowIn(memoGlow)}
+                    onBlur={() => glowOut(memoGlow)}
+                    multiline
+                    textAlignVertical="top"
+                    returnKeyType="default"
+                  />
+                </Animated.View>
+              </View>
+            </>
+          )}
         </View>
         </ScrollView>
 
@@ -468,5 +531,48 @@ const styles = StyleSheet.create({
   },
   buttonTextInactive: {
     color: "#5C7A70",
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: moderateScale(24),
+  },
+  errorTitle: {
+    color: "#FF6B6B",
+    fontSize: moderateScale(FONT.lg),
+    marginBottom: moderateScale(8),
+  },
+  errorSubtitle: {
+    color: "#8B9396",
+    fontSize: moderateScale(FONT.sm),
+    textAlign: "center",
+    marginBottom: moderateScale(32),
+  },
+  errorButtonPrimary: {
+    width: "100%",
+    borderRadius: moderateScale(14),
+    backgroundColor: "#53B88F",
+    paddingVertical: moderateScale(16),
+    alignItems: "center",
+    marginBottom: moderateScale(12),
+  },
+  errorButtonTextPrimary: {
+    color: "#FFFFFF",
+    fontSize: moderateScale(FONT.sm),
+  },
+  errorButtonSecondary: {
+    width: "100%",
+    borderRadius: moderateScale(14),
+    borderWidth: 1,
+    borderColor: "#53B88F",
+    backgroundColor: "transparent",
+    paddingVertical: moderateScale(16),
+    alignItems: "center",
+    marginBottom: moderateScale(12),
+  },
+  errorButtonTextSecondary: {
+    color: "#53B88F",
+    fontSize: moderateScale(FONT.sm),
   },
 });

@@ -114,7 +114,7 @@ export default function LoginScreen() {
   return (
     <>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-        <SafeAreaView edges={['top']} style={styles.container}>
+        <SafeAreaView edges={['top', 'bottom']} style={styles.container}>
           <View style={styles.mainArea}>
             <View style={styles.header}>
               <Pressable style={styles.iconButton} onPress={() => router.back()}>
@@ -231,6 +231,7 @@ const styles = StyleSheet.create({
   title: {
     color: '#F4F7F6',
     fontSize: moderateScale(FONT.h2),
+    marginTop: moderateScale(16),
   },
   description: {
     color: '#656D73',

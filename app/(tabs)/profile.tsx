@@ -146,9 +146,8 @@ export default function ProfileScreen() {
       >
         <View style={styles.topBar}>
           <View style={styles.brandRow}>
-            <Ionicons name="flag-outline" size={moderateScale(18)} color="#49C895" />
             <Text type="barlowHard" style={styles.brandText}>
-              CADDIE
+              파크필드
             </Text>
           </View>
 
@@ -300,7 +299,7 @@ const styles = StyleSheet.create({
     paddingBottom: moderateScale(22),
   },
   topBar: {
-    marginTop: moderateScale(6),
+    marginTop: moderateScale(16),
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',

@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
     gap: moderateScale(25),
   },
   header: {
-    marginTop: moderateScale(4),
+    marginTop: moderateScale(16),
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -177,6 +177,6 @@ const styles = StyleSheet.create({
   skeletonContainer: {
     flex: 1,
     paddingHorizontal: moderateScale(10),
-    paddingTop: moderateScale(4),
+    paddingTop: moderateScale(16),
   },
 });

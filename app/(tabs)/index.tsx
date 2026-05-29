@@ -6,10 +6,12 @@ import HomeFeedHeader from '@/components/HomeFeedComponents/homeFeedHeader';
 import HomeFeedSkeleton from '@/components/HomeFeedComponents/HomeFeedSkeleton';
 import HottestLocationsComponent from '@/components/HomeFeedComponents/hottestLocationsComponent';
 import RecentRoundComponent from '@/components/HomeFeedComponents/recentRoundComponent';
+import RegionalRankComponent from '@/components/HomeFeedComponents/regionalRankComponent';
 import UsernameHeader from '@/components/HomeFeedComponents/usernameHeader';
 import UserStatComponent from '@/components/HomeFeedComponents/userStatComponent';
 import WeatherSummaryComponent from '@/components/HomeFeedComponents/weatherSummaryComponent';
 import WeeklySummaryComponent from '@/components/HomeFeedComponents/weeklySummaryComponent';
+import LaunchEventModal from '@/components/LaunchEventModal';
 import { ThemedText as Text } from '@/components/themed-text';
 import db from '@/config/firebase';
 import { FONT } from '@/constants/theme';
@@ -19,7 +21,7 @@ import { useRouter } from 'expo-router';
 import { collection, getCountFromServer, query, where } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { Linking, Pressable, StyleSheet, View } from 'react-native';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut, useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { moderateScale } from 'react-native-size-matters';
 
@@ -28,11 +30,18 @@ export default function HomeScreen() {
   const { user } = useAuth();
   const tabBarHeight = useBottomTabBarHeight();
   const [showSkeleton, setShowSkeleton] = useState(true);
+  const [showEventAd, setShowEventAd] = useState(false);
   const [roundCount, setRoundCount] = useState<number | null>(null);
+  const scrollY = useSharedValue(0);
+
+  const scrollHandler = useAnimatedScrollHandler((event) => {
+    scrollY.value = event.contentOffset.y;
+  });
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowSkeleton(false);
+      setShowEventAd(true);
     }, 2000);
     return () => clearTimeout(timer);
   }, []);
@@ -69,10 +78,12 @@ export default function HomeScreen() {
         entering={FadeIn.duration(400)}
         style={styles.container}
         contentContainerStyle={{ paddingBottom: tabBarHeight + moderateScale(32) }}
+        onScroll={scrollHandler}
+        scrollEventThrottle={16}
       >
 
         <View style={{marginBottom: moderateScale(15)}}>
-          <HomeFeedHeader/>
+          <HomeFeedHeader scrollY={scrollY}/>
         </View>
 
         <View style={{marginBottom: moderateScale(15)}}>
@@ -85,6 +96,10 @@ export default function HomeScreen() {
 
         <View style={{marginBottom: moderateScale(15)}}>
           <WeeklySummaryComponent/>
+        </View>
+
+        <View style={{marginBottom: moderateScale(15)}}>
+          <RegionalRankComponent/>
         </View>
 
         <View style={{marginBottom: moderateScale(25)}}>
@@ -128,6 +143,11 @@ export default function HomeScreen() {
 
       </Animated.ScrollView>
       )}
+
+      {/* Event Overlay - Shows on top of home feed */}
+      {showEventAd && (
+        <LaunchEventModal onClose={() => setShowEventAd(false)} />
+      )}
     </SafeAreaView>
   );
 }
@@ -142,10 +162,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#0F1010",
     flex: 1,
     paddingHorizontal: moderateScale(10),
+    paddingTop: moderateScale(12),
   },
   skeletonContainer: {
     flex: 1,
     paddingHorizontal: moderateScale(10),
+    paddingTop: moderateScale(12),
   },
   titleContainer: {
     flexDirection: 'row',

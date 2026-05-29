@@ -210,7 +210,7 @@ export default function HoleSelectionModal({
                   ]}
                   allowFontScaling={false}
                 >
-                  9 홀
+                  코스 1개
                 </Animated.Text>
                 <Animated.Text
                   style={[
@@ -246,7 +246,7 @@ export default function HoleSelectionModal({
                   ]}
                   allowFontScaling={false}
                 >
-                  18 홀
+                  코스 2개
                 </Animated.Text>
                 <Animated.Text
                   style={[

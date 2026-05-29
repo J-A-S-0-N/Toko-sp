@@ -129,7 +129,7 @@ export default function CourseSelectionScreen() {
   };
 
   return (
-    <SafeAreaView edges={['top']} style={styles.container}>
+    <SafeAreaView edges={['top', 'bottom']} style={styles.container}>
       <View style={styles.content}>
         <View style={styles.headerWrap}>
           <Pressable style={styles.iconButton} onPress={() => router.back()}>
@@ -227,6 +227,7 @@ const styles = StyleSheet.create({
   title: {
     color: '#F4F7F6',
     fontSize: moderateScale(FONT.xl),
+    marginTop: moderateScale(16),
   },
   subtitle: {
     marginTop: moderateScale(6),

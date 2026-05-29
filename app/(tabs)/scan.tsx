@@ -60,6 +60,7 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingBottom: moderateScale(30),
+    paddingTop: moderateScale(16),
     gap: moderateScale(14),
   },
   adContainer: {

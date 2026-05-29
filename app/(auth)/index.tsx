@@ -15,7 +15,7 @@ export default function AuthEntryScreen() {
         </View>
 
         <Text type="barlowHard" style={styles.title}>
-          TOKO스포츠
+          파크필드
         </Text>
         <Text style={styles.subtitle}>골프를 더 스마트하게</Text>
 
