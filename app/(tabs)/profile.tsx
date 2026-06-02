@@ -121,10 +121,8 @@ export default function ProfileScreen() {
     const roundCount = rounds.length;
     const uniqueCourses = new Set(rounds.map((r) => r.courseName).filter(Boolean)).size;
 
-    const eighteenHoleScores = rounds
-      .filter((r) => r.holesCount === 18)
-      .map((r) => r.totalScore);
-    const bestRound = eighteenHoleScores.length > 0 ? Math.min(...eighteenHoleScores) : null;
+    // Best per-course score (lowest 9-hole segment score across all rounds)
+    const bestRound = stats.bestRound;
 
     const avgScore = stats.averageScore;
 
@@ -237,7 +235,7 @@ export default function ProfileScreen() {
               trigger={animationTrigger}
             />
             <Text type="barlowLight" style={styles.statLabel}>
-              최저타 라운드 (18홀)
+              최저타 (1코스 기준)
             </Text>
           </View>
 

@@ -7,6 +7,7 @@ import { moderateScale } from 'react-native-size-matters';
 type HoleEditorModalProps = {
   visible: boolean;
   hole: number;
+  course?: "A" | "B";
   initialScore: number;
   initialPar: number;
   onClose: () => void;
@@ -17,6 +18,7 @@ type HoleEditorModalProps = {
 export default function HoleEditorModal({
   visible,
   hole,
+  course,
   initialScore,
   initialPar,
   onClose,

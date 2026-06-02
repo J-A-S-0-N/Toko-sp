@@ -1,17 +1,23 @@
+import AnimatedNumber from "@/components/AnimatedNumber";
 import { ThemedText as Text } from "@/components/themed-text";
 import { db } from "@/config/firebase";
 import { FONT } from '@/constants/theme';
 import { useAuth } from "@/context/AuthContext";
+import { expandToPerCourseRounds } from "@/hooks/useComputedStats";
 import { useIsFocused } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Animated, Easing, StyleSheet, View } from "react-native";
+import React, { useEffect, useMemo, useState } from "react";
+import { StyleSheet, View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
 
 interface RoundRow {
+  id: string;
   totalScore: number;
+  holesCount: number;
   playedAt: string;
+  appliedPar: number;
+  holeScores: { hole: number; score: number; par: number }[];
 }
 
 /** Monday 00:00 of the week containing `date` */
@@ -27,72 +33,6 @@ function startOfWeek(date: Date): Date {
 function formatMonthDay(d: Date): string {
   return `${d.getMonth() + 1}월 ${d.getDate()}일`;
 }
-
-interface AnimatedNumberProps {
-  value: string | number;
-  style?: object;
-  delay?: number;
-  duration?: number;
-  trigger: number;
-}
-
-const AnimatedNumber = ({ value, style, delay = 0, duration = 1000, trigger }: AnimatedNumberProps) => {
-  const animValue = useRef(new Animated.Value(0)).current;
-  const [displayValue, setDisplayValue] = useState('0');
-  
-  const numericValue = useMemo(() => {
-    const num = typeof value === 'string' ? parseFloat(value) : value;
-    return isNaN(num) ? 0 : num;
-  }, [value]);
-  
-  const isDecimal = useMemo(() => {
-    return numericValue % 1 !== 0;
-  }, [numericValue]);
-
-  useEffect(() => {
-    // Always reset first
-    animValue.setValue(0);
-    setDisplayValue(isDecimal ? '0.0' : '0');
-    
-    // Small timeout to ensure reset is applied before animation starts
-    const timeoutId = setTimeout(() => {
-      if (trigger > 0) {
-        Animated.timing(animValue, {
-          toValue: numericValue,
-          duration,
-          delay,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: false,
-        }).start(({ finished }) => {
-          if (finished) {
-            setDisplayValue(String(value));
-          }
-        });
-      }
-    }, 10);
-    
-    return () => clearTimeout(timeoutId);
-  }, [trigger, numericValue, delay, duration, isDecimal, value, animValue]);
-
-  useEffect(() => {
-    const listener = animValue.addListener(({ value: v }) => {
-      if (isDecimal) {
-        setDisplayValue(v.toFixed(1));
-      } else {
-        setDisplayValue(Math.round(v).toString());
-      }
-    });
-    
-    return () => animValue.removeListener(listener);
-  }, [animValue, isDecimal]);
-
-  // Handle non-numeric values (like "-")
-  if (typeof value === 'string' && isNaN(parseFloat(value))) {
-    return <Text type="barlowLight" style={style}>{value}</Text>;
-  }
-
-  return <Text type="barlowLight" style={style}>{displayValue}</Text>;
-};
 
 const WeeklySummaryComponent = () => {
   const { user } = useAuth();
@@ -116,8 +56,12 @@ const WeeklySummaryComponent = () => {
           snap.docs.map((d) => {
             const data = d.data();
             return {
+              id: d.id,
               totalScore: data.totalScore ?? 0,
+              holesCount: data.holesCount ?? 18,
               playedAt: data.playedAt ?? "",
+              appliedPar: data.appliedPar ?? 0,
+              holeScores: data.holeScores ?? [],
             };
           })
         );
@@ -172,20 +116,40 @@ const WeeklySummaryComponent = () => {
       };
     }
 
-    const scores = thisWeekRounds.map((r) => r.totalScore);
-    const avgVal = Math.round((scores.reduce((s, v) => s + v, 0) / scores.length) * 10) / 10;
-    const bestVal = Math.min(...scores);
+    // Expand each scan into per-course (9-hole) entries so averages and "best"
+    // are comparable across 1-course and 2-course scans.
+    const toRoundData = (r: RoundRow) => ({
+      id: r.id,
+      courseName: "",
+      totalScore: r.totalScore,
+      holesCount: r.holesCount,
+      playedAt: r.playedAt,
+      appliedPar: r.appliedPar,
+      diff: 0,
+      holeScores: r.holeScores,
+      birdieCount: 0,
+      doubleCount: 0,
+    });
+
+    const thisWeekCourses = expandToPerCourseRounds(thisWeekRounds.map(toRoundData));
+    const lastWeekCourses = expandToPerCourseRounds(lastWeekRounds.map(toRoundData));
+
+    const scores = thisWeekCourses.map((c) => c.score);
+    const avgVal = scores.length > 0
+      ? Math.round((scores.reduce((s, v) => s + v, 0) / scores.length) * 10) / 10
+      : 0;
+    const bestVal = scores.length > 0 ? Math.min(...scores) : 0;
 
     let dLabel: string;
     let badge: string;
 
-    if (lastWeekRounds.length === 0) {
+    if (lastWeekCourses.length === 0) {
       dLabel = "지난주 기록 없음";
       badge = "-";
     } else {
       const lastAvg =
-        lastWeekRounds.reduce((s, r) => s + r.totalScore, 0) /
-        lastWeekRounds.length;
+        lastWeekCourses.reduce((s, c) => s + c.score, 0) /
+        lastWeekCourses.length;
       const diff = Math.round((avgVal - lastAvg) * 10) / 10;
       if (diff > 0) {
         dLabel = `+${diff}타`;

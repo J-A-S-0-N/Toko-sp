@@ -4,15 +4,15 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import Animated, {
-  Easing,
-  type SharedValue,
-  interpolateColor,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withSequence,
-  withSpring,
-  withTiming,
+    Easing,
+    type SharedValue,
+    interpolateColor,
+    useAnimatedStyle,
+    useSharedValue,
+    withRepeat,
+    withSequence,
+    withSpring,
+    withTiming,
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
@@ -140,7 +140,10 @@ export default function RoundInfoScreen() {
           const data = snap.data();
           if (data?.status === "done") {
             const s: number[] = [];
-            for (let i = 1; i <= holesCount; i++) s.push(data[`hole${i}_raw`] ?? 0);
+            for (let i = 1; i <= 9; i++) s.push(data[`AHole${i}_raw`] ?? 0);
+            if (holesCount === 18) {
+              for (let i = 1; i <= 9; i++) s.push(data[`BHole${i}_raw`] ?? 0);
+            }
             if (isActive) {
               setScores(s);
               setUploadPhase("done");

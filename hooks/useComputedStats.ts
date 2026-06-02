@@ -24,17 +24,74 @@ export interface ScoreCountItem {
   valueColor: string;
 }
 
-// Normalize 9-hole score to 18-hole equivalent
-const normalizeTo18Holes = (score: number, holesCount: number): number => {
-  if (holesCount === 9) {
-    return Math.round(score * 2 * 10) / 10; // Double and round to 1 decimal
+export interface PerCourseRound {
+  sourceId: string;
+  course: "A" | "B" | "single";
+  score: number;
+  par: number;
+  delta: number;
+  birdies: number;
+  holeScores: { hole: number; score: number; par: number }[];
+  playedAt: string;
+}
+
+// Expand each round into one entry per 9-hole course.
+// 9-hole rounds yield 1 entry (course: "single").
+// 18-hole rounds yield 2 entries (course "A" for holes 1–9, "B" for holes 10–18).
+export const expandToPerCourseRounds = (rounds: RoundData[]): PerCourseRound[] => {
+  const out: PerCourseRound[] = [];
+  for (const r of rounds) {
+    const holes = r.holeScores ?? [];
+    if (r.holesCount === 18) {
+      const a = holes.filter((h) => h.hole <= 9);
+      const b = holes.filter((h) => h.hole >= 10);
+      const aScore = a.reduce((s, h) => s + h.score, 0);
+      const aPar = a.reduce((s, h) => s + h.par, 0);
+      const bScore = b.reduce((s, h) => s + h.score, 0);
+      const bPar = b.reduce((s, h) => s + h.par, 0);
+      out.push({
+        sourceId: r.id,
+        course: "A",
+        score: aScore,
+        par: aPar,
+        delta: aScore - aPar,
+        birdies: a.filter((h) => h.score < h.par).length,
+        holeScores: a,
+        playedAt: r.playedAt,
+      });
+      out.push({
+        sourceId: r.id,
+        course: "B",
+        score: bScore,
+        par: bPar,
+        delta: bScore - bPar,
+        birdies: b.filter((h) => h.score < h.par).length,
+        holeScores: b,
+        playedAt: r.playedAt,
+      });
+    } else {
+      const totalPar = holes.reduce((s, h) => s + h.par, 0) || r.appliedPar;
+      out.push({
+        sourceId: r.id,
+        course: "single",
+        score: r.totalScore,
+        par: totalPar,
+        delta: r.totalScore - totalPar,
+        birdies: holes.filter((h) => h.score < h.par).length,
+        holeScores: holes,
+        playedAt: r.playedAt,
+      });
+    }
   }
-  return score;
+  return out;
 };
 
 export const useComputedStats = (rounds: RoundData[]) => {
+  const perCourseRounds = useMemo(() => expandToPerCourseRounds(rounds), [rounds]);
+
   const stats = useMemo<ComputedStats>(() => {
     const totalRounds = rounds.length;
+    const perCourseCount = perCourseRounds.length;
 
     if (totalRounds === 0) {
       return {
@@ -48,32 +105,27 @@ export const useComputedStats = (rounds: RoundData[]) => {
       };
     }
 
-    // Average score (all rounds, normalized to 18 holes)
-    const normalizedScores = rounds.map((r) => normalizeTo18Holes(r.totalScore, r.holesCount));
-    const avgScore = Math.round(
-      (normalizedScores.reduce((a, b) => a + b, 0) / totalRounds) * 10
-    ) / 10;
+    // Per-course average score (each Course A or Course B is one entry)
+    const avgScore = perCourseCount > 0
+      ? Math.round(
+          (perCourseRounds.reduce((a, r) => a + r.score, 0) / perCourseCount) * 10
+        ) / 10
+      : null;
 
-    // Best round (18-hole only)
-    const eighteenHoleRounds = rounds.filter((r) => r.holesCount === 18);
-    const bestRound =
-      eighteenHoleRounds.length > 0
-        ? Math.min(...eighteenHoleRounds.map((r) => r.totalScore))
-        : null;
+    // Best per-course score across all rounds
+    const bestRound = perCourseCount > 0
+      ? Math.min(...perCourseRounds.map((r) => r.score))
+      : null;
 
-    // Average delta
-    const deltas = rounds.map((r) => {
-      const totalPar = r.holeScores?.reduce((s, h) => s + h.par, 0) || r.appliedPar;
-      return r.totalScore - totalPar;
-    });
-    const avgDelta =
-      Math.round((deltas.reduce((a, b) => a + b, 0) / totalRounds) * 10) / 10;
+    // Per-course average delta
+    const avgDelta = perCourseCount > 0
+      ? Math.round(
+          (perCourseRounds.reduce((a, r) => a + r.delta, 0) / perCourseCount) * 10
+        ) / 10
+      : null;
 
-    // Total birdies
-    const totalBirdies = rounds.reduce(
-      (sum, r) => sum + (r.holeScores?.filter((h) => h.score < h.par).length || 0),
-      0
-    );
+    // Total birdies across all courses
+    const totalBirdies = perCourseRounds.reduce((sum, r) => sum + r.birdies, 0);
 
     // Streak calculation
     const uniqueDays = [...new Set(rounds.map((r) => r.playedAt.slice(0, 10)).filter(Boolean))].sort();
@@ -128,23 +180,23 @@ export const useComputedStats = (rounds: RoundData[]) => {
       longestStreak,
       currentStreak,
     };
-  }, [rounds]);
+  }, [rounds, perCourseRounds]);
 
   const trend = useMemo<TrendPoint[]>(() => {
-    if (rounds.length === 0) return [];
+    if (perCourseRounds.length === 0) return [];
 
-    // Group by month using YYYY-MM format for proper sorting (with normalized scores)
+    // Group per-course scores by month (each course A/B counts as its own data point)
     const byMonth: Record<string, { scores: number[]; label: string }> = {};
-    rounds.forEach((r) => {
+    perCourseRounds.forEach((r) => {
       const date = new Date(r.playedAt);
       const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
       const label = `${date.getMonth() + 1}월`;
       if (!byMonth[key]) byMonth[key] = { scores: [], label };
-      byMonth[key].scores.push(normalizeTo18Holes(r.totalScore, r.holesCount));
+      byMonth[key].scores.push(r.score);
     });
 
     // Find date range
-    const dates = rounds.map((r) => new Date(r.playedAt));
+    const dates = perCourseRounds.map((r) => new Date(r.playedAt));
     const minDate = new Date(Math.min(...dates.map((d) => d.getTime())));
     const maxDate = new Date(Math.max(...dates.map((d) => d.getTime())));
 
@@ -169,7 +221,7 @@ export const useComputedStats = (rounds: RoundData[]) => {
 
     // Return last 6 months (or fewer if less data)
     return points.slice(-6);
-  }, [rounds]);
+  }, [perCourseRounds]);
 
   // Score counts (birdies, pars, bogeys, doubles) with month-over-month comparison
   const parAnalysis = useMemo<ScoreCountItem[]>(() => {
@@ -213,23 +265,23 @@ export const useComputedStats = (rounds: RoundData[]) => {
     }));
   }, [rounds]);
 
-  // Score distribution (all rounds normalized to 18 holes)
+  // Score distribution per 9-hole course (par-36 scale)
   const scoreDistribution = useMemo(() => {
     const buckets: Record<string, number> = {
-      '<66': 0,
-      '66': 0,
-      '67-69': 0,
-      '70-72': 0,
-      '73+': 0,
+      '<33': 0,
+      '33': 0,
+      '34-35': 0,
+      '36': 0,
+      '37+': 0,
     };
 
-    rounds.forEach((r) => {
-      const normalizedScore = normalizeTo18Holes(r.totalScore, r.holesCount);
-      if (normalizedScore < 66) buckets['<66']++;
-      else if (normalizedScore === 66) buckets['66']++;
-      else if (normalizedScore <= 69) buckets['67-69']++;
-      else if (normalizedScore <= 72) buckets['70-72']++;
-      else buckets['73+']++;
+    perCourseRounds.forEach((r) => {
+      const s = r.score;
+      if (s < 33) buckets['<33']++;
+      else if (s === 33) buckets['33']++;
+      else if (s <= 35) buckets['34-35']++;
+      else if (s === 36) buckets['36']++;
+      else buckets['37+']++;
     });
 
     const maxCount = Math.max(...Object.values(buckets), 1);
@@ -241,15 +293,15 @@ export const useComputedStats = (rounds: RoundData[]) => {
       barColor: colors[i],
       height: count > 0 ? Math.max((count / maxCount) * 78, 10) : 10,
     }));
-  }, [rounds]);
+  }, [perCourseRounds]);
 
-  // Per-round stats (birdies, pars, bogeys, doubles per round)
+  // Per-course stats (birdies, pars, bogeys, doubles per 9-hole course)
   const perRoundStats = useMemo(() => {
-    if (rounds.length === 0) return [];
+    if (perCourseRounds.length === 0) return [];
 
-    const totals = rounds.reduce(
+    const totals = perCourseRounds.reduce(
       (acc, r) => {
-        r.holeScores?.forEach((h) => {
+        r.holeScores.forEach((h) => {
           const diff = h.score - h.par;
           if (diff <= -1) acc.birdies++;
           else if (diff === 0) acc.pars++;
@@ -261,52 +313,52 @@ export const useComputedStats = (rounds: RoundData[]) => {
       { birdies: 0, pars: 0, bogeys: 0, doubles: 0 }
     );
 
-    const totalHoles = rounds.reduce((s, r) => s + (r.holeScores?.length || 0), 0);
+    const courseCount = perCourseRounds.length;
 
     return [
       {
-        label: '라운드당 버디',
-        value: totalHoles > 0 ? (totals.birdies / rounds.length) : 0,
-        max: 3,
+        label: '코스당 버디',
+        value: courseCount > 0 ? (totals.birdies / courseCount) : 0,
+        max: 2,
         color: '#45D07F',
       },
       {
-        label: '라운드당 파',
-        value: totalHoles > 0 ? (totals.pars / rounds.length) : 0,
-        max: 15,
+        label: '코스당 파',
+        value: courseCount > 0 ? (totals.pars / courseCount) : 0,
+        max: 8,
         color: '#B7BCB9',
       },
       {
-        label: '라운드당 보기',
-        value: totalHoles > 0 ? (totals.bogeys / rounds.length) : 0,
-        max: 12,
+        label: '코스당 보기',
+        value: courseCount > 0 ? (totals.bogeys / courseCount) : 0,
+        max: 6,
         color: '#55BE96',
       },
       {
-        label: '라운드당 더블보기+',
-        value: totalHoles > 0 ? (totals.doubles / rounds.length) : 0,
-        max: 5,
+        label: '코스당 더블보기+',
+        value: courseCount > 0 ? (totals.doubles / courseCount) : 0,
+        max: 3,
         color: '#FF4F5F',
       },
     ];
-  }, [rounds]);
+  }, [perCourseRounds]);
 
   // Birdie trend: monthly birdie counts over last 6 months
   const birdieTrend = useMemo<TrendPoint[]>(() => {
-    if (rounds.length === 0) return [];
+    if (perCourseRounds.length === 0) return [];
 
-    // Group birdies by month
+    // Group birdies by month (counting all birdies across courses)
     const byMonth: Record<string, { count: number; label: string }> = {};
-    rounds.forEach((r) => {
+    perCourseRounds.forEach((r) => {
       const date = new Date(r.playedAt);
       const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
       const label = `${date.getMonth() + 1}월`;
       if (!byMonth[key]) byMonth[key] = { count: 0, label };
-      byMonth[key].count += r.holeScores?.filter((h) => h.score < h.par).length || 0;
+      byMonth[key].count += r.birdies;
     });
 
     // Find date range
-    const dates = rounds.map((r) => new Date(r.playedAt));
+    const dates = perCourseRounds.map((r) => new Date(r.playedAt));
     const minDate = new Date(Math.min(...dates.map((d) => d.getTime())));
     const maxDate = new Date(Math.max(...dates.map((d) => d.getTime())));
 
@@ -328,7 +380,7 @@ export const useComputedStats = (rounds: RoundData[]) => {
     }
 
     return points.slice(-6);
-  }, [rounds]);
+  }, [perCourseRounds]);
 
-  return { stats, trend, birdieTrend, parAnalysis, scoreDistribution, perRoundStats };
+  return { stats, trend, birdieTrend, parAnalysis, scoreDistribution, perRoundStats, perCourseRounds };
 };

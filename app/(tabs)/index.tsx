@@ -1,3 +1,4 @@
+import AdRequestModal from '@/components/AdRequestModal';
 import PromoAdComponent from '@/components/ads/PromoAdComponent';
 import SponsoredAdComponent from '@/components/ads/SponsoredAdComponent';
 import DailyTipComponent from '@/components/HomeFeedComponents/dailyTipComponent';
@@ -30,7 +31,7 @@ export default function HomeScreen() {
   const { user } = useAuth();
   const tabBarHeight = useBottomTabBarHeight();
   const [showSkeleton, setShowSkeleton] = useState(true);
-  const [showEventAd, setShowEventAd] = useState(false);
+  const [adStep, setAdStep] = useState<'event' | 'adRequest' | null>(null);
   const [roundCount, setRoundCount] = useState<number | null>(null);
   const scrollY = useSharedValue(0);
 
@@ -41,7 +42,7 @@ export default function HomeScreen() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowSkeleton(false);
-      setShowEventAd(true);
+      setAdStep('event');
     }, 2000);
     return () => clearTimeout(timer);
   }, []);
@@ -145,8 +146,11 @@ export default function HomeScreen() {
       )}
 
       {/* Event Overlay - Shows on top of home feed */}
-      {showEventAd && (
-        <LaunchEventModal onClose={() => setShowEventAd(false)} />
+      {adStep === 'event' && (
+        <LaunchEventModal onClose={() => setAdStep('adRequest')} />
+      )}
+      {adStep === 'adRequest' && (
+        <AdRequestModal onClose={() => setAdStep(null)} />
       )}
     </SafeAreaView>
   );

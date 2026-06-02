@@ -1,3 +1,4 @@
+import AnimatedNumber from "@/components/AnimatedNumber";
 import { ThemedText as Text } from "@/components/themed-text";
 import { db } from "@/config/firebase";
 import { FONT } from '@/constants/theme';
@@ -5,7 +6,7 @@ import Feather from "@expo/vector-icons/Feather";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import { doc, getDoc } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -37,17 +38,9 @@ export default function ActivityModal() {
   const [location, setLocation] = useState<string>("");
   const [date, setDate] = useState<string>("");
 
-  const [score, setScore] = useState<number>(0);
-  const [fieldPar, setFieldPar] = useState<number>(0);
-  const [delta, setDelta] = useState<string>("");
-
-  const [parCount, setParCount] = useState<number>(0);
-  const [birdieCount, setBirdieCount] = useState<number>(0);
-  const [bogeyCount, setBogeyCount] = useState<number>(0);
-  const [eagleCount, setEagleCount] = useState<number>(0);
-  const [doubleCount, setDoubleCount] = useState<number>(0);
-
   const [holeData, setHoleData] = useState<{ hole: number; par: number; score: number; delta: string }[]>([]);
+  const [holesCount, setHolesCount] = useState<9 | 18>(9);
+  const [selectedCourse, setSelectedCourse] = useState<"A" | "B">("A");
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -64,35 +57,20 @@ export default function ActivityModal() {
         setLocation(data.location ?? "");
         const rawDate = data.playedAt ?? "";
         setDate(rawDate ? rawDate.slice(0, 10) : "");
-        setScore(data.totalScore ?? 0);
-        setFieldPar(data.appliedPar ?? 0);
 
-        const diff = (data.totalScore ?? 0) - (data.appliedPar ?? 0);
-        setDelta(diff > 0 ? `+${diff}` : diff === 0 ? "E" : `${diff}`);
+        const rawHolesCount = data.holesCount === 18 ? 18 : 9;
+        setHolesCount(rawHolesCount);
 
         const holes: { hole: number; score: number; par: number }[] = data.holeScores ?? [];
 
-        let eagles = 0, birdies = 0, pars = 0, bogeys = 0, doubles = 0;
         const processed = holes.map((h) => {
           const d = h.score - h.par;
-          if (d <= -2) eagles++;
-          else if (d === -1) birdies++;
-          else if (d === 0) pars++;
-          else if (d === 1) bogeys++;
-          else if (d >= 2) doubles++;
-
           let deltaStr = "E";
           if (d > 0) deltaStr = `+${d}`;
           else if (d < 0) deltaStr = `${d}`;
-
           return { hole: h.hole, par: h.par, score: h.score, delta: deltaStr };
         });
 
-        setEagleCount(eagles);
-        setBirdieCount(birdies);
-        setParCount(pars);
-        setBogeyCount(bogeys);
-        setDoubleCount(doubles);
         setHoleData(processed);
       } catch (error) {
         console.error("Failed to fetch round:", error);
@@ -103,6 +81,33 @@ export default function ActivityModal() {
 
     fetchRound();
   }, [id]);
+
+  const visibleHoles = useMemo(() => {
+    if (holesCount === 9) return holeData;
+    return selectedCourse === "A"
+      ? holeData.filter((h) => h.hole <= 9)
+      : holeData.filter((h) => h.hole >= 10);
+  }, [holeData, holesCount, selectedCourse]);
+
+  const courseSummary = useMemo(() => {
+    let eagles = 0, birdies = 0, pars = 0, bogeys = 0, doubles = 0;
+    let totalScore = 0, totalPar = 0;
+    for (const h of visibleHoles) {
+      totalScore += h.score;
+      totalPar += h.par;
+      const d = h.score - h.par;
+      if (d <= -2) eagles++;
+      else if (d === -1) birdies++;
+      else if (d === 0) pars++;
+      else if (d === 1) bogeys++;
+      else if (d >= 2) doubles++;
+    }
+    const diff = totalScore - totalPar;
+    const deltaStr = diff > 0 ? `+${diff}` : diff === 0 ? "E" : `${diff}`;
+    return { eagles, birdies, pars, bogeys, doubles, totalScore, totalPar, deltaStr };
+  }, [visibleHoles]);
+
+  const animationTrigger = selectedCourse === "A" ? 1 : 2;
 
   if (isLoading) {
     return (
@@ -155,39 +160,92 @@ export default function ActivityModal() {
           {/* Score summary */}
           <View style={styles.scoreRow}>
             <View>
-              <Text
-                type="barlowHard"
+              <AnimatedNumber
                 style={styles.totalScore}
-              >
-                {score}
-              </Text>
+                value={courseSummary.totalScore}
+                trigger={animationTrigger}
+                delay={0}
+                duration={700}
+              />
               <View style={styles.totalDeltaRow}>
-                <Text style={styles.totalDeltaText} type="barlowLight">{delta}</Text>
+                <AnimatedNumber
+                  style={styles.totalDeltaText}
+                  value={courseSummary.deltaStr}
+                  trigger={animationTrigger}
+                  delay={100}
+                  duration={700}
+                />
               </View>
-              <Text style={styles.parText} type="barlowLight">Par {fieldPar}</Text>
+              <Text style={styles.parText} type="barlowLight">Par {courseSummary.totalPar}</Text>
             </View>
 
             <View style={styles.summaryStatsRow}>
-              {eagleCount > 0 && (
+              {courseSummary.eagles > 0 && (
                 <View style={styles.summaryStat}>
-                  <Text type="barlowLight" style={[styles.summaryValue, { color: "#D4AF37" }]}>{eagleCount}</Text>
+                  <AnimatedNumber
+                    style={[styles.summaryValue, { color: "#D4AF37" }]}
+                    value={courseSummary.eagles}
+                    trigger={animationTrigger}
+                    delay={200}
+                    duration={700}
+                  />
                   <Text style={styles.summaryLabel}>이글</Text>
                 </View>
               )}
               <View style={styles.summaryStat}>
-                <Text type="barlowLight" style={[styles.summaryValue, { color: "#4CAE82" }]}>{birdieCount}</Text>
+                <AnimatedNumber
+                  style={[styles.summaryValue, { color: "#4CAE82" }]}
+                  value={courseSummary.birdies}
+                  trigger={animationTrigger}
+                  delay={300}
+                  duration={700}
+                />
                 <Text style={styles.summaryLabel}>버디</Text>
               </View>
               <View style={styles.summaryStat}>
-                <Text type="barlowLight" style={[styles.summaryValue, { color: "#FFFFFF" }]}>{parCount}</Text>
+                <AnimatedNumber
+                  style={[styles.summaryValue, { color: "#FFFFFF" }]}
+                  value={courseSummary.pars}
+                  trigger={animationTrigger}
+                  delay={400}
+                  duration={700}
+                />
                 <Text style={styles.summaryLabel}>파</Text>
               </View>
               <View style={styles.summaryStat}>
-                <Text type="barlowLight" style={[styles.summaryValue, { color: "#E83F40" }]}>{bogeyCount}</Text>
+                <AnimatedNumber
+                  style={[styles.summaryValue, { color: "#E83F40" }]}
+                  value={courseSummary.bogeys}
+                  trigger={animationTrigger}
+                  delay={500}
+                  duration={700}
+                />
                 <Text style={styles.summaryLabel}>보기</Text>
               </View>
             </View>
           </View>
+
+          {/* Course switcher */}
+          {holesCount === 18 ? (
+            <View style={styles.courseSwitcher}>
+              <Pressable
+                onPress={() => setSelectedCourse("A")}
+                style={[styles.courseSwitchButton, selectedCourse === "A" && styles.courseSwitchButtonActive]}
+              >
+                <Text type="barlowHard" style={[styles.courseSwitchText, selectedCourse === "A" && styles.courseSwitchTextActive]}>
+                  코스 A
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={() => setSelectedCourse("B")}
+                style={[styles.courseSwitchButton, selectedCourse === "B" && styles.courseSwitchButtonActive]}
+              >
+                <Text type="barlowHard" style={[styles.courseSwitchText, selectedCourse === "B" && styles.courseSwitchTextActive]}>
+                  코스 B
+                </Text>
+              </Pressable>
+            </View>
+          ) : null}
 
           {/* Scorecard header */}
           <View style={styles.sectionHeader}>
@@ -201,14 +259,15 @@ export default function ActivityModal() {
 
           {/* Scorecard rows */}
           <View style={styles.tableContainer}>
-            {holeData.map((item, index) => {
+            {visibleHoles.map((item, index) => {
               const colors = getScoreCircleColors(item.delta);
-              const isLast = index === holeData.length - 1;
+              const isLast = index === visibleHoles.length - 1;
+              const displayHole = item.hole > 9 ? item.hole - 9 : item.hole;
               return (
                 <View key={item.hole}>
                   <View style={styles.tableRow}>
                     <View style={{ flex: 2, flexDirection: 'row', alignItems: 'center', gap: moderateScale(5)}}>
-                      <Text type="barlowLight" style={styles.holeCountText}>{item.hole}</Text>
+                      <Text type="barlowLight" style={styles.holeCountText}>{displayHole}</Text>
                       <Text style={styles.holeText}>홀</Text>
                     </View>
                     <Text style={[styles.parValueText, { flex: 1, textAlign: "center" }]}>
@@ -391,5 +450,31 @@ const styles = StyleSheet.create({
   rowDivider: {
     height: StyleSheet.hairlineWidth,
     backgroundColor: "#353838",
+  },
+  courseSwitcher: {
+    flexDirection: "row",
+    backgroundColor: "#161A1B",
+    borderRadius: moderateScale(12),
+    padding: moderateScale(4),
+    marginBottom: moderateScale(14),
+    borderWidth: 1,
+    borderColor: "#2C3133",
+  },
+  courseSwitchButton: {
+    flex: 1,
+    paddingVertical: moderateScale(10),
+    borderRadius: moderateScale(9),
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  courseSwitchButtonActive: {
+    backgroundColor: "#2A7D5D",
+  },
+  courseSwitchText: {
+    color: "#7A8387",
+    fontSize: moderateScale(FONT.sm),
+  },
+  courseSwitchTextActive: {
+    color: "#ECF7F1",
   },
 });

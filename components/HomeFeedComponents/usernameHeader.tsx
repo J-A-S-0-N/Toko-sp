@@ -1,49 +1,18 @@
 import { ThemedText as Text } from '@/components/themed-text';
-import { db } from '@/config/firebase';
 import { FONT } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
-import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore';
-import { useEffect, useState } from "react";
+import { useComputedStats } from '@/hooks/useComputedStats';
+import { useRounds } from '@/hooks/useRounds';
 import { View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
 
 const UsernameHeader = () => {
-  const { user, username } = useAuth();
-  const [stats, setStats] = useState({
-    averageDelta: 0,
-    rounds: 0,
-  });
+  const { username } = useAuth();
+  const { rounds } = useRounds();
+  const { stats } = useComputedStats(rounds);
 
-  useEffect(() => {
-    if (!user?.uid) return;
-
-    const fetchStats = async () => {
-      try {
-        // Fetch averageDelta from Stats subcollection
-        const statsDocRef = doc(db, 'Users', user.uid, 'Stats', 'AllTimeScore');
-        const statsDoc = await getDoc(statsDocRef);
-        const averageDelta = statsDoc.exists() ? (statsDoc.data()?.averageDelta ?? 0) : 0;
-
-        // Count completed rounds
-        const scansRef = collection(db, 'Scans');
-        const q = query(
-          scansRef,
-          where('userId', '==', user.uid),
-          where('status', '==', 'completed'),
-        );
-        const snapshot = await getDocs(q);
-
-        setStats({
-          averageDelta,
-          rounds: snapshot.size,
-        });
-      } catch (error) {
-        console.error('Failed to fetch user stats:', error);
-      }
-    };
-
-    fetchStats();
-  }, [user?.uid]);
+  const averageDelta = stats.averageDelta;
+  const roundCount = rounds.length;
 
   return (
     <View
@@ -70,13 +39,13 @@ const UsernameHeader = () => {
         <View style={{flexDirection: 'row', alignItems: 'center', gap: moderateScale(5)}}>
           <Text
           style={{fontSize: moderateScale(FONT.xs), color: "#6E7171"}}
-          >{stats.averageDelta >= 0 ? '+' : ''}{stats.averageDelta} 평타</Text>
+          >{averageDelta != null ? `${averageDelta >= 0 ? '+' : ''}${averageDelta}` : '-'} 평타</Text>
          <View
           style={{width: moderateScale(4), height: moderateScale(4), borderRadius: moderateScale(5), backgroundColor: "#6E7171"}}
           ></View>
           <Text
           style={{fontSize: moderateScale(FONT.xs), color: "#6E7171"}}
-          >{stats.rounds}회 라운딩</Text>
+          >{roundCount}회 라운딩</Text>
         </View>
       </View>
     </View>

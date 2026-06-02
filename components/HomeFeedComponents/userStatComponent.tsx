@@ -1,6 +1,7 @@
 import { db } from "@/config/firebase";
 import { FONT } from '@/constants/theme';
 import { useAuth } from "@/context/AuthContext";
+import { expandToPerCourseRounds } from "@/hooks/useComputedStats";
 import { useIsFocused } from "@react-navigation/native";
 import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -9,9 +10,12 @@ import { moderateScale } from "react-native-size-matters";
 import { ThemedText as Text } from "../themed-text";
 
 interface RoundRow {
+  id: string;
   totalScore: number;
   holesCount: number;
   playedAt: string;
+  appliedPar: number;
+  holeScores: { hole: number; score: number; par: number }[];
 }
 
 const DIGITS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
@@ -124,9 +128,12 @@ const UserStatComponent = () => {
           snap.docs.map((d) => {
             const data = d.data();
             return {
+              id: d.id,
               totalScore: data.totalScore ?? 0,
               holesCount: data.holesCount ?? 18,
               playedAt: data.playedAt ?? "",
+              appliedPar: data.appliedPar ?? 0,
+              holeScores: data.holeScores ?? [],
             };
           })
         );
@@ -143,34 +150,47 @@ const UserStatComponent = () => {
       return { best: "-", avg: "-", delta: "-", deltaLabel: "저번달 대비 -/+" };
     }
 
-    // Lowest score among 18-hole rounds
-    const eighteenHoleScores = rounds
-      .filter((r) => r.holesCount === 18)
-      .map((r) => r.totalScore);
+    // Expand into per-course (9-hole) entries for stat comparison
+    const perCourse = expandToPerCourseRounds(
+      rounds.map((r) => ({
+        id: r.id,
+        courseName: "",
+        totalScore: r.totalScore,
+        holesCount: r.holesCount,
+        playedAt: r.playedAt,
+        appliedPar: r.appliedPar,
+        diff: 0,
+        holeScores: r.holeScores,
+        birdieCount: 0,
+        doubleCount: 0,
+      }))
+    );
 
-    const bestVal =
-      eighteenHoleScores.length > 0
-        ? Math.min(...eighteenHoleScores)
-        : "-";
+    if (perCourse.length === 0) {
+      return { best: "-", avg: "-", delta: "-", deltaLabel: "저번달 대비 -/+" };
+    }
 
-    // Overall average
+    // Lowest per-course score across all rounds (1코스 기준)
+    const bestVal = Math.min(...perCourse.map((r) => r.score));
+
+    // Per-course average
     const avgVal =
       Math.round(
-        (rounds.reduce((s, r) => s + r.totalScore, 0) / rounds.length) * 10
+        (perCourse.reduce((s, r) => s + r.score, 0) / perCourse.length) * 10
       ) / 10;
 
-    // Month-over-month delta
+    // Month-over-month delta on per-course averages
     const now = new Date();
     const thisMonth = now.getMonth();
     const thisYear = now.getFullYear();
     const lastMonth = thisMonth === 0 ? 11 : thisMonth - 1;
     const lastMonthYear = thisMonth === 0 ? thisYear - 1 : thisYear;
 
-    const thisMonthScores = rounds.filter((r) => {
+    const thisMonthCourses = perCourse.filter((r) => {
       const d = new Date(r.playedAt);
       return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
     });
-    const lastMonthScores = rounds.filter((r) => {
+    const lastMonthCourses = perCourse.filter((r) => {
       const d = new Date(r.playedAt);
       return d.getMonth() === lastMonth && d.getFullYear() === lastMonthYear;
     });
@@ -178,22 +198,21 @@ const UserStatComponent = () => {
     let deltaVal: string;
     let dLabel = "저번달 대비 -/+";
 
-    if (thisMonthScores.length === 0 && lastMonthScores.length === 0) {
+    if (thisMonthCourses.length === 0 && lastMonthCourses.length === 0) {
       deltaVal = "-";
-    } else if (lastMonthScores.length === 0) {
-      // Fresh or single-month user – no previous month to compare
+    } else if (lastMonthCourses.length === 0) {
       deltaVal = "-";
       dLabel = "저번달 기록 없음";
-    } else if (thisMonthScores.length === 0) {
+    } else if (thisMonthCourses.length === 0) {
       deltaVal = "-";
       dLabel = "이번달 기록 없음";
     } else {
       const thisAvg =
-        thisMonthScores.reduce((s, r) => s + r.totalScore, 0) /
-        thisMonthScores.length;
+        thisMonthCourses.reduce((s, r) => s + r.score, 0) /
+        thisMonthCourses.length;
       const lastAvg =
-        lastMonthScores.reduce((s, r) => s + r.totalScore, 0) /
-        lastMonthScores.length;
+        lastMonthCourses.reduce((s, r) => s + r.score, 0) /
+        lastMonthCourses.length;
       const diff = Math.round((thisAvg - lastAvg) * 10) / 10;
       deltaVal = diff > 0 ? `+${diff}` : diff === 0 ? "E" : `${diff}`;
     }
@@ -227,7 +246,7 @@ const UserStatComponent = () => {
             trigger={animationTrigger}
           />
         </View>
-        <Text style={styles.label}>최저 (18홀 기준)</Text>
+        <Text style={styles.label}>최저 (1코스 기준)</Text>
       </View>
       <View style={styles.separator} />
       {/*avg*/}

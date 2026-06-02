@@ -106,67 +106,67 @@ export const onNewDocument = onDocumentCreated({
 
     console.error("docId: " + docId);
 
-    //front 9 (holes 1-9)
-    const frontResponse = await processImage(imageLinks[0]);
-    const frontHits = {};
-    for (const pair of frontResponse) {
+    //Course A (holes 1-9 of first image)
+    const courseAResponse = await processImage(imageLinks[0]);
+    const courseAHits = {};
+    for (const pair of courseAResponse) {
       if (pair.hole >= 1 && pair.hole <= 9) {
-        frontHits[pair.hole] = pair.hit;
+        courseAHits[pair.hole] = pair.hit;
       }
     }
-    console.error("frontHits: " + JSON.stringify(frontHits));
+    console.error("courseAHits: " + JSON.stringify(courseAHits));
 
-    //back 9 (holes 10-18) — only if a second image exists
-    const backHits = {};
+    //Course B (holes 1-9 of second image) — only if a second image exists
+    const courseBHits = {};
     if (imageLinks[1]) {
-      const backResponse = await processImage(imageLinks[1]);
-      for (const pair of backResponse) {
+      const courseBResponse = await processImage(imageLinks[1]);
+      for (const pair of courseBResponse) {
         if (pair.hole >= 1 && pair.hole <= 9) {
-          backHits[pair.hole + 9] = pair.hit;
+          courseBHits[pair.hole] = pair.hit;
         }
       }
-      console.error("backHits: " + JSON.stringify(backHits));
+      console.error("courseBHits: " + JSON.stringify(courseBHits));
     }
 
-    const updateData_Nine = {
-      hole1_raw: frontHits[1] ?? null,
-      hole2_raw: frontHits[2] ?? null,
-      hole3_raw: frontHits[3] ?? null,
-      hole4_raw: frontHits[4] ?? null,
-      hole5_raw: frontHits[5] ?? null,
-      hole6_raw: frontHits[6] ?? null,
-      hole7_raw: frontHits[7] ?? null,
-      hole8_raw: frontHits[8] ?? null,
-      hole9_raw: frontHits[9] ?? null,
+    const updateData_OneCourse = {
+      AHole1_raw: courseAHits[1] ?? null,
+      AHole2_raw: courseAHits[2] ?? null,
+      AHole3_raw: courseAHits[3] ?? null,
+      AHole4_raw: courseAHits[4] ?? null,
+      AHole5_raw: courseAHits[5] ?? null,
+      AHole6_raw: courseAHits[6] ?? null,
+      AHole7_raw: courseAHits[7] ?? null,
+      AHole8_raw: courseAHits[8] ?? null,
+      AHole9_raw: courseAHits[9] ?? null,
       status: "done",
     };
 
-    const updateData_Eighteen = {
-      hole1_raw: frontHits[1] ?? null,
-      hole2_raw: frontHits[2] ?? null,
-      hole3_raw: frontHits[3] ?? null,
-      hole4_raw: frontHits[4] ?? null,
-      hole5_raw: frontHits[5] ?? null,
-      hole6_raw: frontHits[6] ?? null,
-      hole7_raw: frontHits[7] ?? null,
-      hole8_raw: frontHits[8] ?? null,
-      hole9_raw: frontHits[9] ?? null,
-      hole10_raw: backHits[10] ?? null,
-      hole11_raw: backHits[11] ?? null,
-      hole12_raw: backHits[12] ?? null,
-      hole13_raw: backHits[13] ?? null,
-      hole14_raw: backHits[14] ?? null,
-      hole15_raw: backHits[15] ?? null,
-      hole16_raw: backHits[16] ?? null,
-      hole17_raw: backHits[17] ?? null,
-      hole18_raw: backHits[18] ?? null,
+    const updateData_TwoCourse = {
+      AHole1_raw: courseAHits[1] ?? null,
+      AHole2_raw: courseAHits[2] ?? null,
+      AHole3_raw: courseAHits[3] ?? null,
+      AHole4_raw: courseAHits[4] ?? null,
+      AHole5_raw: courseAHits[5] ?? null,
+      AHole6_raw: courseAHits[6] ?? null,
+      AHole7_raw: courseAHits[7] ?? null,
+      AHole8_raw: courseAHits[8] ?? null,
+      AHole9_raw: courseAHits[9] ?? null,
+      BHole1_raw: courseBHits[1] ?? null,
+      BHole2_raw: courseBHits[2] ?? null,
+      BHole3_raw: courseBHits[3] ?? null,
+      BHole4_raw: courseBHits[4] ?? null,
+      BHole5_raw: courseBHits[5] ?? null,
+      BHole6_raw: courseBHits[6] ?? null,
+      BHole7_raw: courseBHits[7] ?? null,
+      BHole8_raw: courseBHits[8] ?? null,
+      BHole9_raw: courseBHits[9] ?? null,
       status: "done",
     };
 
     if (imageLinks[1]) {
-      await docRef.update(updateData_Eighteen);
+      await docRef.update(updateData_TwoCourse);
     } else {
-      await docRef.update(updateData_Nine);
+      await docRef.update(updateData_OneCourse);
     }
   } catch (error) {
     console.error(`Processing failed for ${docId}:`, error);

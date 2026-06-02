@@ -1,3 +1,4 @@
+import AnimatedNumber from "@/components/AnimatedNumber";
 import HoleEditorModal from "@/components/ScanPageComponent/HoleEditorModal";
 import { submit } from "@/components/ScanPageComponent/backendLogic/submit";
 import { ThemedText as Text } from "@/components/themed-text";
@@ -65,24 +66,36 @@ export default function ResultPreviewScreen() {
   });
   const [selectedHoleIndex, setSelectedHoleIndex] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState<"A" | "B">("A");
 
-  const visibleHoleScores = useMemo(() => holeScores.slice(0, holesCount), [holeScores, holesCount]);
+  const allHoleScores = useMemo(() => holeScores.slice(0, holesCount), [holeScores, holesCount]);
+
+  const visibleHoleScores = useMemo(() => {
+    if (holesCount === 9) return allHoleScores;
+    return selectedCourse === "A" ? allHoleScores.slice(0, 9) : allHoleScores.slice(9, 18);
+  }, [allHoleScores, holesCount, selectedCourse]);
+
   const selectedHole = useMemo(
     () => (selectedHoleIndex === null ? null : holeScores[selectedHoleIndex] ?? null),
     [selectedHoleIndex, holeScores]
   );
 
+  // Per-course par when in 18-hole mode the displayed course uses half of the whole-round par.
+  const displayedCoursePar = holesCount === 18 ? coursePar / 2 : coursePar;
+  const displayedHolesCount = visibleHoleScores.length;
+
   const stats = useMemo(() => {
     const totalScore = visibleHoleScores.reduce((acc, item) => acc + item.score, 0);
     const holeTotalPar = visibleHoleScores.reduce((acc, item) => acc + item.par, 0);
-    const appliedPar = parInputEnabled ? holeTotalPar : coursePar;
+    const appliedPar = parInputEnabled ? holeTotalPar : displayedCoursePar;
     const diff = totalScore - appliedPar;
+    const perHolePar = parInputEnabled ? null : displayedCoursePar / displayedHolesCount;
     const birdieCount = visibleHoleScores.filter((item) => {
-      const ep = parInputEnabled ? item.par : coursePar / holesCount;
+      const ep = parInputEnabled ? item.par : (perHolePar as number);
       return item.score < ep;
     }).length;
     const doubleCount = visibleHoleScores.filter((item) => {
-      const ep = parInputEnabled ? item.par : coursePar / holesCount;
+      const ep = parInputEnabled ? item.par : (perHolePar as number);
       return item.score - ep >= 2;
     }).length;
 
@@ -93,12 +106,32 @@ export default function ResultPreviewScreen() {
       birdieCount,
       doubleCount,
     };
-  }, [visibleHoleScores, parInputEnabled, coursePar]);
+  }, [visibleHoleScores, parInputEnabled, displayedCoursePar, displayedHolesCount]);
 
   const diffLabel = stats.diff > 0 ? `+${stats.diff}` : stats.diff === 0 ? "E" : String(stats.diff);
+  const animationTrigger = selectedCourse === "A" ? 1 : 2;
 
-  const handleHolePress = (index: number) => {
-    setSelectedHoleIndex(index);
+  // Whole-round stats, used for submission regardless of which course is currently displayed.
+  const roundStats = useMemo(() => {
+    const totalScore = allHoleScores.reduce((acc, item) => acc + item.score, 0);
+    const holeTotalPar = allHoleScores.reduce((acc, item) => acc + item.par, 0);
+    const appliedPar = parInputEnabled ? holeTotalPar : coursePar;
+    const diff = totalScore - appliedPar;
+    const perHolePar = parInputEnabled ? null : coursePar / holesCount;
+    const birdieCount = allHoleScores.filter((item) => {
+      const ep = parInputEnabled ? item.par : (perHolePar as number);
+      return item.score < ep;
+    }).length;
+    const doubleCount = allHoleScores.filter((item) => {
+      const ep = parInputEnabled ? item.par : (perHolePar as number);
+      return item.score - ep >= 2;
+    }).length;
+    return { totalScore, appliedPar, diff, birdieCount, doubleCount };
+  }, [allHoleScores, parInputEnabled, coursePar, holesCount]);
+
+  const handleHolePress = (visibleIndex: number) => {
+    const absoluteIndex = selectedCourse === "B" && holesCount === 18 ? visibleIndex + 9 : visibleIndex;
+    setSelectedHoleIndex(absoluteIndex);
   };
 
   const handleCloseHoleEditor = () => {
@@ -157,12 +190,12 @@ export default function ResultPreviewScreen() {
         courseName: courseName?.trim() || "코스명 없음",
         playedAt: new Date().toISOString(),
         parInputEnabled,
-        appliedPar: stats.appliedPar,
-        totalScore: stats.totalScore,
-        diff: stats.diff,
-        birdieCount: stats.birdieCount,
-        doubleCount: stats.doubleCount,
-        holeScores: visibleHoleScores,
+        appliedPar: roundStats.appliedPar,
+        totalScore: roundStats.totalScore,
+        diff: roundStats.diff,
+        birdieCount: roundStats.birdieCount,
+        doubleCount: roundStats.doubleCount,
+        holeScores: allHoleScores,
       });
 
 
@@ -216,7 +249,7 @@ export default function ResultPreviewScreen() {
             {courseName || "코스명 없음"}
           </Text>
           <Text type="barlowLight" style={styles.dateText}>
-            2026년 3월 28일 · {holesCount}홀
+            2026년 3월 28일 · {holesCount === 18 ? "2개 코스" : "1개 코스"}
           </Text>
 
           <View style={[styles.courseParCard, parInputEnabled && styles.courseParCardDisabled]}>
@@ -225,7 +258,7 @@ export default function ResultPreviewScreen() {
                 코스 파
               </Text>
               <Text type="barlowLight" style={styles.courseParHint}>
-                {parInputEnabled ? "홀별 파 사용 중" : `표준 ${holesCount}홀 기준 ${standardCoursePar}`}
+                {parInputEnabled ? "홀별 파 사용 중" : holesCount === 18 ? `표준 9홀 기준 36` : `표준 ${holesCount}홀 기준 ${standardCoursePar}`}
               </Text>
             </View>
 
@@ -239,7 +272,7 @@ export default function ResultPreviewScreen() {
               </Pressable>
 
               <Text type="barlowHard" style={styles.courseParValue}>
-                {stats.appliedPar}
+                {holesCount === 18 && !parInputEnabled ? coursePar : stats.appliedPar}
               </Text>
 
               <Pressable
@@ -254,33 +287,49 @@ export default function ResultPreviewScreen() {
 
           <View style={styles.summaryRow}>
             <View style={styles.summaryItem}>
-              <Text type="barlowHard" style={styles.summaryValuePrimary}>
-                {stats.totalScore}
-              </Text>
+              <AnimatedNumber
+                style={styles.summaryValuePrimary}
+                value={stats.totalScore}
+                trigger={animationTrigger}
+                delay={0}
+                duration={700}
+              />
               <Text type="barlowLight" style={styles.summaryLabel}>
                 스코어
               </Text>
             </View>
             <View style={styles.summaryItem}>
-              <Text type="barlowHard" style={styles.summaryValueDanger}>
-                {diffLabel}
-              </Text>
+              <AnimatedNumber
+                style={styles.summaryValueDanger}
+                value={diffLabel}
+                trigger={animationTrigger}
+                delay={150}
+                duration={700}
+              />
               <Text type="barlowLight" style={styles.summaryLabel}>
                 ±파
               </Text>
             </View>
             <View style={styles.summaryItem}>
-              <Text type="barlowHard" style={styles.summaryValueSuccess}>
-                {stats.birdieCount}
-              </Text>
+              <AnimatedNumber
+                style={styles.summaryValueSuccess}
+                value={stats.birdieCount}
+                trigger={animationTrigger}
+                delay={300}
+                duration={700}
+              />
               <Text type="barlowLight" style={styles.summaryLabel}>
                 버디
               </Text>
             </View>
             <View style={styles.summaryItem}>
-              <Text type="barlowHard" style={styles.summaryValueWarn}>
-                {stats.doubleCount}
-              </Text>
+              <AnimatedNumber
+                style={styles.summaryValueWarn}
+                value={stats.doubleCount}
+                trigger={animationTrigger}
+                delay={450}
+                duration={700}
+              />
               <Text type="barlowLight" style={styles.summaryLabel}>
                 더블
               </Text>
@@ -302,10 +351,33 @@ export default function ResultPreviewScreen() {
             </Text>
           </Text>
 
+          {holesCount === 18 ? (
+            <View style={styles.courseSwitcherRow}>
+              {(["A", "B"] as const).map((c) => {
+                const isActive = selectedCourse === c;
+                return (
+                  <Pressable
+                    key={c}
+                    onPress={() => setSelectedCourse(c)}
+                    style={[styles.courseSwitcherButton, isActive && styles.courseSwitcherButtonActive]}
+                  >
+                    <Text
+                      type="barlowHard"
+                      style={[styles.courseSwitcherText, isActive && styles.courseSwitcherTextActive]}
+                    >
+                      코스 {c}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          ) : null}
+
           <View style={styles.scoreGrid}>
             {visibleHoleScores.map((item, index) => {
-              const effectivePar = parInputEnabled ? item.par : coursePar / holesCount;
+              const effectivePar = parInputEnabled ? item.par : displayedCoursePar / displayedHolesCount;
               const isGood = item.score <= effectivePar;
+              const displayHole = item.hole > 9 ? item.hole - 9 : item.hole;
 
               return (
                 <Pressable
@@ -318,7 +390,7 @@ export default function ResultPreviewScreen() {
                   ]}
                 >
                   <Text type="barlowLight" style={styles.holeNumber}>
-                    {item.hole}
+                    {displayHole}
                   </Text>
                   {parInputEnabled ? (
                     <Text type="barlowHard" style={styles.holeParPrimary}>
@@ -377,7 +449,8 @@ export default function ResultPreviewScreen() {
       {selectedHole ? (
         <HoleEditorModal
           visible={selectedHoleIndex !== null}
-          hole={selectedHole.hole}
+          hole={selectedHole.hole > 9 ? selectedHole.hole - 9 : selectedHole.hole}
+          course={holesCount === 18 ? selectedCourse : undefined}
           initialScore={selectedHole.score}
           initialPar={selectedHole.par}
           onClose={handleCloseHoleEditor}
@@ -563,6 +636,32 @@ const styles = StyleSheet.create({
     color: "#8B9396",
     fontSize: moderateScale(FONT.sm),
     marginBottom: moderateScale(10),
+  },
+  courseSwitcherRow: {
+    flexDirection: "row",
+    gap: moderateScale(8),
+    marginBottom: moderateScale(12),
+  },
+  courseSwitcherButton: {
+    flex: 1,
+    borderRadius: moderateScale(14),
+    borderWidth: 1,
+    borderColor: "#2C3133",
+    backgroundColor: "#161A1B",
+    paddingVertical: moderateScale(10),
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  courseSwitcherButtonActive: {
+    backgroundColor: "#2A7D5D",
+    borderColor: "#46D49A",
+  },
+  courseSwitcherText: {
+    color: "#8B9396",
+    fontSize: moderateScale(FONT.sm),
+  },
+  courseSwitcherTextActive: {
+    color: "#ECF7F1",
   },
   scoreGrid: {
     flexDirection: "row",
