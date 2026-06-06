@@ -77,8 +77,8 @@ Rules:
 export const onNewDocument = onDocumentCreated({
       document: "Scans/{docId}",
       secrets: [GEMINI_API_KEY],
-      memory: "1GiB",
-      timeoutSeconds: 50,
+      memory: "2GiB",
+      timeoutSeconds: 120,
     }, async (event) => {
   const docId = event.params.docId;
   const docRef = db.collection("Scans").doc(docId);

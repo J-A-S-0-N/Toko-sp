@@ -145,7 +145,7 @@ export default function ProfileScreen() {
         <View style={styles.topBar}>
           <View style={styles.brandRow}>
             <Text type="barlowHard" style={styles.brandText}>
-              파크필드
+              토코기록기
             </Text>
           </View>
 

@@ -55,10 +55,11 @@ export default function ResultPreviewScreen() {
       try {
         const parsed = JSON.parse(scores) as number[];
         if (Array.isArray(parsed)) {
-          return HoleScoreTemplate.map((hole, i) => ({
-            ...hole,
-            score: Math.max(1, Math.min(9, parsed[i] ?? hole.score)),
-          }));
+          return HoleScoreTemplate.map((hole, i) => {
+            const v = parsed[i];
+            const score = v == null || v === 0 ? hole.score : Math.max(1, Math.min(9, v));
+            return { ...hole, score };
+          });
         }
       } catch {}
     }

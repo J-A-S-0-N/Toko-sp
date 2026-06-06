@@ -1,21 +1,20 @@
+import { ThemedText as Text } from '@/components/themed-text';
 import { FONT } from '@/constants/theme';
+import { useAuth } from '@/context/AuthContext';
 import { router } from 'expo-router';
 import type { UserCredential } from 'firebase/auth';
 import { useMemo, useRef, useState } from 'react';
-import { Alert, Animated, Keyboard, Pressable, StyleSheet, TextInput, TouchableWithoutFeedback, View } from 'react-native';
+import { Alert, Animated, Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, TouchableWithoutFeedback, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { moderateScale } from 'react-native-size-matters';
 import { saveUserInfo } from './functions/saveUserFunction';
 import { clearPendingUserCredential, getPendingUserCredential } from './functions/userCredentialStore';
 
-import { ThemedText as Text } from '@/components/themed-text';
-import { useAuth } from '@/context/AuthContext';
-
 const SKILL_LEVELS = [
-  { id: 'beginner', icon: '🚀', label: '입문자', hint: '30+' },
-  { id: 'amateur', icon: '⛳', label: '아마추어', hint: '20-30' },
-  { id: 'intermediate', icon: '🥂', label: '중급자', hint: '10-20' },
-  { id: 'advanced', icon: '🏆', label: '싱글', hint: '<10' },
+  { id: 'beginner', icon: '🚀', label: '입문자', hint: '45+' },
+  { id: 'amateur', icon: '⛳', label: '아마추어', hint: '40-45' },
+  { id: 'intermediate', icon: '🥂', label: '중급자', hint: '33-40' },
+  { id: 'advanced', icon: '🏆', label: '프로', hint: '<33' },
 ] as const;
 
 export default function ProfileSetupScreen() {
@@ -114,6 +113,11 @@ export default function ProfileSetupScreen() {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
     <SafeAreaView edges={['top', 'bottom']} style={styles.container}>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={0}
+      >
       <View style={styles.content}>
         <View style={styles.headerWrap}>
           <Pressable style={styles.iconButton} onPress={() => router.back()}>
@@ -129,7 +133,12 @@ export default function ProfileSetupScreen() {
           </View>
         </View>
 
-        <View style={styles.body}>
+        <ScrollView
+          style={styles.bodyScroll}
+          contentContainerStyle={styles.body}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
           <Text type="barlowHard" style={styles.title}>
             프로필 설정
           </Text>
@@ -165,7 +174,7 @@ export default function ProfileSetupScreen() {
           </View>
 
           <View style={styles.fieldGroup}>
-            <Text style={styles.fieldLabel}>본서 핸디캡 *</Text>
+            <Text style={styles.fieldLabel}>본인 최저타수 (9홀 기준) *</Text>
             <View
               style={[
                 styles.handicapWrap,
@@ -187,7 +196,7 @@ export default function ProfileSetupScreen() {
           </View>
 
           <View style={styles.fieldGroup}>
-            <Text style={styles.fieldLabel}>실력 수준 (선택)</Text>
+            <Text style={styles.fieldLabel}>실력 수준 (9홀 기준)</Text>
             <View style={styles.skillRow}>
               {SKILL_LEVELS.map((item) => {
                 const isSelected = item.id === skillLevel;
@@ -206,7 +215,7 @@ export default function ProfileSetupScreen() {
               })}
             </View>
           </View>
-        </View>
+        </ScrollView>
       </View>
 
       <Pressable
@@ -216,12 +225,16 @@ export default function ProfileSetupScreen() {
       >
         <Text style={[styles.nextText, !isNextEnabled && styles.nextTextDisabled]}>다음</Text>
       </Pressable>
+      </KeyboardAvoidingView>
     </SafeAreaView>
     </TouchableWithoutFeedback>
   );
 }
 
 const styles = StyleSheet.create({
+  flex: {
+    flex: 1,
+  },
   container: {
     flex: 1,
     backgroundColor: '#05080B',
@@ -260,8 +273,12 @@ const styles = StyleSheet.create({
   progressSegmentActive: {
     backgroundColor: '#4FB78A',
   },
+  bodyScroll: {
+    flex: 1,
+  },
   body: {
     marginTop: moderateScale(28),
+    paddingBottom: moderateScale(24),
   },
   title: {
     color: '#F4F7F6',
@@ -377,14 +394,14 @@ const styles = StyleSheet.create({
     marginTop: moderateScale(2),
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: moderateScale(8),
+    gap: moderateScale(13),
   },
   skillChip: {
     borderRadius: 999,
     borderWidth: 1,
     borderColor: '#20262C',
     backgroundColor: '#11161B',
-    paddingVertical: moderateScale(8),
+    paddingVertical: moderateScale(10),
     paddingHorizontal: moderateScale(12),
   },
   skillChipSelected: {

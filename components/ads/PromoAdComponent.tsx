@@ -28,7 +28,7 @@ export default function PromoAdComponent() {
             스코어 디스크 무료 증정 이벤트
           </ThemedText>
           <ThemedText type="barlowLight" style={styles.description}>
-            파크필드 스코어 어플 출시 기념 이벤트
+            토코기록기 스코어 어플 출시 기념 이벤트
           </ThemedText>
         </View>
 

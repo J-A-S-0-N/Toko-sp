@@ -27,14 +27,14 @@ export default function EventDetailModal() {
             스코어 디스크 무료 증정 이벤트
           </Text>
           <Text type="barlowLight" style={styles.eventSubtitle}>
-            파크필드 스코어 어플 출시 기념 이벤트
+            토코기록기 스코어 어플 출시 기념 이벤트
           </Text>
         </View>
 
         <View style={styles.section}>
           <Text type="barlowHard" style={styles.sectionTitle}>이벤트 내용</Text>
           <Text type="barlowLight" style={styles.sectionText}>
-            파크필드 스코어 앱을 다운로드하고 스코어 디스크를 무료로 받아가세요!
+            토코기록기 스코어 앱을 다운로드하고 스코어 디스크를 무료로 받아가세요!
           </Text>
         </View>
 
@@ -48,7 +48,7 @@ export default function EventDetailModal() {
         <View style={styles.section}>
           <Text type="barlowHard" style={styles.sectionTitle}>참여 방법</Text>
           <Text type="barlowLight" style={styles.sectionText}>
-            1. 파크필드 스코어 앱 다운로드{'\n'}
+            1. 토코기록기 스코어 앱 다운로드{'\n'}
             2. 회원가입 및 라운드 기록 1회 이상{'\n'}
             3. 이벤트 신청하기
           </Text>

@@ -2,6 +2,7 @@ import { ThemedText as Text } from "@/components/themed-text";
 import { FONT } from '@/constants/theme';
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Animated, Modal, Pressable, StyleSheet, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { moderateScale } from 'react-native-size-matters';
 
 type HoleEditorModalProps = {
@@ -28,6 +29,7 @@ export default function HoleEditorModal({
   const [score, setScore] = useState(initialScore);
   const [par, setPar] = useState(initialPar);
   const translateY = useRef(new Animated.Value(moderateScale(40))).current;
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     if (!visible) return;
@@ -58,7 +60,7 @@ export default function HoleEditorModal({
       <View style={styles.modalOverlay}>
         <Pressable style={styles.modalDismissArea} onPress={onClose} />
 
-        <Animated.View style={[styles.holeEditorSheet, { transform: [{ translateY }] }]}> 
+        <Animated.View style={[styles.holeEditorSheet, { paddingBottom: moderateScale(22) + insets.bottom, transform: [{ translateY }] }]}> 
           <View style={styles.holeEditorHandle} />
 
           <Text type="barlowHard" style={styles.holeEditorTitle}>
@@ -156,7 +158,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#121719",
     paddingHorizontal: moderateScale(20),
     paddingTop: moderateScale(10),
-    paddingBottom: moderateScale(22),
   },
   holeEditorHandle: {
     alignSelf: "center",

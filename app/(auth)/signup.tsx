@@ -11,6 +11,7 @@ import { FONT } from '@/constants/theme';
 import { moderateScale } from 'react-native-size-matters';
 import { sendVerification } from './functions/authFunctions';
 import { checkUserExistsByPhoneNumber } from './functions/loginFetchUserFunction';
+import { setPendingConfirmation } from './functions/phoneConfirmationStore';
 
 export default function SignupScreen() {
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -96,19 +97,20 @@ export default function SignupScreen() {
       }
 
       const confirmation = await sendVerification(e164PhoneNumber);
-      //const verificationId = await sendVerification(e164PhoneNumber, recaptchaVerifier);
-
+      setPendingConfirmation(confirmation);
+      setIsSubmitting(false);
       router.push({
         pathname: '/(auth)/verification',
-        params: { phone: phoneNumber, verificationId: confirmation.verificationId },
+        params: { phone: phoneNumber },
       });
     } catch (error) {
-      console.error(error);
-      Alert.alert('인증 실패', '인증번호 전송에 실패했어요. 잠시 후 다시 시도해 주세요.');
-    } finally {
       setIsSubmitting(false);
+      const errorCode = (error as { code?: string })?.code ?? 'unknown';
+      const errorMessage = (error as { message?: string })?.message ?? 'unknown error';
+      console.error('[SIGNUP_SEND_FAIL]', { errorCode, errorMessage, error });
+      Alert.alert('인증 실패', `${errorCode}\n${errorMessage}`);
     }
-  }; 
+  };
 
   return (
     <>

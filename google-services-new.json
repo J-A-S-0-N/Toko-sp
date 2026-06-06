@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "815485205204-jtk2h9ldubqm2utlgvku8shvukm3eej3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tokosp.app",
+            "certificate_hash": "5709e0f1959d9687b9e7d76738973e447df6e68c"
+          }
+        },
+        {
           "client_id": "815485205204-lbt069v4it2o363a2tqfnisdekqd15h8.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

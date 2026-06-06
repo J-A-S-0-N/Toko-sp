@@ -19,16 +19,17 @@ export const confirmCode = async (verificationId: string, code: string) => {
 */
 
 
-import { getAuth, PhoneAuthProvider, signInWithCredential, signInWithPhoneNumber } from '@react-native-firebase/auth';
+import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 
-const auth = getAuth();
-
-export const sendVerification = async (phoneNumber: string) => {
-  const confirmation = await signInWithPhoneNumber(auth, phoneNumber);
-  return confirmation;
+export const sendVerification = (
+  phoneNumber: string,
+): Promise<FirebaseAuthTypes.ConfirmationResult> => {
+  return auth().signInWithPhoneNumber(phoneNumber);
 };
 
-export const confirmCode = async (verificationId: string, code: string) => {
-  const credential = PhoneAuthProvider.credential(verificationId, code);
-  return await signInWithCredential(auth, credential);
+export const confirmCode = (
+  confirmation: FirebaseAuthTypes.ConfirmationResult,
+  code: string,
+) => {
+  return confirmation.confirm(code);
 };

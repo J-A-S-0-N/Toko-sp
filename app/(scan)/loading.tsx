@@ -8,15 +8,15 @@ import { doc, type DocumentReference, onSnapshot } from "firebase/firestore";
 import React, { useEffect, useMemo, useState } from "react";
 import { Alert, LayoutChangeEvent, Pressable, StyleSheet, View } from "react-native";
 import Animated, {
-    Easing,
-    FadeIn,
-    FadeInUp,
-    FadeOut,
-    FadeOutUp,
-    useAnimatedStyle,
-    useSharedValue,
-    withRepeat,
-    withTiming
+  Easing,
+  FadeIn,
+  FadeInUp,
+  FadeOut,
+  FadeOutUp,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from 'react-native-size-matters';
@@ -166,8 +166,13 @@ export default function LoadingScreen() {
         if (status === "pending") return;
 
         const scores: number[] = [];
-        for (let i = 1; i <= holesCount; i++) {
-          scores.push(data?.[`hole${i}`] ?? 0);
+        for (let i = 1; i <= 9; i++) {
+          scores.push(data?.[`AHole${i}_raw`] ?? 0);
+        }
+        if (holesCount === 18) {
+          for (let i = 1; i <= 9; i++) {
+            scores.push(data?.[`BHole${i}_raw`] ?? 0);
+          }
         }
 
         unsubscribeStatusListener?.();

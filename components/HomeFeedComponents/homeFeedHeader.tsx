@@ -28,8 +28,8 @@ const HomeFeedHeader = ({ scrollY }: HomeFeedHeaderProps) => {
       ]}
     >
       <View>
-        <Text type="barlowHard" style={{fontSize: moderateScale(FONT.xl), color: "white"}}>파크필드</Text>
-        <Text type="barlowLight" style={{fontSize: moderateScale(12), color: "#9BA1A6"}}>토고코포츠 - 대한민국 1위 파크골프 기록기</Text>
+        <Text type="barlowHard" style={{fontSize: moderateScale(FONT.xl), color: "white"}}>토코기록기</Text>
+        <Text type="barlowLight" style={{fontSize: moderateScale(12), color: "#9BA1A6"}}>토코코포츠 - 대한민국 1위 파크골프 기록기</Text>
       </View>
       <View
         style={{
