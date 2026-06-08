@@ -9,14 +9,12 @@ import { useLocalSearchParams } from "expo-router";
 import { addDoc, collection, doc, getDoc, getDocs, query, serverTimestamp, where } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Modal,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    TextInput,
-    TouchableOpacity,
-    View
+  ActivityIndicator, KeyboardAvoidingView, Modal, Platform, Pressable,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View
 } from "react-native";
 import Animated, { FadeIn, FadeOut, SlideInDown, SlideOutDown } from "react-native-reanimated";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
@@ -62,7 +60,7 @@ function GiveawayForm({ noticeId }: GiveawayFormProps) {
   React.useEffect(() => {
     const checkSubmission = async () => {
       if (!user?.uid) return;
-      
+
       try {
         const q = query(
           collection(db, 'GiveawaySubmissions'),
@@ -77,7 +75,7 @@ function GiveawayForm({ noticeId }: GiveawayFormProps) {
         console.error('Error checking submission:', error);
       }
     };
-    
+
     checkSubmission();
   }, [user?.uid, noticeId]);
 
@@ -85,7 +83,7 @@ function GiveawayForm({ noticeId }: GiveawayFormProps) {
     if (!user?.uid || !userInput.trim()) return;
 
     setIsSubmitting(true);
-    
+
     try {
       // Get user details from Firestore
       let userPhone = '';
@@ -146,7 +144,7 @@ function GiveawayForm({ noticeId }: GiveawayFormProps) {
         <ThemedText style={modalStyles.giveawayDescription}>
           이름과 주소를 입력해주세요. 추첨을 통해 무료 상품을 보내드립니다!
         </ThemedText>
-        
+
         <TextInput
           style={modalStyles.giveawayInput}
           placeholder="이름, 주소, 연락처 등 필요한 정보를 입력해주세요"
@@ -157,7 +155,7 @@ function GiveawayForm({ noticeId }: GiveawayFormProps) {
           onChangeText={setUserInput}
           textAlignVertical="top"
         />
-        
+
         <TouchableOpacity
           onPress={handleSubmit}
           disabled={isSubmitting || !userInput.trim()}
@@ -246,7 +244,10 @@ function NoticeDetailModal({
       onRequestClose={onClose}
       statusBarTranslucent
     >
-      <View style={modalStyles.container}>
+      <KeyboardAvoidingView
+        style={modalStyles.container}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
         <Animated.View
           entering={FadeIn.duration(280)}
           exiting={FadeOut.duration(220)}
@@ -260,70 +261,71 @@ function NoticeDetailModal({
           exiting={SlideOutDown.duration(220)}
           style={modalStyles.sheetWrapper}
         >
-      <View style={[modalStyles.sheet, { paddingBottom: insets.bottom + moderateScale(16) }]}>
-        {/* Drag handle */}
-        <View style={modalStyles.dragHandle} />
+          <View style={[modalStyles.sheet, { paddingBottom: insets.bottom + moderateScale(16) }]}>
+            {/* Drag handle */}
+            <View style={modalStyles.dragHandle} />
 
-        {/* Header row */}
-        <View style={modalStyles.headerRow}>
-          <View style={modalStyles.headerLeft}>
-            <View style={[modalStyles.badgeInline, { backgroundColor: badge.bg }]}>
-              <ThemedText style={[modalStyles.badgeText, { color: badge.color }]}>
-                {badge.label}
-              </ThemedText>
+            {/* Header row */}
+            <View style={modalStyles.headerRow}>
+              <View style={modalStyles.headerLeft}>
+                <View style={[modalStyles.badgeInline, { backgroundColor: badge.bg }]}>
+                  <ThemedText style={[modalStyles.badgeText, { color: badge.color }]}>
+                    {badge.label}
+                  </ThemedText>
+                </View>
+                <ThemedText style={modalStyles.headerDate}>{notice.date}</ThemedText>
+              </View>
+              <TouchableOpacity
+                onPress={onClose}
+                activeOpacity={0.7}
+                style={modalStyles.closeBtn}
+              >
+                <Feather name="x" size={moderateScale(15)} color="#9BA1A6" />
+              </TouchableOpacity>
             </View>
-            <ThemedText style={modalStyles.headerDate}>{notice.date}</ThemedText>
+
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={modalStyles.scrollContent}
+              keyboardShouldPersistTaps="handled"
+            >
+              {/* Title */}
+              <ThemedText style={modalStyles.title}>{notice.title}</ThemedText>
+
+              {/* Body paragraphs */}
+              {Array.isArray(notice.body) && notice.body.map((para, i) => (
+                <ThemedText key={i} style={modalStyles.bodyPara}>
+                  {para}
+                </ThemedText>
+              ))}
+
+              {/* Highlight box */}
+              {notice.highlight && (
+                <View style={modalStyles.highlightBox}>
+                  <ThemedText style={modalStyles.highlightLabel}>
+                    {notice.highlight.label}
+                  </ThemedText>
+                  <ThemedText style={modalStyles.highlightContent}>
+                    {notice.highlight.content}
+                  </ThemedText>
+                </View>
+              )}
+
+              {/* Giveaway Form */}
+              {notice.hasGiveaway && <GiveawayForm noticeId={notice.id} />}
+            </ScrollView>
+
+            {/* CTA */}
+            <TouchableOpacity
+              onPress={onClose}
+              activeOpacity={0.85}
+              style={modalStyles.ctaBtn}
+            >
+              <ThemedText style={modalStyles.ctaText}>확인했습니다</ThemedText>
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity
-            onPress={onClose}
-            activeOpacity={0.7}
-            style={modalStyles.closeBtn}
-          >
-            <Feather name="x" size={moderateScale(15)} color="#9BA1A6" />
-          </TouchableOpacity>
-        </View>
-
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={modalStyles.scrollContent}
-        >
-          {/* Title */}
-          <ThemedText style={modalStyles.title}>{notice.title}</ThemedText>
-
-          {/* Body paragraphs */}
-          {Array.isArray(notice.body) && notice.body.map((para, i) => (
-            <ThemedText key={i} style={modalStyles.bodyPara}>
-              {para}
-            </ThemedText>
-          ))}
-
-          {/* Highlight box */}
-          {notice.highlight && (
-            <View style={modalStyles.highlightBox}>
-              <ThemedText style={modalStyles.highlightLabel}>
-                {notice.highlight.label}
-              </ThemedText>
-              <ThemedText style={modalStyles.highlightContent}>
-                {notice.highlight.content}
-              </ThemedText>
-            </View>
-          )}
-
-          {/* Giveaway Form */}
-          {notice.hasGiveaway && <GiveawayForm noticeId={notice.id} />}
-        </ScrollView>
-
-        {/* CTA */}
-        <TouchableOpacity
-          onPress={onClose}
-          activeOpacity={0.85}
-          style={modalStyles.ctaBtn}
-        >
-          <ThemedText style={modalStyles.ctaText}>확인했습니다</ThemedText>
-        </TouchableOpacity>
-      </View>
         </Animated.View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
@@ -398,91 +400,91 @@ export default function NoticeScreen() {
               중요 공지
             </ThemedText>
             <TouchableOpacity activeOpacity={0.85} onPress={() => setSelected(pinnedNotice)}>
-            <LinearGradient
-              colors={["#0D2B1A", "#111E15", "#0F1010"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.featuredCard}
-            >
-              <View style={styles.featuredTopRow}>
-                <View style={styles.badge}>
-                  <ThemedText style={[styles.badgeText, { color: getBadgeConfig("pinned").color }]}>
-                    고정됨
+              <LinearGradient
+                colors={["#0D2B1A", "#111E15", "#0F1010"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.featuredCard}
+              >
+                <View style={styles.featuredTopRow}>
+                  <View style={styles.badge}>
+                    <ThemedText style={[styles.badgeText, { color: getBadgeConfig("pinned").color }]}>
+                      고정됨
+                    </ThemedText>
+                  </View>
+                  <ThemedText type="barlowLight" style={styles.featuredDate}>
+                    {pinnedNotice.date}
                   </ThemedText>
                 </View>
-                <ThemedText type="barlowLight" style={styles.featuredDate}>
-                  {pinnedNotice.date}
-                </ThemedText>
-              </View>
 
-              <ThemedText type="barlowHard" style={styles.featuredTitle}>
-                {pinnedNotice.title}
-              </ThemedText>
-              <ThemedText type="barlowLight" style={styles.featuredDesc}>
-                {pinnedNotice.description}
-              </ThemedText>
-
-              <View style={styles.featuredLink}>
-                <ThemedText type="barlowLight" style={styles.featuredLinkText}>
-                  자세히 보기
+                <ThemedText type="barlowHard" style={styles.featuredTitle}>
+                  {pinnedNotice.title}
                 </ThemedText>
-                <Feather name="arrow-right" size={moderateScale(13)} color="#3CC06E" />
-              </View>
-            </LinearGradient>
-          </TouchableOpacity>
+                <ThemedText type="barlowLight" style={styles.featuredDesc}>
+                  {pinnedNotice.description}
+                </ThemedText>
+
+                <View style={styles.featuredLink}>
+                  <ThemedText type="barlowLight" style={styles.featuredLinkText}>
+                    자세히 보기
+                  </ThemedText>
+                  <Feather name="arrow-right" size={moderateScale(13)} color="#3CC06E" />
+                </View>
+              </LinearGradient>
+            </TouchableOpacity>
           </View>
         )}
 
         {/* 최근 공지 */}
         {recentNotices.length > 0 && (
           <View style={styles.sectionContainer}>
-          <View style={styles.sectionHeaderRow}>
-            <ThemedText type="barlowLight" style={styles.sectionLabel}>
-              최근 공지
-            </ThemedText>
-          </View>
+            <View style={styles.sectionHeaderRow}>
+              <ThemedText type="barlowLight" style={styles.sectionLabel}>
+                최근 공지
+              </ThemedText>
+            </View>
 
-          <View style={styles.noticeList}>
-            {recentNotices.map((notice, index) => {
-              const badge = getBadgeConfig(notice.type);
-              return (
-                <TouchableOpacity
-                  key={notice.id}
-                  activeOpacity={0.75}
-                  onPress={() => setSelected(notice)}
-                  style={[
-                    styles.noticeCard,
-                    index === recentNotices.length - 1 && styles.noticeCardLast,
-                  ]}
-                >
-                  <View style={styles.noticeCardInner}>
-                    <View style={styles.noticeTopRow}>
-                      <View style={[styles.badge, { backgroundColor: badge.bg }]}>
-                        <ThemedText style={[styles.badgeText, { color: badge.color }]}>
-                          {badge.label}
+            <View style={styles.noticeList}>
+              {recentNotices.map((notice, index) => {
+                const badge = getBadgeConfig(notice.type);
+                return (
+                  <TouchableOpacity
+                    key={notice.id}
+                    activeOpacity={0.75}
+                    onPress={() => setSelected(notice)}
+                    style={[
+                      styles.noticeCard,
+                      index === recentNotices.length - 1 && styles.noticeCardLast,
+                    ]}
+                  >
+                    <View style={styles.noticeCardInner}>
+                      <View style={styles.noticeTopRow}>
+                        <View style={[styles.badge, { backgroundColor: badge.bg }]}>
+                          <ThemedText style={[styles.badgeText, { color: badge.color }]}>
+                            {badge.label}
+                          </ThemedText>
+                        </View>
+                        <ThemedText type="barlowLight" style={styles.noticeDate}>
+                          {notice.date}
                         </ThemedText>
                       </View>
-                      <ThemedText type="barlowLight" style={styles.noticeDate}>
-                        {notice.date}
+                      <ThemedText type="barlowLight" style={styles.noticeTitle} numberOfLines={1}>
+                        {notice.title}
+                      </ThemedText>
+                      <ThemedText type="barlowLight" style={styles.noticeDesc} numberOfLines={2}>
+                        {notice.description}
                       </ThemedText>
                     </View>
-                    <ThemedText type="barlowLight" style={styles.noticeTitle} numberOfLines={1}>
-                      {notice.title}
-                    </ThemedText>
-                    <ThemedText type="barlowLight" style={styles.noticeDesc} numberOfLines={2}>
-                      {notice.description}
-                    </ThemedText>
-                  </View>
-                  <Feather
-                    name="chevron-right"
-                    size={moderateScale(16)}
-                    color="#4A5055"
-                    style={styles.chevron}
-                  />
-                </TouchableOpacity>
-              );
-            })}
-          </View>
+                    <Feather
+                      name="chevron-right"
+                      size={moderateScale(16)}
+                      color="#4A5055"
+                      style={styles.chevron}
+                    />
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
           </View>
         )}
       </ScrollView>

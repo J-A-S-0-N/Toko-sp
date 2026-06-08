@@ -34,6 +34,20 @@ export async function createPendingScan(holesCount: number, photoUris: string[],
   return scanDocRef;
 }
 
+export async function createManualScan(holesCount: number, userId: string) {
+  const scanDocRef = doc(collection(db, "Scans"));
+
+  await setDoc(scanDocRef, {
+    userId,
+    holes: holesCount,
+    photoUrls: [],
+    status: "manual",
+    createdAt: serverTimestamp(),
+  });
+
+  return scanDocRef;
+}
+
 
 /* export async function setFinalValues(scanDocRef: any) {
   //fetch all the pars and hits and then set the document and route to other page (this will be done else where)

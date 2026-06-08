@@ -9,11 +9,13 @@ import { moderateScale } from 'react-native-size-matters';
 type HoleSelectionModalProps = {
   visible: boolean;
   onClose: () => void;
+  mode?: "camera" | "manual";
 };
 
 export default function HoleSelectionModal({
   visible,
   onClose,
+  mode = "camera",
 }: HoleSelectionModalProps) {
   const [selectedHole, setSelectedHole] = useState<9 | 18>(18);
   const [isModalVisible, setIsModalVisible] = useState(visible);
@@ -22,6 +24,16 @@ export default function HoleSelectionModal({
 
   const routeToScreen = () => {
     onClose();
+    if (mode === "manual") {
+      router.push({
+        pathname: "/(scan)/roundInfo",
+        params: {
+          holes: String(selectedHole),
+          manual: "1",
+        }
+      });
+      return;
+    }
     router.push({
       pathname: "/(scan)/capture",
       params: {
@@ -185,7 +197,9 @@ export default function HoleSelectionModal({
           <View style={styles.handle} />
 
           <Text style={styles.title}>몇 홀 라운드인가요?</Text>
-          <Text style={styles.description}>홀 수에 맞게 스코어카드를 촬영합니다</Text>
+          <Text style={styles.description}>
+            {mode === "manual" ? "홀 수를 선택하고 직접 입력합니다" : "홀 수에 맞게 스코어카드를 촬영합니다"}
+          </Text>
 
           <View style={styles.optionsRow}>
             <Animated.View
@@ -219,7 +233,7 @@ export default function HoleSelectionModal({
                   ]}
                   allowFontScaling={false}
                 >
-                  사진 1장
+                  {mode === "manual" ? "9홀" : "사진 1장"}
                 </Animated.Text>
               </Pressable>
             </Animated.View>
@@ -255,7 +269,7 @@ export default function HoleSelectionModal({
                   ]}
                   allowFontScaling={false}
                 >
-                  사진 2장
+                  {mode === "manual" ? "18홀" : "사진 2장"}
                 </Animated.Text>
               </Pressable>
             </Animated.View>
@@ -263,7 +277,7 @@ export default function HoleSelectionModal({
 
           <SafeAreaView edges={['bottom']} style={styles.safeArea}>
             <Pressable style={styles.button} onPress={routeToScreen}>
-              <Text style={styles.buttonText}>카메라 열기</Text>
+              <Text style={styles.buttonText}>{mode === "manual" ? "직접 입력하기" : "카메라 열기"}</Text>
             </Pressable>
           </SafeAreaView>
         </Animated.View>

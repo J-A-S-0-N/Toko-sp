@@ -15,11 +15,11 @@ interface Course {
 }
 
 const COURSES: Course[] = [
-  { id: '1', name: '서울 컨트리클럽', location: '서울', holes: 18 },
-  { id: '2', name: '한양 CC', location: '서울', holes: 18 },
-  { id: '3', name: '뚝섬 CC', location: '서울', holes: 18 },
-  { id: '4', name: '서서울 CC', location: '서울', holes: 18 },
-  { id: '5', name: '88 CC', location: '서울', holes: 18 },
+  { id: '1', name: '이순신파크골프장', location: '아산', holes: 18 },
+  { id: '2', name: '산천어파크골프장', location: '화천', holes: 18 },
+  { id: '3', name: '동락파크골프장', location: '구미', holes: 18 },
+  { id: '4', name: '연천파크골프장', location: '연천', holes: 18 },
+  { id: '5', name: '문경영강천변파크골프장', location: '문경', holes: 18 },
 ];
 
 export default function CourseSelectionScreen() {

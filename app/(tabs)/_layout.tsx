@@ -31,25 +31,25 @@ const ITEMS: TabItem[] = [
   {
     key: 'index',
     label: '피드',
-    renderIcon: (color) => <Octicons name="home" size={moderateScale(20)} color={color} />,
+    renderIcon: (color) => <Octicons name="home" size={moderateScale(23)} color={color} />,
   },
   {
     key: 'stats',
     label: '통계',
     renderIcon: (color) => (
-      <MaterialCommunityIcons name="waves" size={moderateScale(22)} color={color} />
+      <MaterialCommunityIcons name="waves" size={moderateScale(25)} color={color} />
     ),
   },
   { key: 'scan', label: '스캔', isCenter: true },
   {
     key: 'profile',
     label: '내 정보',
-    renderIcon: (color) => <Feather name="disc" size={moderateScale(20)} color={color} />,
+    renderIcon: (color) => <Feather name="disc" size={moderateScale(23)} color={color} />,
   },
   {
     key: 'notice',
     label: '공지글',
-    renderIcon: (color) => <Feather name="menu" size={moderateScale(20)} color={color} />,
+    renderIcon: (color) => <Feather name="menu" size={moderateScale(23)} color={color} />,
   },
 ];
 
@@ -96,7 +96,7 @@ function CustomTabBar({ state, navigation }: BottomTabBarProps) {
                 <View style={styles.scanBtn}>
                   <MaterialCommunityIcons
                     name="record-circle-outline"
-                    size={moderateScale(28)}
+                    size={moderateScale(31)}
                     color="#0F1010"
                   />
                 </View>
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
     borderColor: SELECTED_BORDER,
   },
   label: {
-    fontSize: moderateScale(9),
+    fontSize: moderateScale(11),
   },
   centerWrap: {
     flex: 1,

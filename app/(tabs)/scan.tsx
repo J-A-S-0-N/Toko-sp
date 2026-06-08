@@ -14,6 +14,7 @@ import HoleSelectionModal from "../(scan)/holeSelectionModal";
 export default function ScanScreen() {
   const tabBarHeight = useBottomTabBarHeight();
   const [isHoleModalVisible, setIsHoleModalVisible] = React.useState(false);
+  const [scanMode, setScanMode] = React.useState<"camera" | "manual">("camera");
 
   return (
     <SafeAreaView edges={["top"]} style={styles.safeArea}>
@@ -28,10 +29,15 @@ export default function ScanScreen() {
         <RecentScansSection />
         <ScanFrameSection
           onCameraPress={() => {
+            setScanMode("camera");
             setIsHoleModalVisible(true);
           }}
-          onGalleryPress={() => {}}
+          onGalleryPress={() => {
+            setScanMode("manual");
+            setIsHoleModalVisible(true);
+          }}
           onFramePress={() => {
+            setScanMode("camera");
             setIsHoleModalVisible(true);
           }}
         />
@@ -43,6 +49,7 @@ export default function ScanScreen() {
 
       <HoleSelectionModal
         visible={isHoleModalVisible}
+        mode={scanMode}
         onClose={() => setIsHoleModalVisible(false)}
       />
     </SafeAreaView>

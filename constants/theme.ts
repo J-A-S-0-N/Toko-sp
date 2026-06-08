@@ -21,16 +21,16 @@ const tintColor = '#49DF80';
 // };
 
 export const FONT = {
-  xxs: 13,
-  xs: 15,
-  sm: 17,
-  md: 19,
-  lg: 22,
-  xl: 25,
-  xxl: 29,
-  h2: 37,
-  h1: 45,
-  hero: 53,
+  xxs: 15,
+  xs: 17,
+  sm: 19,
+  md: 21,
+  lg: 24,
+  xl: 27,
+  xxl: 31,
+  h2: 39,
+  h1: 47,
+  hero: 55,
 };
 
 export const Colors = {

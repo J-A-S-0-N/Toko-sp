@@ -2,7 +2,7 @@ import { ThemedText } from "@/components/themed-text";
 import { FONT } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import { Dimensions, Image, Pressable, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Image, Pressable, StyleSheet, TouchableOpacity, View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
 
 interface AdRequestModalProps {
@@ -31,7 +31,7 @@ export default function AdRequestModal({ onClose }: AdRequestModalProps) {
         <Image
           source={require('../assets/images/adImages/ads reqest banner image.png')}
           style={styles.bannerImage}
-          resizeMode="contain"
+          resizeMode="stretch"
         />
 
         {/* Buttons */}
@@ -101,10 +101,9 @@ const styles = StyleSheet.create({
   },
   bannerImage: {
     alignSelf: "center",
-    width: Dimensions.get('window').width - moderateScale(55),
+    width: "100%",
     height: moderateScale(230),
     marginVertical: moderateScale(16),
-    marginHorizontal: moderateScale(-8),
     borderRadius: moderateScale(16),
     borderWidth: 1,
     borderColor: "#4CAE82",

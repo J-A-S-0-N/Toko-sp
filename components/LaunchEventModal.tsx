@@ -3,7 +3,7 @@ import { FONT } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
-import { Dimensions, Image, Pressable, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Image, Pressable, StyleSheet, TouchableOpacity, View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
 
 interface LaunchEventModalProps {
@@ -42,7 +42,7 @@ export default function LaunchEventModal({ onClose }: LaunchEventModalProps) {
         <Image
           source={require('../assets/images/adImages/launch event banner image.png')}
           style={styles.bannerImage}
-          resizeMode="contain"
+          resizeMode="stretch"
         />
 
         {/* Buttons */}
@@ -157,11 +157,9 @@ const styles = StyleSheet.create({
   },
   bannerImage: {
     alignSelf: "center",
-    // width: "100%",
-    width: Dimensions.get('window').width - moderateScale(55),
+    width: "100%",
     height: moderateScale(230),
     marginVertical: moderateScale(16),
-    marginHorizontal: moderateScale(-8),
     borderRadius: moderateScale(16),
     borderWidth: 1,
     borderColor: "#4CAE82",

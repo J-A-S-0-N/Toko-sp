@@ -40,8 +40,9 @@ const ScanFrameSection = ({ onFramePress, onCameraPress, onGalleryPress }: ScanF
         </Pressable>
 
         <Pressable style={[styles.actionButton, styles.secondaryAction]} onPress={onGalleryPress}>
+          <Feather name="edit-3" size={moderateScale(16)} color="#E5E9E6" />
           <Text type="barlowLight" style={styles.secondaryActionText}>
-            갤러리
+            직접 입력
           </Text>
         </Pressable>
       </View>
@@ -131,12 +132,12 @@ const styles = StyleSheet.create({
     borderRadius: moderateScale(16),
     justifyContent: "center",
     alignItems: "center",
-    height: moderateScale(52),
+    height: moderateScale(70),
     flexDirection: "row",
     gap: moderateScale(7),
   },
   primaryAction: {
-    flex: 2,
+    flex: 1,
     backgroundColor: "#52B88F",
     shadowColor: "#52B88F",
     shadowOpacity: 0.25,

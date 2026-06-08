@@ -4,15 +4,15 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import Animated, {
-    Easing,
-    type SharedValue,
-    interpolateColor,
-    useAnimatedStyle,
-    useSharedValue,
-    withRepeat,
-    withSequence,
-    withSpring,
-    withTiming,
+  Easing,
+  type SharedValue,
+  interpolateColor,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withSpring,
+  withTiming,
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
@@ -21,7 +21,7 @@ import { useAuth } from "@/context/AuthContext";
 import Feather from "@expo/vector-icons/Feather";
 import { type DocumentReference, onSnapshot, updateDoc } from "firebase/firestore";
 import { deletePendingScan } from "./scanCleanup";
-import { createPendingScan } from "./scanFirebase";
+import { createManualScan, createPendingScan } from "./scanFirebase";
 
 const INACTIVE_COLOR = "#162923";
 const ACTIVE_COLOR = "#53B88F";
@@ -29,10 +29,12 @@ const ACTIVE_COLOR = "#53B88F";
 export default function RoundInfoScreen() {
   const router = useRouter();
   const { user } = useAuth();
-  const { holes, photos } = useLocalSearchParams<{
+  const { holes, photos, manual } = useLocalSearchParams<{
     holes?: string;
     photos?: string;
+    manual?: string;
   }>();
+  const isManual = manual === "1";
 
   const [courseName, setCourseName] = useState("");
   const [location, setLocation] = useState("");
@@ -122,6 +124,7 @@ export default function RoundInfoScreen() {
 
   useEffect(() => {
     if (uploadStartedRef.current) return;
+    if (isManual) return;
     if (!parsedPhotos.length) return;
     uploadStartedRef.current = true;
 
@@ -167,7 +170,32 @@ export default function RoundInfoScreen() {
       isActive = false;
       unsubscribe?.();
     };
-  }, [holesCount, parsedPhotos, activate]);
+  }, [holesCount, parsedPhotos, activate, isManual]);
+
+  // Manual entry: create an empty scan doc up front so saving (updateDoc) works later.
+  useEffect(() => {
+    if (!isManual) return;
+    if (uploadStartedRef.current) return;
+    uploadStartedRef.current = true;
+
+    let isActive = true;
+    setUploadPhase("done");
+
+    (async () => {
+      try {
+        const docRef = await createManualScan(holesCount, user?.uid ?? "");
+        if (!isActive) return;
+        scanDocRefLocal.current = docRef;
+        setScanDocId(docRef.id);
+      } catch (error) {
+        console.error("Failed to create manual scan:", error);
+      }
+    })();
+
+    return () => {
+      isActive = false;
+    };
+  }, [isManual, holesCount, user?.uid]);
 
   // Safety net: client-side timeout for OOM cases where server can't update status
   useEffect(() => {
@@ -199,7 +227,19 @@ export default function RoundInfoScreen() {
       }).catch((e) => console.error("Failed to save round info:", e));
     }
 
-    if (scores) {
+    if (isManual) {
+      // Manual entry: go straight to the editor with default scores (1 per hole, par 3).
+      const defaultScores = Array(holesCount).fill(1);
+      router.replace({
+        pathname: "./resultPreview",
+        params: {
+          holes: String(holesCount),
+          scores: JSON.stringify(defaultScores),
+          courseName: courseName.trim(),
+          ...(effectiveScanDocId ? { scanDocId: effectiveScanDocId } : {}),
+        },
+      });
+    } else if (scores) {
       router.replace({
         pathname: "./resultPreview",
         params: {
@@ -286,10 +326,18 @@ export default function RoundInfoScreen() {
             }}>
               <Feather name="x" size={moderateScale(18)} color="#D4D9DB" />
             </Pressable>
-            <Animated.View style={[styles.statusDot, dotStyle]} />
-            <Text type="barlowLight" style={styles.statusText}>
-              {uploadPhase === "done" ? "분석 완료" : uploadPhase === "analyzing" ? "백그라운드 분석 중" : uploadPhase === "error" ? "오류 발생" : "업로드 중"}
-            </Text>
+            {isManual ? (
+              <Text type="barlowLight" style={styles.statusText}>
+                직접 입력
+              </Text>
+            ) : (
+              <>
+                <Animated.View style={[styles.statusDot, dotStyle]} />
+                <Text type="barlowLight" style={styles.statusText}>
+                  {uploadPhase === "done" ? "분석 완료" : uploadPhase === "analyzing" ? "백그라운드 분석 중" : uploadPhase === "error" ? "오류 발생" : "업로드 중"}
+                </Text>
+              </>
+            )}
           </View>
         </View>
 
@@ -318,7 +366,7 @@ export default function RoundInfoScreen() {
                 어디서 치셨나요?
               </Text>
               <Text type="barlowLight" style={styles.subtitle}>
-                분석하는 동안 입력해 주세요
+                {isManual ? "라운드 정보를 입력해 주세요" : "분석하는 동안 입력해 주세요"}
               </Text>
 
               <View style={styles.inputGroup}>
@@ -374,7 +422,7 @@ export default function RoundInfoScreen() {
         <Animated.View style={[styles.button, buttonAnimStyle]}>
           <Pressable style={styles.buttonPressable} onPress={handleNext} disabled={!isActivated}>
             <Text type="barlowHard" style={[styles.buttonText, !isActivated && styles.buttonTextInactive]}>
-              {scores ? "결과 보기 →" : "다음 →"}
+              {isManual ? "스코어 입력 →" : scores ? "결과 보기 →" : "다음 →"}
             </Text>
           </Pressable>
         </Animated.View>
