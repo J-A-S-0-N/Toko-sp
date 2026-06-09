@@ -108,7 +108,7 @@ export default function HomeScreen() {
         </View>
 
         <View style={{marginBottom: moderateScale(25)}}>
-          <PromoAdComponent/>
+          <SponsoredAdComponent/>
         </View>
 
         <View style={{marginBottom: moderateScale(25)}}>
@@ -116,7 +116,7 @@ export default function HomeScreen() {
         </View>
 
         <View style={{marginBottom: moderateScale(15)}}>
-          <SponsoredAdComponent/>
+          <PromoAdComponent/>
         </View>
 
         <View style={{marginBottom: moderateScale(25)}}>

@@ -1,5 +1,9 @@
 import { FONT } from '@/constants/theme';
-import { router } from 'expo-router';
+// --- BACK-STACK FIX (added): imports for root stack reset ---
+import { CommonActions } from '@react-navigation/native';
+import { router, useNavigation } from 'expo-router';
+// To revert: restore -> import { router } from 'expo-router';
+// --- END BACK-STACK FIX ---
 import { useState } from 'react';
 import { FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -20,9 +24,10 @@ const COURSES: Course[] = [
   { id: '3', name: '동락파크골프장', location: '구미', holes: 18 },
   { id: '4', name: '연천파크골프장', location: '연천', holes: 18 },
   { id: '5', name: '문경영강천변파크골프장', location: '문경', holes: 18 },
-];
+]; // BACK-STACK FIX (added): used to reset root stack
 
 export default function CourseSelectionScreen() {
+  const navigation = useNavigation();
   const [courses, setCourses] = useState<Course[]>(COURSES);
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
   const [isCustomInputOpen, setIsCustomInputOpen] = useState(false);
@@ -63,7 +68,14 @@ export default function CourseSelectionScreen() {
   };
 
   const handleNext = () => {
-    router.replace('/(tabs)');
+    // --- BACK-STACK FIX (added): reset whole stack so back can't return to onboarding ---
+    const root = navigation.getParent() ?? navigation;
+    root.dispatch(
+      CommonActions.reset({ index: 0, routes: [{ name: '(tabs)' }] })
+    );
+    // To revert: delete the block above and uncomment the original line below
+    // router.replace('/(tabs)');
+    // --- END BACK-STACK FIX ---
   };
 
   const handleCustomCourseAdd = () => {

@@ -35,9 +35,10 @@ export default function SponsoredAdComponent() {
           {/* Text Content */}
           <View style={styles.textContainer}>
             <ThemedText type="barlowHard" style={styles.title}>
-              ARCGOLF 프리미엄 볼 SET 할인
+              하루 8만원 4명이용 6만원 이벤트!!
             </ThemedText>
             <ThemedText type="barlowLight" style={styles.description}>
+              서산점 올싱글 041 662 8979
               부드러운 타구감과 뛰어난 비거리.{"\n"}
               지금 20% 할인된 가격으로 만나보세요!
             </ThemedText>
