@@ -4,9 +4,79 @@ import { Image, Pressable, StyleSheet, View } from 'react-native';
 import { moderateScale } from 'react-native-size-matters';
 
 import { ThemedText as Text } from '@/components/themed-text';
-import { IconSymbol } from '@/components/ui/icon-symbol';
+
+// ===== GOOGLE AUTH (added) START — remove this block to revert =====
+
+import db from '@/config/firebase';
+import { isErrorWithCode, statusCodes } from '@react-native-google-signin/google-signin';
+import { CommonActions } from '@react-navigation/native';
+import { useNavigation } from 'expo-router';
+import { doc, getDoc } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert } from 'react-native';
+import { signInWithGoogle } from './functions/authFunctions';
+import { checkUserExistsByUid } from './functions/loginFetchUserFunction';
+import { setPendingUserCredential } from './functions/userCredentialStore';
+
+// ===== GOOGLE AUTH (added) END =====
 
 export default function AuthEntryScreen() {
+
+  // ===== GOOGLE AUTH (added) START — remove this block to revert =====
+
+  const navigation = useNavigation();
+  const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(false);
+
+  const resetToTabs = () => {
+    const root = navigation.getParent() ?? navigation;
+    root.dispatch(CommonActions.reset({ index: 0, routes: [{ name: '(tabs)' }] }));
+  };
+
+  const checkIfGoogleisDisabled = async () => {
+    const snap = await getDoc(doc(db, "DisableComponent", "GoogleVerficationButton"));
+    const disabled = snap.exists() ? Boolean(snap.data()?.isDisabled) : false;
+    setIsDisabled(disabled);
+  }
+
+  const handleGoogleSignIn = async () => {
+    if (isGoogleSubmitting) {
+      return;
+    }
+
+    setIsGoogleSubmitting(true);
+
+    try {
+      const credential = await signInWithGoogle();
+      const uid = credential.user?.uid ?? '';
+      const existingUser = await checkUserExistsByUid(uid);
+
+      if (existingUser) {
+        resetToTabs();
+        return;
+      }
+
+      setPendingUserCredential(credential);
+      router.push('/(auth)/verified');
+    } catch (error) {
+      if (isErrorWithCode(error) && error.code === statusCodes.SIGN_IN_CANCELLED) {
+        return;
+      }
+      const errorCode = (error as { code?: string })?.code ?? 'unknown';
+      const errorMessage = (error as { message?: string })?.message ?? 'unknown error';
+      console.error('[GOOGLE_SIGNIN_FAIL]', { errorCode, errorMessage, error });
+      Alert.alert('Google 인증 실패', `${errorCode}\n${errorMessage}`);
+    } finally {
+      setIsGoogleSubmitting(false);
+    }
+  };
+
+  useEffect(() => {
+    checkIfGoogleisDisabled();
+  }, []);
+
+  // ===== GOOGLE AUTH (added) END =====
+
   return (
     <View style={styles.container}>
       <View style={styles.content}>
@@ -34,17 +104,32 @@ export default function AuthEntryScreen() {
           }}
         >
           <View style={styles.startTextContainer}>
+            {/* ===== GOOGLE AUTH (added) START — original text was: 회원가입 ===== */}
             <Text type="barlowLight" style={styles.startText}>
-              회원가입
+              전화번호로 가입하기
             </Text>
-            <IconSymbol 
-              name="chevron.right" 
-              size={20} 
-              color="#F5F9F7" 
-              style={styles.arrowIcon}
-            />
+            {/* ===== GOOGLE AUTH (added) END ===== */}
           </View>
         </Pressable>  
+
+        {/* ===== GOOGLE AUTH (added) START — remove this block to revert ===== */}
+
+        {!isDisabled && (
+          <Pressable
+            style={[styles.googleButton, isGoogleSubmitting && styles.googleButtonDisabled]}
+            onPress={handleGoogleSignIn}
+            disabled={isGoogleSubmitting}
+          >
+            {isGoogleSubmitting ? (
+              <ActivityIndicator size="small" color="#1F1F1F" />
+            ) : (
+              <Text style={styles.googleButtonText}>Google로 시작하기</Text>
+            )}
+          </Pressable>
+
+        )}
+
+        {/* ===== GOOGLE AUTH (added) END ===== */}
 
         <View style={styles.loginRow}>
           <Text style={styles.loginHint}>이미 계정이 있으신가요? </Text>
@@ -113,11 +198,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#55BA8D',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#55BA8D',
-    shadowOpacity: 0.4,
-    shadowRadius: 20,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 10,
   },
   startText: {
     fontWeight: '800',
@@ -135,6 +215,29 @@ const styles = StyleSheet.create({
   arrowIcon: {
     marginLeft: 4,
   },
+  // ===== GOOGLE AUTH (added) START — remove this block to revert =====
+
+  googleButton: {
+    marginTop: 12,
+    width: '80%',
+    minHeight: moderateScale(44),
+    padding: moderateScale(10),
+    borderRadius: moderateScale(15),
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  googleButtonDisabled: {
+    opacity: 0.6,
+  },
+  googleButtonText: {
+    fontSize: moderateScale(FONT.md),
+    color: '#1F1F1F',
+    fontFamily: 'Pretendard-Bold',
+  },
+
+  // ===== GOOGLE AUTH (added) END =====
+
   loginRow: {
     marginTop: 6,
     flexDirection: 'row',

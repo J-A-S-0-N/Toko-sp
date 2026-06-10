@@ -19,7 +19,15 @@ const SKILL_LEVELS = [
 
 export default function ProfileSetupScreen() {
   const { setUsername } = useAuth();
-  const [name, setName] = useState('');
+
+  // ===== GOOGLE AUTH (added) START — to revert, replace with: const [name, setName] = useState(''); =====
+
+  const [name, setName] = useState(
+    () => (getPendingUserCredential() as UserCredential | null)?.user?.displayName ?? ''
+  );
+
+  // ===== GOOGLE AUTH (added) END =====
+
   const [handicap, setHandicap] = useState('');
   const [skillLevel, setSkillLevel] = useState<(typeof SKILL_LEVELS)[number]['id'] | null>(null);
   const avatarShake = useRef(new Animated.Value(0)).current;
@@ -52,7 +60,10 @@ export default function ProfileSetupScreen() {
         name,
         handicap: parseFloat(handicap),
         skillLevel,
-        test: 'name',
+
+        // ===== GOOGLE AUTH (added) START — remove this line to revert =====
+        email: (userCredential as UserCredential).user?.email ?? null,
+        // ===== GOOGLE AUTH (added) END =====
       });
 
       if (!result.saved && (result.reason === 'already_saved' || result.reason === 'existing_user')) {

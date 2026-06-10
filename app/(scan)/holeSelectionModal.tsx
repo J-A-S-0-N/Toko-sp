@@ -1,8 +1,7 @@
-import { ThemedText as Text } from '@/components/themed-text';
 import { FONT } from '@/constants/theme';
 import { router } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Modal, Pressable, StyleSheet, View } from 'react-native';
+import { Animated, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { moderateScale } from 'react-native-size-matters';
 
@@ -196,7 +195,7 @@ export default function HoleSelectionModal({
         >
           <View style={styles.handle} />
 
-          <Text style={styles.title}>몇 홀 라운드인가요?</Text>
+{/*           <Text style={styles.title}>몇 홀 라운드인가요?</Text>
           <Text style={styles.description}>
             {mode === "manual" ? "홀 수를 선택하고 직접 입력합니다" : "홀 수에 맞게 스코어카드를 촬영합니다"}
           </Text>
@@ -274,6 +273,7 @@ export default function HoleSelectionModal({
               </Pressable>
             </Animated.View>
           </View>
+          */}
 
           <SafeAreaView edges={['bottom']} style={styles.safeArea}>
             <Pressable style={styles.button} onPress={routeToScreen}>
@@ -364,6 +364,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: moderateScale(10),
+    marginVertical: moderateScale(10),
   },
   buttonText: {
     color: '#FFFFFF',

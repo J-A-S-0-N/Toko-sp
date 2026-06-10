@@ -107,13 +107,6 @@ export default function CaptureScreen() {
   return (
     <SafeAreaView edges={["top", "bottom"]} style={styles.safeArea}>
       <View style={styles.container}>
-        <CameraView
-          ref={cameraRef}
-          style={StyleSheet.absoluteFill}
-          facing="back"
-          enableTorch={isFlashOn}
-        />
-
         {/* 
         <Text type="barlowLight" style={styles.helperText}>
           원형 스코어카드를 안에 맞춰주세요
@@ -151,8 +144,18 @@ export default function CaptureScreen() {
           </Pressable>
         </View>
 
-        <View style={styles.circleArea}>
-          <View style={styles.scanCircle} />
+        <View style={styles.cameraArea}>
+          <View style={styles.cameraWrap}>
+            <CameraView
+              ref={cameraRef}
+              style={StyleSheet.absoluteFill}
+              facing="back"
+              enableTorch={isFlashOn}
+            />
+            <View style={styles.circleOverlay}>
+              <View style={styles.scanCircle} />
+            </View>
+          </View>
         </View>
 
         <View style={styles.bottomArea}>
@@ -250,8 +253,20 @@ const styles = StyleSheet.create({
     color: "#E9ECEE",
     letterSpacing: moderateScale(0.5),
   },
-  circleArea: {
+  cameraArea: {
     flex: 1,
+    justifyContent: "center",
+  },
+  cameraWrap: {
+    width: "100%",
+    aspectRatio: 3 / 4,
+    borderRadius: moderateScale(20),
+    overflow: "hidden",
+    backgroundColor: "#000",
+    alignSelf: "center",
+  },
+  circleOverlay: {
+    ...StyleSheet.absoluteFillObject,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -259,7 +274,7 @@ const styles = StyleSheet.create({
     width: "95%",
     aspectRatio: 1,
     borderRadius: moderateScale(157.5),
-    borderWidth: 1,
+    borderWidth: moderateScale(3),
     borderStyle: "dotted",
     borderColor: "#7FA4A0",
     backgroundColor: "transparent",

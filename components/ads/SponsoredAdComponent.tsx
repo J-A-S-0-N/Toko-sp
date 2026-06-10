@@ -1,7 +1,7 @@
 import { ThemedText } from "@/components/themed-text";
 import { FONT } from "@/constants/theme";
 import React from "react";
-import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Image, Linking, StyleSheet, TouchableOpacity, View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
 
 export default function SponsoredAdComponent() {
@@ -24,7 +24,7 @@ export default function SponsoredAdComponent() {
         {/* Product Image */}
         <View style={styles.imageContainer}>
           <Image
-            source={{ uri: "https://via.placeholder.com/100x100/2D3A2D/FFFFFF?text=Golf+Set" }}
+            source={require("@/assets/images/서산매장이미지.png")}
             style={styles.productImage}
             resizeMode="cover"
           />
@@ -45,9 +45,12 @@ export default function SponsoredAdComponent() {
           </View>
 
           {/* CTA Button */}
-          <TouchableOpacity style={styles.ctaButton}>
+          <TouchableOpacity
+            style={styles.ctaButton}
+            onPress={() => Linking.openURL("tel:0416628979")}
+          >
             <ThemedText type="barlowLight" style={styles.ctaText}>
-              자세히 보기
+              바로 연락하기
             </ThemedText>
           </TouchableOpacity>
         </View>
@@ -127,7 +130,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#45D07F",
     borderRadius: moderateScale(20),
-    paddingHorizontal: moderateScale(12),
+    paddingHorizontal: moderateScale(20),
     paddingVertical: moderateScale(8),
     alignItems: "center",
     justifyContent: "center",
