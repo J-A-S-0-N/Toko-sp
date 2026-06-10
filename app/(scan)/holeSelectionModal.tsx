@@ -16,7 +16,7 @@ export default function HoleSelectionModal({
   onClose,
   mode = "camera",
 }: HoleSelectionModalProps) {
-  const [selectedHole, setSelectedHole] = useState<9 | 18>(18);
+  const [selectedHole, setSelectedHole] = useState<9 | 18>(9);
   const [isModalVisible, setIsModalVisible] = useState(visible);
   const progress = useRef(new Animated.Value(0)).current;
   const holeSelectionProgress = useRef(new Animated.Value(selectedHole === 18 ? 1 : 0)).current;
