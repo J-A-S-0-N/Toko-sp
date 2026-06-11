@@ -42,14 +42,14 @@ const ITEMS: TabItem[] = [
   },
   { key: 'scan', label: '스캔', isCenter: true },
   {
+    key: 'notice',
+    label: '채팅',
+    renderIcon: (color) => <Feather name="menu" size={moderateScale(23)} color={color} />,
+  },
+  {
     key: 'profile',
     label: '내 정보',
     renderIcon: (color) => <Feather name="disc" size={moderateScale(23)} color={color} />,
-  },
-  {
-    key: 'notice',
-    label: '공지글',
-    renderIcon: (color) => <Feather name="menu" size={moderateScale(23)} color={color} />,
   },
 ];
 
@@ -101,7 +101,7 @@ function CustomTabBar({ state, navigation }: BottomTabBarProps) {
                   />
                 </View>
                 <Text
-                  type="barlowLight"
+                  type="barlowHard"
                   style={[
                     styles.label,
                     { color: focused ? ACTIVE : INACTIVE, marginTop: moderateScale(6) },
@@ -128,7 +128,7 @@ function CustomTabBar({ state, navigation }: BottomTabBarProps) {
                   {item.renderIcon?.(color)}
                 </View>
               </View>
-              <Text type="barlowLight" style={[styles.label, { color }]}>
+              <Text type="barlowHard" style={[styles.label, { color }]}>
                 {item.label}
               </Text>
             </Pressable>

@@ -31,7 +31,7 @@ const HomeFeedHeader = ({ scrollY }: HomeFeedHeaderProps) => {
         <Text type="barlowHard" style={{fontSize: moderateScale(FONT.xl), color: "white"}}>토코기록기</Text>
         <Text type="barlowLight" style={{fontSize: moderateScale(12), color: "#5A6068"}}>토코스포츠 - 대한민국 1위 파크골프 기록기</Text>
       </View>
-      <View
+{/*       <View
         style={{
           paddingHorizontal: moderateScale(15),
           paddingVertical: moderateScale(5),
@@ -44,7 +44,7 @@ const HomeFeedHeader = ({ scrollY }: HomeFeedHeaderProps) => {
         <Text
           style={{fontSize: moderateScale(FONT.xs), color: "white"}}
         >내 피드</Text>
-      </View>
+      </View> */}
     </Animated.View>
   );
 };

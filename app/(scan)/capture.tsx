@@ -151,6 +151,7 @@ export default function CaptureScreen() {
               style={StyleSheet.absoluteFill}
               facing="back"
               enableTorch={isFlashOn}
+              zoom={0.04}
             />
             <View style={styles.circleOverlay}>
               <View style={styles.scanCircle} />

@@ -291,6 +291,7 @@ const styles = StyleSheet.create({
     borderColor: "#2E3131",
   },
   statBlock: {
+    gap: moderateScale(5),
     alignItems: "center",
   },
   valueBest: {

@@ -10,8 +10,6 @@ import RecentRoundComponent from '@/components/HomeFeedComponents/recentRoundCom
 import RegionalRankComponent from '@/components/HomeFeedComponents/regionalRankComponent';
 import UsernameHeader from '@/components/HomeFeedComponents/usernameHeader';
 import UserStatComponent from '@/components/HomeFeedComponents/userStatComponent';
-import WeatherSummaryComponent from '@/components/HomeFeedComponents/weatherSummaryComponent';
-import WeeklySummaryComponent from '@/components/HomeFeedComponents/weeklySummaryComponent';
 import LaunchEventModal from '@/components/LaunchEventModal';
 import { ThemedText as Text } from '@/components/themed-text';
 import db from '@/config/firebase';
@@ -95,17 +93,17 @@ export default function HomeScreen() {
           <UserStatComponent/>
         </View>
 
-        <View style={{marginBottom: moderateScale(15)}}>
+{/*         <View style={{marginBottom: moderateScale(15)}}>
           <WeeklySummaryComponent/>
-        </View>
+        </View> */}
 
         <View style={{marginBottom: moderateScale(15)}}>
           <RegionalRankComponent/>
         </View>
 
-        <View style={{marginBottom: moderateScale(25)}}>
+  {/*       <View style={{marginBottom: moderateScale(25)}}>
           <WeatherSummaryComponent/>
-        </View>
+        </View> */}
 
         <View style={{marginBottom: moderateScale(25)}}>
           <SponsoredAdComponent/>

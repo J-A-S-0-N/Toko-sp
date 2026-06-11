@@ -4,15 +4,15 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import Animated, {
-  Easing,
-  type SharedValue,
-  interpolateColor,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withSequence,
-  withSpring,
-  withTiming,
+    Easing,
+    type SharedValue,
+    interpolateColor,
+    useAnimatedStyle,
+    useSharedValue,
+    withRepeat,
+    withSequence,
+    withSpring,
+    withTiming,
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
@@ -228,8 +228,8 @@ export default function RoundInfoScreen() {
     }
 
     if (isManual) {
-      // Manual entry: go straight to the editor with default scores (1 per hole, par 3).
-      const defaultScores = Array(holesCount).fill(1);
+      // Manual entry: go straight to the editor with default scores (3 per hole, par 3).
+      const defaultScores = Array(holesCount).fill(3);
       router.replace({
         pathname: "./resultPreview",
         params: {
@@ -276,8 +276,8 @@ export default function RoundInfoScreen() {
 
   const handleManualEntry = () => {
     const effectiveScanDocId = scanDocRefLocal.current?.id ?? scanDocId;
-    // All scores set to 1, par defaults to 3 in resultPreview
-    const defaultScores = Array(holesCount).fill(1);
+    // All scores set to 3, par defaults to 3 in resultPreview
+    const defaultScores = Array(holesCount).fill(3);
     router.replace({
       pathname: "./resultPreview",
       params: {

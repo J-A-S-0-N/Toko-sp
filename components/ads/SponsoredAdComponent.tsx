@@ -1,10 +1,37 @@
 import { ThemedText } from "@/components/themed-text";
+import { db } from "@/config/firebase";
 import { FONT } from "@/constants/theme";
+import { useAuth } from "@/context/AuthContext";
+import { arrayUnion, doc, increment, serverTimestamp, setDoc } from "firebase/firestore";
 import React from "react";
 import { Image, Linking, StyleSheet, TouchableOpacity, View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
 
 export default function SponsoredAdComponent() {
+  const { user, username } = useAuth();
+
+  const handleContactPress = async () => {
+    console.log("contact pressed by:", username);
+    try {
+      await setDoc(
+        doc(db, "AdStats", "서산점"),
+        {
+          contactClicks: increment(1),
+          contacts: arrayUnion({
+            userUid: user?.uid ?? null,
+            userName: username ?? null,
+            pressedAt: new Date().toISOString(),
+          }),
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
+    } catch (error) {
+      console.error("Error incrementing contact clicks:", error);
+    }
+    Linking.openURL("tel:0416628979");
+  };
+
   return (
     <View style={styles.container}>
       {/* Header with Sponsored label */}
@@ -47,7 +74,7 @@ export default function SponsoredAdComponent() {
           {/* CTA Button */}
           <TouchableOpacity
             style={styles.ctaButton}
-            onPress={() => Linking.openURL("tel:0416628979")}
+            onPress={handleContactPress}
           >
             <ThemedText type="barlowLight" style={styles.ctaText}>
               바로 연락하기

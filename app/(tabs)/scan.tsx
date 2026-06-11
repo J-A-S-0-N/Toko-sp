@@ -1,7 +1,6 @@
 import {
     RecentScansSection,
-    ScanFrameSection,
-    ScanGuideSection
+    ScanFrameSection
 } from "@/components/ScanPageComponent";
 import PromoAdComponent from "@/components/ads/PromoAdComponent";
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
@@ -44,7 +43,6 @@ export default function ScanScreen() {
         <View style={styles.adContainer}>
           <PromoAdComponent />
         </View>
-        <ScanGuideSection />
       </ScrollView>
 
       <HoleSelectionModal
