@@ -365,6 +365,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: moderateScale(10),
     marginVertical: moderateScale(10),
+    marginBottom: moderateScale(15),
   },
   buttonText: {
     color: '#FFFFFF',

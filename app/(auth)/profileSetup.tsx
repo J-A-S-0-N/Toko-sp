@@ -7,6 +7,7 @@ import { useMemo, useRef, useState } from 'react';
 import { Alert, Animated, Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, TouchableWithoutFeedback, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { moderateScale } from 'react-native-size-matters';
+import { checkUserExistsByPhoneNumber } from './functions/loginFetchUserFunction';
 import { saveUserInfo } from './functions/saveUserFunction';
 import { clearPendingUserCredential, getPendingUserCredential } from './functions/userCredentialStore';
 
@@ -19,35 +20,71 @@ const SKILL_LEVELS = [
 
 export default function ProfileSetupScreen() {
   const { setUsername } = useAuth();
+  const pendingUserCredential = getPendingUserCredential() as UserCredential | null;
 
   // ===== GOOGLE AUTH (added) START — to revert, replace with: const [name, setName] = useState(''); =====
 
   const [name, setName] = useState(
-    () => (getPendingUserCredential() as UserCredential | null)?.user?.displayName ?? ''
+    () => pendingUserCredential?.user?.displayName ?? ''
   );
 
   // ===== GOOGLE AUTH (added) END =====
 
   const [handicap, setHandicap] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [skillLevel, setSkillLevel] = useState<(typeof SKILL_LEVELS)[number]['id'] | null>(null);
   const avatarShake = useRef(new Animated.Value(0)).current;
 
+  const isGoogleSignup = useMemo(() => {
+    const providerIds = pendingUserCredential?.user?.providerData
+      ?.map((provider) => provider?.providerId)
+      .filter(Boolean) ?? [];
+    return providerIds.includes('google.com');
+  }, [pendingUserCredential]);
+
+  const formattedPhoneNumber = useMemo(() => {
+    const digits = phoneNumber.replace(/\D/g, '').slice(0, 11);
+
+    if (digits.length <= 3) {
+      return digits;
+    }
+
+    if (digits.length <= 7) {
+      return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+    }
+
+    return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7, 11)}`;
+  }, [phoneNumber]);
+
   const hasNameValue = name.trim().length > 0;
   const hasHandicapValue = handicap.trim().length > 0;
+  const hasPhoneValue = phoneNumber.replace(/\D/g, '').length > 0;
+  const isPhoneValid = phoneNumber.replace(/\D/g, '').length >= 10;
   const hasInvalidHandicapChars = /[^\d.]/.test(handicap);
   const hasInvalidNameChars = /[^가-힣a-zA-Z0-9\s]/.test(name);
   const hasNameTooLong = name.trim().length > 10;
 
+  const handlePhoneChange = (value: string) => {
+    const digits = value.replace(/\D/g, '').slice(0, 11);
+    setPhoneNumber(digits);
+  };
+
   const isNextEnabled = useMemo(() => {
-    return hasNameValue && hasHandicapValue && !hasInvalidHandicapChars && !hasInvalidNameChars && !hasNameTooLong && skillLevel !== null;
-  }, [hasHandicapValue, hasInvalidHandicapChars, hasInvalidNameChars, hasNameTooLong, hasNameValue, skillLevel]);
+    const isBaseFormValid = hasNameValue && hasHandicapValue && !hasInvalidHandicapChars && !hasInvalidNameChars && !hasNameTooLong && skillLevel !== null;
+
+    if (!isGoogleSignup) {
+      return isBaseFormValid;
+    }
+
+    return isBaseFormValid && isPhoneValid;
+  }, [hasHandicapValue, hasInvalidHandicapChars, hasInvalidNameChars, hasNameTooLong, hasNameValue, isGoogleSignup, isPhoneValid, skillLevel]);
 
   const handleNext = async () => {
     if (!isNextEnabled) {
       return;
     }
 
-    const userCredential = getPendingUserCredential();
+    const userCredential = getPendingUserCredential() as UserCredential | null;
 
     if (!userCredential) {
       Alert.alert('인증 정보 없음', '다시 인증 후 시도해주세요.');
@@ -55,11 +92,25 @@ export default function ProfileSetupScreen() {
       return;
     }
 
+    let googlePhoneNumberToSave: string | null = null;
+
+    if (isGoogleSignup) {
+      const digitsOnly = phoneNumber.replace(/\D/g, '');
+      googlePhoneNumberToSave = `+82${digitsOnly.replace(/^0/, '')}`;
+      const existingPhoneUser = await checkUserExistsByPhoneNumber(googlePhoneNumberToSave);
+
+      if (existingPhoneUser) {
+        Alert.alert('이미 가입된 번호예요', '다른 번호를 입력해주세요.');
+        return;
+      }
+    }
+
     try {
       const result = await saveUserInfo(userCredential as UserCredential, {
         name,
         handicap: parseFloat(handicap),
         skillLevel,
+        ...(googlePhoneNumberToSave ? { phoneNumber: googlePhoneNumberToSave } : {}),
 
         // ===== GOOGLE AUTH (added) START — remove this line to revert =====
         email: (userCredential as UserCredential).user?.email ?? null,
@@ -183,6 +234,26 @@ export default function ProfileSetupScreen() {
               selectionColor="#4FB78A"
             />
           </View>
+
+          {isGoogleSignup && (
+            <View style={styles.fieldGroup}>
+              <Text style={styles.fieldLabel}>전화번호 *</Text>
+              <TextInput
+                value={formattedPhoneNumber}
+                onChangeText={handlePhoneChange}
+                keyboardType="number-pad"
+                placeholder="010-0000-0000"
+                placeholderTextColor="#6A7278"
+                style={[
+                  styles.textField,
+                  hasPhoneValue && styles.textFieldActive,
+                  hasPhoneValue && !isPhoneValid && styles.textFieldInvalid,
+                ]}
+                selectionColor="#4FB78A"
+                maxLength={13}
+              />
+            </View>
+          )}
 
           <View style={styles.fieldGroup}>
             <Text style={styles.fieldLabel}>본인 최저타수 (9홀 기준) *</Text>

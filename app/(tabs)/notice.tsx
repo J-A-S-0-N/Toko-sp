@@ -1,3 +1,4 @@
+import GlobalChatCard from "@/components/ChatComponents/GlobalChatCard";
 import { ThemedText } from "@/components/themed-text";
 import { db } from "@/config/firebase";
 import { FONT } from "@/constants/theme";
@@ -5,7 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Notice, NoticeType, useNotices } from "@/hooks/useNotices";
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { addDoc, collection, doc, getDoc, getDocs, query, serverTimestamp, where } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
@@ -246,7 +247,8 @@ function NoticeDetailModal({
     >
       <KeyboardAvoidingView
         style={modalStyles.container}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={0}
       >
         <Animated.View
           entering={FadeIn.duration(280)}
@@ -336,6 +338,7 @@ export default function NoticeScreen() {
   const [selected, setSelected] = useState<Notice | null>(null);
   const { notices, loading, error, pinnedNotice, recentNotices } = useNotices();
   const { showGiveaway } = useLocalSearchParams<{ showGiveaway?: string }>();
+  const router = useRouter();
 
   // Auto-open giveaway notice when navigated from event banner
   useEffect(() => {
@@ -392,6 +395,9 @@ export default function NoticeScreen() {
             <ThemedText style={styles.pillText}>공지사항</ThemedText>
           </View>
         </View>
+
+        {/* 전체 채팅 */}
+        <GlobalChatCard onEnter={() => router.push("/chatRoom")} />
 
         {/* 중요 공지 */}
         {pinnedNotice && (

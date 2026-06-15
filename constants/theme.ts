@@ -21,6 +21,7 @@ const tintColor = '#49DF80';
 // };
 
 export const FONT = {
+  xxxs: 12,
   xxs: 15,
   xs: 17,
   sm: 19,

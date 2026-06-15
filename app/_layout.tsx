@@ -13,10 +13,6 @@ import { BarlowCondensed_400Regular, BarlowCondensed_500Medium_Italic, BarlowCon
 import { useEffect } from 'react';
 import { Text } from 'react-native';
 
-export const unstable_settings = {
-  anchor: '(onboarding)',
-};
-
 //{rop to disable font scaling
 (Text as any).defaultProps = (Text as any).defaultProps || {};
 (Text as any).defaultProps.style = { fontFamily: 'Pretendard-Bold' }; 
@@ -67,6 +63,7 @@ export default function RootLayout() {
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="(scan)" options={{ headerShown: false }} />
+          <Stack.Screen name="chatRoom" options={{ headerShown: false, animation: 'slide_from_right' }} />
           <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
           <Stack.Screen name="(modals)/activityModal" 
             options={{ 
