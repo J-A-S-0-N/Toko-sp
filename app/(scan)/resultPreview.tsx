@@ -253,7 +253,7 @@ export default function ResultPreviewScreen() {
             2026년 3월 28일 · {holesCount === 18 ? "2개 코스" : "1개 코스"}
           </Text>
 
-          <View style={[styles.courseParCard, parInputEnabled && styles.courseParCardDisabled]}>
+{/*           <View style={[styles.courseParCard, parInputEnabled && styles.courseParCardDisabled]}>
             <View style={styles.courseParInfo}>
               <Text type="barlowLight" style={styles.courseParLabel}>
                 코스 파
@@ -284,21 +284,22 @@ export default function ResultPreviewScreen() {
                 <Feather name="plus" size={moderateScale(18)} color={parInputEnabled ? "#5C6366" : "#57C79A"} />
               </Pressable>
             </View>
+          </View> */}
+
+          <View style={styles.summaryPrimaryItem}>
+            <AnimatedNumber
+              style={styles.summaryValuePrimary}
+              value={stats.totalScore}
+              trigger={animationTrigger}
+              delay={0}
+              duration={700}
+            />
+            <Text type="barlowLight" style={styles.summaryLabel}>
+              스코어
+            </Text>
           </View>
 
           <View style={styles.summaryRow}>
-            <View style={styles.summaryItem}>
-              <AnimatedNumber
-                style={styles.summaryValuePrimary}
-                value={stats.totalScore}
-                trigger={animationTrigger}
-                delay={0}
-                duration={700}
-              />
-              <Text type="barlowLight" style={styles.summaryLabel}>
-                스코어
-              </Text>
-            </View>
             <View style={styles.summaryItem}>
               <AnimatedNumber
                 style={styles.summaryValueDanger}
@@ -598,8 +599,19 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: moderateScale(12),
   },
+  summaryPrimaryItem: {
+    width: "100%",
+    alignItems: "center",
+    borderRadius: moderateScale(18),
+    backgroundColor: "#1A1E1F",
+    borderWidth: 1,
+    borderColor: "#2C3032",
+    paddingVertical: moderateScale(14),
+    marginBottom: moderateScale(10),
+    gap: moderateScale(3),
+  },
   summaryItem: {
-    width: "23%",
+    width: "31.5%",
     alignItems: "center",
     borderRadius: moderateScale(14),
     backgroundColor: "#1A1E1F",
@@ -610,7 +622,7 @@ const styles = StyleSheet.create({
   },
   summaryValuePrimary: {
     color: "#57C79A",
-    fontSize: moderateScale(FONT.lg),
+    fontSize: moderateScale(FONT.hero),
   },
   summaryValueDanger: {
     color: "#FF4D4D",

@@ -1,16 +1,16 @@
 import { db } from "@/config/firebase";
 import {
-  collection,
-  doc,
-  endBefore,
-  getDocs,
-  limit,
-  limitToLast,
-  onSnapshot,
-  orderBy,
-  query,
-  serverTimestamp,
-  setDoc,
+    collection,
+    doc,
+    endBefore,
+    getDocs,
+    limit,
+    limitToLast,
+    onSnapshot,
+    orderBy,
+    query,
+    serverTimestamp,
+    setDoc,
 } from "firebase/firestore";
 
 export interface ChatMessage {
@@ -33,6 +33,7 @@ interface SendChatMessageInput {
 export const MAX_CHAT_MESSAGE_LENGTH = 100;
 
 const CHAT_MESSAGES_COLLECTION = collection(db, "chats", "global", "messages");
+const ADMIN_LIST_COLLECTION = collection(db, "AdminList");
 
 const mapDocToChatMessage = (snapshotDoc: any): ChatMessage => {
   const data = snapshotDoc.data();
@@ -157,4 +158,18 @@ export const getKoreanRelativeTime = (createdAtMs?: number): string => {
 
   const diffDays = Math.floor(diffHours / 24);
   return `${diffDays}일 전`;
+};
+
+export const getAdminUsernameSet = async (): Promise<Set<string>> => {
+  const snap = await getDocs(ADMIN_LIST_COLLECTION);
+  const usernames = new Set<string>();
+
+  snap.docs.forEach((docSnap) => {
+    const data = docSnap.data();
+    if (typeof data.username === "string" && data.username.length > 0) {
+      usernames.add(data.username);
+    }
+  });
+
+  return usernames;
 };

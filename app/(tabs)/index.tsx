@@ -2,6 +2,7 @@ import { checkUserExistsByPhoneNumber } from '@/app/(auth)/functions/loginFetchU
 import AdRequestModal from '@/components/AdRequestModal';
 import PromoAdComponent from '@/components/ads/PromoAdComponent';
 import SponsoredAdComponent from '@/components/ads/SponsoredAdComponent';
+import DailyScanEventCard from '@/components/HomeFeedComponents/dailyScanEventCard';
 import DailyTipComponent from '@/components/HomeFeedComponents/dailyTipComponent';
 import GoalSetupPromptComponent from '@/components/HomeFeedComponents/goalSetupPromptComponent';
 import HomeFeedHeader from '@/components/HomeFeedComponents/homeFeedHeader';
@@ -19,9 +20,9 @@ import { FONT } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useRouter } from 'expo-router';
-import { collection, doc, getCountFromServer, getDoc, query, setDoc, where } from 'firebase/firestore';
+import { collection, doc, getCountFromServer, query, setDoc, where } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
-import { Alert, BackHandler, Linking, Modal, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, Linking, Pressable, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { moderateScale } from 'react-native-size-matters';
@@ -75,43 +76,43 @@ export default function HomeScreen() {
     fetchCount();
   }, [user?.uid]);
 
-  useEffect(() => {
-    if (!user?.uid) {
-      setPhoneModalVisible(false);
-      return;
-    }
+  // useEffect(() => {
+  //   if (!user?.uid) {
+  //     setPhoneModalVisible(false);
+  //     return;
+  //   }
 
-    const checkLegacyGooglePhoneRequirement = async () => {
-      try {
-        const providerIds = user.providerData?.map((provider) => provider?.providerId).filter(Boolean) ?? [];
-        const isGoogleUser = providerIds.includes('google.com');
+  //   const checkLegacyGooglePhoneRequirement = async () => {
+  //     try {
+  //       const providerIds = user.providerData?.map((provider) => provider?.providerId).filter(Boolean) ?? [];
+  //       const isGoogleUser = providerIds.includes('google.com');
 
-        if (!isGoogleUser) {
-          setPhoneModalVisible(false);
-          return;
-        }
+  //       if (!isGoogleUser) {
+  //         setPhoneModalVisible(false);
+  //         return;
+  //       }
 
-        const userSnap = await getDoc(doc(db, 'Users', user.uid));
-        const storedPhone = userSnap.exists() ? userSnap.data()?.phoneNumber : null;
-        const hasStoredPhone = typeof storedPhone === 'string' && storedPhone.trim().length > 0;
+  //       const userSnap = await getDoc(doc(db, 'Users', user.uid));
+  //       const storedPhone = userSnap.exists() ? userSnap.data()?.phoneNumber : null;
+  //       const hasStoredPhone = typeof storedPhone === 'string' && storedPhone.trim().length > 0;
 
-        setPhoneModalVisible(!hasStoredPhone);
-      } catch (error) {
-        console.error('Failed to check phone requirement:', error);
-      }
-    };
+  //       setPhoneModalVisible(!hasStoredPhone);
+  //     } catch (error) {
+  //       console.error('Failed to check phone requirement:', error);
+  //     }
+  //   };
 
-    checkLegacyGooglePhoneRequirement();
-  }, [user]);
+  //   checkLegacyGooglePhoneRequirement();
+  // }, [user]);
 
-  useEffect(() => {
-    if (!phoneModalVisible) {
-      return;
-    }
+  // useEffect(() => {
+  //   if (!phoneModalVisible) {
+  //     return;
+  //   }
 
-    const subscription = BackHandler.addEventListener('hardwareBackPress', () => true);
-    return () => subscription.remove();
-  }, [phoneModalVisible]);
+  //   const subscription = BackHandler.addEventListener('hardwareBackPress', () => true);
+  //   return () => subscription.remove();
+  // }, [phoneModalVisible]);
 
   const handlePhoneChange = (value: string) => {
     const digits = value.replace(/\D/g, '').slice(0, 11);
@@ -200,6 +201,10 @@ export default function HomeScreen() {
         </View> */}
 
         <View style={{marginBottom: moderateScale(15)}}>
+          <DailyScanEventCard/>
+        </View>
+
+        <View style={{marginBottom: moderateScale(15)}}>
           <RegionalRankComponent/>
         </View>
 
@@ -223,14 +228,14 @@ export default function HomeScreen() {
           <PromoAdComponent/>
         </View>
 
+        <View style={{marginBottom: moderateScale(15)}}>
+          <DailyTipComponent/>
+        </View>
+
         <View style={{marginBottom: moderateScale(25)}}>
           <HottestLocationsComponent
             onPressViewAll={() => Linking.openURL('https://www.kpga7330.com/park-golf/courses')}
           />
-        </View>
-
-        <View style={{marginBottom: moderateScale(15)}}>
-          <DailyTipComponent/>
         </View>
 
         <View style={{marginBottom: moderateScale(15)}}>
@@ -257,6 +262,7 @@ export default function HomeScreen() {
         <AdRequestModal onClose={() => setAdStep(null)} />
       )}
 
+      {/*
       <Modal
         visible={phoneModalVisible}
         transparent
@@ -294,6 +300,7 @@ export default function HomeScreen() {
           </View>
         </View>
       </Modal>
+      */}
     </SafeAreaView>
   );
 }

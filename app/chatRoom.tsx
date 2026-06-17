@@ -3,6 +3,7 @@ import { FONT } from "@/constants/theme";
 import { useAuth } from "@/context/AuthContext";
 import {
   ChatMessage,
+  getAdminUsernameSet,
   getKoreanClockLabel,
   getOlderChatMessages,
   MAX_CHAT_MESSAGE_LENGTH,
@@ -15,6 +16,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  Keyboard,
   KeyboardAvoidingView,
   NativeScrollEvent,
   NativeSyntheticEvent,
@@ -24,7 +26,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
 
 /* ─── Types ────────────────────────────────────────────────────────────────── */
@@ -34,15 +36,16 @@ type ChatItem =
   | { kind: "system"; id: string; text: string }
   | { kind: "divider"; id: string; label: string }
   | {
-      kind: "message";
-      id: string;
-      mine: boolean;
-      name?: string;
-      initial?: string;
-      text: string;
-      time: string;
-      status?: string;
-    };
+    kind: "message";
+    id: string;
+    mine: boolean;
+    name?: string;
+    isAdmin?: boolean;
+    initial?: string;
+    text: string;
+    time: string;
+    status?: string;
+  };
 
 const OLDER_PAGE_SIZE = 30;
 
@@ -111,7 +114,10 @@ function MessageRow({ item }: { item: Extract<ChatItem, { kind: "message" }> }) 
         <ThemedText style={styles.avatarText}>{item.initial}</ThemedText>
       </View>
       <View style={styles.otherContent}>
-        <ThemedText style={styles.otherName}>{item.name}</ThemedText>
+        <View style={styles.otherNameRow}>
+          <ThemedText style={styles.otherName}>{item.name}</ThemedText>
+          {item.isAdmin && <ThemedText style={styles.adminBadge}>관계자</ThemedText>}
+        </View>
         <View style={styles.otherBubbleRow}>
           <View style={styles.otherBubble}>
             <ThemedText style={styles.otherText}>{item.text}</ThemedText>
@@ -128,14 +134,20 @@ function MessageRow({ item }: { item: Extract<ChatItem, { kind: "message" }> }) 
 export default function ChatRoomScreen() {
   const router = useRouter();
   const { user, username } = useAuth();
-  const insets = useSafeAreaInsets();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState("");
   const [pendingMessageIds, setPendingMessageIds] = useState<string[]>([]);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isLoadingOlder, setIsLoadingOlder] = useState(false);
   const [hasOlderMessages, setHasOlderMessages] = useState(true);
+  const [adminUsernames, setAdminUsernames] = useState<Set<string>>(new Set());
   const listRef = useRef<FlatList<ChatItem>>(null);
+
+  const scrollToBottom = useCallback((animated = false) => {
+    requestAnimationFrame(() => {
+      listRef.current?.scrollToEnd({ animated });
+    });
+  }, []);
 
   const handleDraftChange = useCallback((value: string) => {
     setDraft(value.slice(0, MAX_CHAT_MESSAGE_LENGTH));
@@ -149,6 +161,37 @@ export default function ChatRoomScreen() {
 
     return unsubscribe;
   }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadAdminUsernames = async () => {
+      try {
+        const usernames = await getAdminUsernameSet();
+        if (isMounted) {
+          setAdminUsernames(usernames);
+        }
+      } catch (error) {
+        console.error("Failed to load admin usernames:", error);
+      }
+    };
+
+    loadAdminUsernames();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener("keyboardDidShow", () => {
+      scrollToBottom(false);
+    });
+
+    return () => {
+      showSub.remove();
+    };
+  }, [scrollToBottom]);
 
   const loadOlderMessages = useCallback(async () => {
     if (isLoadingOlder || !hasOlderMessages || !messages.length) {
@@ -195,6 +238,7 @@ export default function ChatRoomScreen() {
         id: message.id,
         mine,
         name: mine ? undefined : message.username,
+        isAdmin: mine ? false : adminUsernames.has(message.username),
         initial: mine ? undefined : message.userInitial,
         text: message.text,
         time: getKoreanClockLabel(message.createdAtMs),
@@ -220,7 +264,7 @@ export default function ChatRoomScreen() {
       },
       ...mappedMessages,
     ];
-  }, [isInitialLoading, messages, pendingMessageIds, user?.uid]);
+  }, [adminUsernames, isInitialLoading, messages, pendingMessageIds, user?.uid]);
 
   const handleSend = async () => {
     if (!user?.uid) {
@@ -247,7 +291,10 @@ export default function ChatRoomScreen() {
     setMessages((prev) => mergeMessages(prev, [optimisticMessage]));
     setPendingMessageIds((prev) => [...prev, messageId]);
     setDraft("");
-    requestAnimationFrame(() => listRef.current?.scrollToEnd({ animated: true }));
+
+    setTimeout(() => {
+      scrollToBottom(true);
+    }, 50);
 
     try {
       await sendChatMessage({
@@ -279,7 +326,7 @@ export default function ChatRoomScreen() {
   };
 
   return (
-    <SafeAreaView edges={["top", "bottom"]} style={styles.container}>
+    <SafeAreaView edges={["top"]} style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn} activeOpacity={0.7}>
@@ -310,7 +357,7 @@ export default function ChatRoomScreen() {
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? insets.top : 0}
+        keyboardVerticalOffset={0}
       >
         {isInitialLoading ? (
           <View style={styles.loadingWrapper}>
@@ -326,6 +373,13 @@ export default function ChatRoomScreen() {
             showsVerticalScrollIndicator={false}
             onScroll={handleScroll}
             scrollEventThrottle={16}
+            onContentSizeChange={() => {
+              scrollToBottom(false);
+            }}
+            onLayout={() => {
+              scrollToBottom(false);
+            }}
+            keyboardShouldPersistTaps="handled"
             ListHeaderComponent={
               isLoadingOlder ? (
                 <View style={styles.loadingOlderWrapper}>
@@ -350,6 +404,9 @@ export default function ChatRoomScreen() {
             multiline
             maxLength={MAX_CHAT_MESSAGE_LENGTH}
             onSubmitEditing={handleSend}
+            onFocus={() => {
+              scrollToBottom(false);
+            }}
           />
           <TouchableOpacity
             style={[styles.sendBtn, !draft.trim() && styles.sendBtnDisabled]}
@@ -359,11 +416,6 @@ export default function ChatRoomScreen() {
           >
             <Feather name="arrow-up" size={moderateScale(20)} color="#0F1010" />
           </TouchableOpacity>
-        </View>
-        <View style={[styles.charCountRow, { paddingBottom: moderateScale(8) + insets.bottom }] }>
-          <ThemedText style={styles.charCountText}>
-            {draft.length}/{MAX_CHAT_MESSAGE_LENGTH}
-          </ThemedText>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -544,10 +596,20 @@ const styles = StyleSheet.create({
   otherContent: {
     flex: 1,
   },
+  otherNameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: moderateScale(6),
+    marginBottom: moderateScale(4),
+  },
   otherName: {
     color: "#9BA1A6",
     fontSize: moderateScale(FONT.xxs),
-    marginBottom: moderateScale(4),
+  },
+  adminBadge: {
+    color: "#3CC06E",
+    fontSize: moderateScale(FONT.xxs),
+    fontWeight: "700",
   },
   otherBubbleRow: {
     flexDirection: "row",
@@ -608,19 +670,10 @@ const styles = StyleSheet.create({
     gap: moderateScale(8),
     paddingHorizontal: moderateScale(12),
     paddingTop: moderateScale(8),
-    paddingBottom: moderateScale(10),
+    paddingBottom: moderateScale(8),
     borderTopWidth: 1,
     borderTopColor: "#1F2422",
     backgroundColor: "#0F1010",
-  },
-  charCountRow: {
-    alignItems: "flex-end",
-    paddingHorizontal: moderateScale(14),
-    paddingBottom: moderateScale(8),
-  },
-  charCountText: {
-    color: "#6F7775",
-    fontSize: moderateScale(FONT.xxs),
   },
   plusBtn: {
     width: moderateScale(38),
