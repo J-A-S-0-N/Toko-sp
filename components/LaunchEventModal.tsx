@@ -3,7 +3,7 @@ import { FONT } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
-import { Image, Pressable, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Pressable, StyleSheet, TouchableOpacity, View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
 
 interface LaunchEventModalProps {
@@ -37,13 +37,6 @@ export default function LaunchEventModal({ onClose }: LaunchEventModalProps) {
             <Ionicons name="close" size={moderateScale(20)} color="#6E7171" />
           </Pressable>
         </View>
-
-        {/* Event Banner Image */}
-        <Image
-          source={require('../assets/images/adImages/launch event banner image.png')}
-          style={styles.bannerImage}
-          resizeMode="stretch"
-        />
 
         {/* Buttons */}
         <TouchableOpacity style={styles.primaryButton} onPress={handleJoin}>

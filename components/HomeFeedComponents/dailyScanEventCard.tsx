@@ -1,7 +1,9 @@
 import { ThemedText as Text } from "@/components/themed-text";
+import { db } from "@/config/firebase";
 import { FONT } from "@/constants/theme";
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { collection, getCountFromServer } from "firebase/firestore";
 import { useEffect, useRef, useState } from "react";
 import {
   Animated,
@@ -9,23 +11,76 @@ import {
   Image,
   Modal,
   Pressable,
+  ScrollView,
   StyleSheet,
   View,
 } from "react-native";
 import { moderateScale } from "react-native-size-matters";
 
 const DailyScanEventCard = () => {
+  const eventDescription1 = require("@/assets/images/EventDiscription1.png");
+  const eventDescription2 = require("@/assets/images/EventDescription2.png");
+  const eventDescription3 = require("@/assets/images/3dayGurillaEventImage.png");
+
   const [dayLeft, setDayLeft] = useState(6);
   const [userCount, setUserCount] = useState(127);
+  const [isEventLive, setIsEventLive] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const sheetTranslateY = useRef(new Animated.Value(moderateScale(40))).current;
 
   useEffect(() => {
-    setUserCount(127);
+    let isMounted = true;
+
+    const fetchParticipantCount = async () => {
+      try {
+        const primarySnap = await getCountFromServer(collection(db, "User"));
+        const primaryCount = primarySnap.data().count;
+
+        if (primaryCount > 0) {
+          if (isMounted) setUserCount(primaryCount);
+          return;
+        }
+
+        const fallbackSnap = await getCountFromServer(collection(db, "Users"));
+        if (isMounted) {
+          setUserCount(fallbackSnap.data().count);
+        }
+      } catch (error) {
+        console.error("Failed to fetch event participant count:", error);
+      }
+    };
+
+    fetchParticipantCount();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {
-    setDayLeft(6);
+    const updateCountdown = () => {
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const eventStartKst = new Date(Date.UTC(currentYear, 5, 18, 15, 0, 0));
+
+      const diffMs = eventStartKst.getTime() - now.getTime();
+
+      if (diffMs <= 0) {
+        setIsEventLive(true);
+        setDayLeft(0);
+        return;
+      }
+
+      setIsEventLive(false);
+      setDayLeft(Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+    };
+
+    updateCountdown();
+    const timer = setInterval(updateCountdown, 60 * 1000);
+
+    return () => {
+      clearInterval(timer);
+    };
   }, []);
 
   const openEventModal = () => {
@@ -69,13 +124,13 @@ const DailyScanEventCard = () => {
           <View style={styles.labelWrap}>
             <Feather name="gift" size={moderateScale(14)} color="#49C895" />
             <Text type="barlowLight" style={styles.labelText}>
-              매일 경품 이벤트
+              3일 깜짝 이벤트
             </Text>
           </View>
 
           <View style={styles.deadlineWrap}>
             <Text type="barlowLight" style={styles.deadlineSubtext}>
-              이벤트 시작까지 {dayLeft}일 남음
+              {isEventLive ? "이벤트 진행중" : `이벤트 시작까지 ${dayLeft}일 남음`}
             </Text>
           </View>
         </View>
@@ -83,7 +138,7 @@ const DailyScanEventCard = () => {
         <View style={styles.mainRow}>
           <View style={styles.leftContent}>
             <Text type="barlowHard" style={styles.title}>
-              1일 1경품!
+              한번만 {"\n"}참여해도!
             </Text>
             <Text type="barlowLight" style={styles.subtitle}>
               스캔하여 경품에 응모하세요!
@@ -94,7 +149,7 @@ const DailyScanEventCard = () => {
                 이벤트 진행
               </Text>
               <Text type="barlowHard" style={styles.timeValue}>
-                D-{dayLeft}
+                {isEventLive ? "진행중!" : `D-${dayLeft}`}
               </Text>
             </View>
 
@@ -115,7 +170,7 @@ const DailyScanEventCard = () => {
 
             <Pressable style={styles.ctaButton} onPress={openEventModal}>
               <Text type="barlowHard" style={styles.ctaText}>
-                참여하기
+                자세히보기
               </Text>
             </Pressable>
           </View>
@@ -141,14 +196,35 @@ const DailyScanEventCard = () => {
           >
             <View style={styles.modalHandle} />
 
-            <Text type="barlowHard" style={styles.modalTitle}>
-              이벤트 참여
-            </Text>
-            <Image
-              source={require("@/assets/images/3dayGurillaEventImage.png")}
-              style={styles.modalEventImage}
-              resizeMode="contain"
-            />
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.modalScrollContent}
+            >
+              <Text type="barlowHard" style={styles.modalTitle}>
+                이벤트 참여
+              </Text>
+              <Image
+                source={eventDescription2}
+                style={[
+                  styles.modalEventImage,
+                ]}
+                //resizeMode="contain"
+              />
+              <Image
+                source={eventDescription1}
+                style={[
+                  styles.modalEventImage,
+                ]}
+                resizeMode="contain"
+              />
+              <Image
+                source={eventDescription3}
+                style={[
+                  styles.modalEventImage,
+                ]}
+                resizeMode="contain"
+              />
+            </ScrollView>
           </Animated.View>
         </View>
       </Modal>
@@ -283,11 +359,11 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.45)",
   },
   modalSheet: {
-    height: "85%",
+    maxHeight: "85%",
     backgroundColor: "#262626",
     borderTopLeftRadius: moderateScale(24),
     borderTopRightRadius: moderateScale(24),
-    paddingHorizontal: moderateScale(20),
+    paddingHorizontal: moderateScale(16),
     paddingTop: moderateScale(12),
     paddingBottom: moderateScale(24),
   },
@@ -303,16 +379,21 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: moderateScale(FONT.xl),
   },
+  modalScrollContent: {
+    paddingBottom: moderateScale(24),
+    paddingHorizontal: moderateScale(8),
+  },
   modalDescription: {
     marginTop: moderateScale(8),
     color: "#CBE2D7",
     fontSize: moderateScale(FONT.md),
   },
   modalEventImage: {
-    marginTop: moderateScale(14),
+    borderRadius: moderateScale(20),
+    height: moderateScale(450),
+    marginTop: moderateScale(12),
     width: "100%",
-    height: moderateScale(520),
-    borderRadius: moderateScale(16),
+    alignSelf: "center",
   },
 });
 

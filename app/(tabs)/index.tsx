@@ -13,7 +13,6 @@ import RecentRoundComponent from '@/components/HomeFeedComponents/recentRoundCom
 import RegionalRankComponent from '@/components/HomeFeedComponents/regionalRankComponent';
 import UsernameHeader from '@/components/HomeFeedComponents/usernameHeader';
 import UserStatComponent from '@/components/HomeFeedComponents/userStatComponent';
-import LaunchEventModal from '@/components/LaunchEventModal';
 import { ThemedText as Text } from '@/components/themed-text';
 import db from '@/config/firebase';
 import { FONT } from '@/constants/theme';
@@ -32,7 +31,7 @@ export default function HomeScreen() {
   const { user } = useAuth();
   const tabBarHeight = useBottomTabBarHeight();
   const [showSkeleton, setShowSkeleton] = useState(true);
-  const [adStep, setAdStep] = useState<'event' | 'adRequest' | null>(null);
+  const [showAdRequestModal, setShowAdRequestModal] = useState(false);
   const [roundCount, setRoundCount] = useState<number | null>(null);
   const [phoneModalVisible, setPhoneModalVisible] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -53,7 +52,7 @@ export default function HomeScreen() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowSkeleton(false);
-      setAdStep('event');
+      setShowAdRequestModal(true);
     }, 2000);
     return () => clearTimeout(timer);
   }, []);
@@ -254,12 +253,8 @@ export default function HomeScreen() {
       </Animated.ScrollView>
       )}
 
-      {/* Event Overlay - Shows on top of home feed */}
-      {adStep === 'event' && (
-        <LaunchEventModal onClose={() => setAdStep('adRequest')} />
-      )}
-      {adStep === 'adRequest' && (
-        <AdRequestModal onClose={() => setAdStep(null)} />
+      {showAdRequestModal && (
+        <AdRequestModal onClose={() => setShowAdRequestModal(false)} />
       )}
 
       {/*
