@@ -344,17 +344,6 @@ export default function ChatRoomScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Event banner */}
-      <TouchableOpacity activeOpacity={0.85} style={styles.banner}>
-        <View style={styles.bannerLeft}>
-          <View style={styles.bannerIcon}>
-            <Feather name="gift" size={moderateScale(14)} color="#0F1010" />
-          </View>
-          <ThemedText style={styles.bannerText}>스코어 디스크 무료 증정 이벤트 진행 중</ThemedText>
-        </View>
-        <Feather name="chevron-right" size={moderateScale(18)} color="#0F1010" />
-      </TouchableOpacity>
-
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -481,37 +470,6 @@ const styles = StyleSheet.create({
   headerOnline: {
     color: "#3CC06E",
     fontSize: moderateScale(FONT.xxs),
-  },
-  banner: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#3CC06E",
-    marginHorizontal: moderateScale(12),
-    marginBottom: moderateScale(6),
-    paddingHorizontal: moderateScale(14),
-    paddingVertical: moderateScale(11),
-    borderRadius: moderateScale(12),
-  },
-  bannerLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: moderateScale(10),
-    flex: 1,
-  },
-  bannerIcon: {
-    width: moderateScale(24),
-    height: moderateScale(24),
-    borderRadius: moderateScale(12),
-    backgroundColor: "rgba(15,16,16,0.18)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  bannerText: {
-    color: "#0F1010",
-    fontSize: moderateScale(FONT.xs),
-    fontWeight: "700",
-    flex: 1,
   },
   listContent: {
     paddingHorizontal: moderateScale(14),

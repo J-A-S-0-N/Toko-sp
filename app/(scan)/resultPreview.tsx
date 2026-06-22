@@ -46,7 +46,7 @@ export default function ResultPreviewScreen() {
   const { holes, scores, courseName, scanDocId } = useLocalSearchParams<{ holes?: string; scores?: string; courseName?: string; scanDocId?: string }>();
 
   const holesCount = holes === "18" ? 18 : 9;
-  const standardCoursePar = holesCount === 18 ? 72 : 36;
+  const standardCoursePar = holesCount === 18 ? 66 : 33;
 
   const [parInputEnabled, setParInputEnabled] = useState(false);
   const [coursePar, setCoursePar] = useState(standardCoursePar);
