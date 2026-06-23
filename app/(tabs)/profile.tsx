@@ -139,7 +139,7 @@ export default function ProfileScreen() {
     <SafeAreaView edges={['top']} style={styles.safeArea}>
       <ScrollView
         style={styles.container}
-        contentContainerStyle={[styles.content, { paddingBottom: tabBarHeight + moderateScale(48) }]}
+        contentContainerStyle={[styles.content, { paddingBottom: tabBarHeight + moderateScale(150) }]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.topBar}>

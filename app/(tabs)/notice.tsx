@@ -10,7 +10,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { addDoc, collection, doc, getDoc, getDocs, query, serverTimestamp, where } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
-  ActivityIndicator, KeyboardAvoidingView, Modal, Platform, Pressable,
+  ActivityIndicator, Image, KeyboardAvoidingView, Modal, Platform, Pressable,
   ScrollView,
   StyleSheet,
   TextInput,
@@ -225,6 +225,24 @@ function GiveawayForm({ noticeId }: GiveawayFormProps) {
   );
 }
 
+function NoticeImageItem({ uri }: { uri: string }) {
+  const [aspectRatio, setAspectRatio] = useState(16 / 9);
+
+  return (
+    <Image
+      source={{ uri }}
+      style={[modalStyles.noticeImage, { aspectRatio }]}
+      resizeMode="contain"
+      onLoad={(event) => {
+        const { width, height } = event.nativeEvent.source;
+        if (width > 0 && height > 0) {
+          setAspectRatio(width / height);
+        }
+      }}
+    />
+  );
+}
+
 /* ─── Detail Modal ─────────────────────────────────────────────────────────── */
 
 function NoticeDetailModal({
@@ -287,12 +305,25 @@ function NoticeDetailModal({
             </View>
 
             <ScrollView
+              style={modalStyles.bodyScroll}
               showsVerticalScrollIndicator={false}
               contentContainerStyle={modalStyles.scrollContent}
               keyboardShouldPersistTaps="handled"
             >
               {/* Title */}
               <ThemedText style={modalStyles.title}>{notice.title}</ThemedText>
+
+              {/* Notice images */}
+              {Array.isArray(notice.imageUrls) && notice.imageUrls.length > 0 && (
+                <View style={modalStyles.noticeImageList}>
+                  {notice.imageUrls.map((url, index) => (
+                    <NoticeImageItem
+                      key={`${notice.id}-image-${index}`}
+                      uri={url}
+                    />
+                  ))}
+                </View>
+              )}
 
               {/* Body paragraphs */}
               {Array.isArray(notice.body) && notice.body.map((para, i) => (
@@ -510,7 +541,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#0F1010",
   },
   scrollContent: {
-    paddingBottom: moderateScale(40),
+    paddingBottom: moderateScale(150),
   },
   pageHeader: {
     paddingHorizontal: moderateScale(14),
@@ -696,12 +727,13 @@ const modalStyles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.55)",
   },
   sheetWrapper: {
-    maxHeight: "82%",
+    height: "82%",
     overflow: "hidden",
     borderTopLeftRadius: moderateScale(24),
     borderTopRightRadius: moderateScale(24),
   },
   sheet: {
+    flex: 1,
     backgroundColor: "#181B1B",
     paddingHorizontal: moderateScale(20),
     paddingTop: moderateScale(12),
@@ -749,12 +781,24 @@ const modalStyles = StyleSheet.create({
   scrollContent: {
     paddingBottom: moderateScale(20),
   },
+  bodyScroll: {
+    flex: 1,
+  },
   title: {
     color: "#EEF2EF",
     fontSize: moderateScale(FONT.xl),
     fontFamily: "Pretendard-Bold",
     lineHeight: moderateScale(30),
     marginBottom: moderateScale(16),
+  },
+  noticeImage: {
+    width: "100%",
+    borderRadius: moderateScale(10),
+    backgroundColor: "#121515",
+  },
+  noticeImageList: {
+    gap: moderateScale(10),
+    marginBottom: moderateScale(14),
   },
   bodyPara: {
     color: "#9BA1A6",

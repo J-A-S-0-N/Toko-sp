@@ -11,6 +11,7 @@ export interface Notice {
   description: string;
   date: string;
   body: string[];
+  imageUrls?: string[];
   highlight?: { label: string; content: string };
   hasGiveaway?: boolean;
 }
@@ -40,6 +41,12 @@ export const useNotices = (): UseNoticesReturn => {
       const snap = await getDocs(q);
       const fetchedNotices: Notice[] = snap.docs.map((d) => {
         const data = d.data();
+        const imageUrls = Array.isArray(data.imageUrls)
+          ? data.imageUrls.filter((url: unknown): url is string => typeof url === 'string' && url.trim().length > 0)
+          : typeof data.imageUrl === 'string' && data.imageUrl.trim().length > 0
+            ? [data.imageUrl]
+            : [];
+
         return {
           id: d.id,
           type: data.type ?? 'update',
@@ -47,6 +54,7 @@ export const useNotices = (): UseNoticesReturn => {
           description: data.description ?? '',
           date: data.date ?? '',
           body: Array.isArray(data.body) ? data.body : [],
+          imageUrls,
           highlight: data.highlight,
           hasGiveaway: data.hasGiveaway ?? false,
         };

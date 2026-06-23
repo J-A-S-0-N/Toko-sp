@@ -19,7 +19,7 @@ export default function ScanScreen() {
     <SafeAreaView edges={["top"]} style={styles.safeArea}>
       <ScrollView
         style={styles.container}
-        contentContainerStyle={[styles.content, { paddingBottom: tabBarHeight + moderateScale(48) }]}
+        contentContainerStyle={[styles.content, { paddingBottom: tabBarHeight + moderateScale(150) }]}
         showsVerticalScrollIndicator={false}
       >
         {/*

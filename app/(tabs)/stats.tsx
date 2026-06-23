@@ -52,7 +52,7 @@ export default function StatsScreen() {
         entering={FadeIn.duration(400)}
         style={styles.container}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={[styles.content, { paddingBottom: tabBarHeight + moderateScale(48) }]}
+        contentContainerStyle={[styles.content, { paddingBottom: tabBarHeight + moderateScale(150) }]}
       >
         <View>
           <View style={styles.header}>

@@ -2,7 +2,8 @@ import { checkUserExistsByPhoneNumber } from '@/app/(auth)/functions/loginFetchU
 import AdRequestModal from '@/components/AdRequestModal';
 import PromoAdComponent from '@/components/ads/PromoAdComponent';
 import SponsoredAdComponent from '@/components/ads/SponsoredAdComponent';
-import DailyScanEventCard from '@/components/HomeFeedComponents/dailyScanEventCard';
+import SecondAdRequestModal from '@/components/SecondAdRequestModal';
+// import DailyScanEventCard from '@/components/HomeFeedComponents/dailyScanEventCard';
 import DailyTipComponent from '@/components/HomeFeedComponents/dailyTipComponent';
 import GoalSetupPromptComponent from '@/components/HomeFeedComponents/goalSetupPromptComponent';
 import HomeFeedHeader from '@/components/HomeFeedComponents/homeFeedHeader';
@@ -32,6 +33,7 @@ export default function HomeScreen() {
   const tabBarHeight = useBottomTabBarHeight();
   const [showSkeleton, setShowSkeleton] = useState(true);
   const [showAdRequestModal, setShowAdRequestModal] = useState(false);
+  const [showSecondAdRequestModal, setShowSecondAdRequestModal] = useState(false);
   const [roundCount, setRoundCount] = useState<number | null>(null);
   const [phoneModalVisible, setPhoneModalVisible] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -165,6 +167,15 @@ export default function HomeScreen() {
     ]);
   };
 
+  const handleCloseFirstAdModal = () => {
+    setShowAdRequestModal(false);
+    setShowSecondAdRequestModal(true);
+  };
+
+  const handleCloseSecondAdModal = () => {
+    setShowSecondAdRequestModal(false);
+  };
+
   return (
     <SafeAreaView edges={['top']} style={styles.safeArea}>
       {showSkeleton ? (
@@ -178,7 +189,7 @@ export default function HomeScreen() {
       <Animated.ScrollView
         entering={FadeIn.duration(400)}
         style={styles.container}
-        contentContainerStyle={{ paddingBottom: tabBarHeight + moderateScale(32) }}
+        contentContainerStyle={{ paddingBottom: tabBarHeight + moderateScale(150) }}
         onScroll={scrollHandler}
         scrollEventThrottle={16}
       >
@@ -199,9 +210,9 @@ export default function HomeScreen() {
           <WeeklySummaryComponent/>
         </View> */}
 
-        <View style={{marginBottom: moderateScale(15)}}>
+{/*         <View style={{marginBottom: moderateScale(15)}}>
           <DailyScanEventCard/>
-        </View>
+        </View> */}
 
         <View style={{marginBottom: moderateScale(15)}}>
           <RegionalRankComponent/>
@@ -254,7 +265,11 @@ export default function HomeScreen() {
       )}
 
       {showAdRequestModal && (
-        <AdRequestModal onClose={() => setShowAdRequestModal(false)} />
+        <AdRequestModal onClose={handleCloseFirstAdModal} />
+      )}
+
+      {showSecondAdRequestModal && (
+        <SecondAdRequestModal onClose={handleCloseSecondAdModal} />
       )}
 
       {/*
