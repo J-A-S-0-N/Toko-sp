@@ -1,6 +1,7 @@
 import { ThemedText as Text } from "@/components/themed-text";
 import { FONT } from '@/constants/theme';
 import Feather from "@expo/vector-icons/Feather";
+import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
@@ -15,25 +16,33 @@ const ScanFrameSection = ({ onFramePress, onCameraPress, onGalleryPress }: ScanF
   return (
     <>
       <Pressable style={styles.scanFrame} onPress={onFramePress}>
-        <View style={styles.cornerTopLeft} />
-        <View style={styles.cornerTopRight} />
-        <View style={styles.cornerBottomLeft} />
-        <View style={styles.cornerBottomRight} />
+        <LinearGradient
+          colors={["#13D58B", "#12D88D", "#11CC84"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.scanFrameGradient}
+        >
+          <View style={styles.scanFrameGlowSoft} />
+          <View style={styles.scanFrameGlow} />
 
-        <View style={styles.scanCenterIconWrap}>
-          <Feather name="camera" size={moderateScale(24)} color="#61D8A9" />
-        </View>
-        <Text type="barlowHard" style={styles.scanTitle}>
-          스코어카드를 프레임에 맞추세요
-        </Text>
-        <Text type="barlowLight" style={styles.scanSubtitle}>
-          탭하여 카메라 또는 갤러리 열기
-        </Text>
+          <View style={styles.scanTextWrap}>
+            <Text type="barlowHard" style={styles.scanTitle}>
+              스코어 입력
+            </Text>
+            <Text type="barlowLight" style={styles.scanSubtitle}>
+              오늘 라운드 기록하기
+            </Text>
+          </View>
+
+          <View style={styles.scanArrowWrap}>
+            <Feather name="arrow-right" size={moderateScale(28)} color="#031B12" />
+          </View>
+        </LinearGradient>
       </Pressable>
 
       <View style={styles.actionRow}>
         <Pressable style={[styles.actionButton, styles.primaryAction]} onPress={onCameraPress}>
-          <Feather name="camera" size={moderateScale(16)} color="#FFFFFF" />
+          <Feather name="camera" size={moderateScale(16)} color="#7B8388" />
           <Text type="barlowHard" style={styles.primaryActionText}>
             카메라 열기
           </Text>
@@ -53,75 +62,61 @@ const ScanFrameSection = ({ onFramePress, onCameraPress, onGalleryPress }: ScanF
 const styles = StyleSheet.create({
   scanFrame: {
     marginHorizontal: moderateScale(10),
-    height: moderateScale(300),
-    borderRadius: moderateScale(24),
-    borderWidth: 1,
-    borderColor: "#292E31",
-    backgroundColor: "#1F2222",
-    justifyContent: "center",
-    alignItems: "center",
+    borderRadius: moderateScale(34),
+    overflow: "hidden",
   },
-  cornerTopLeft: {
+  scanFrameGradient: {
+    minHeight: moderateScale(170),
+    borderRadius: moderateScale(34),
+    paddingHorizontal: moderateScale(24),
+    paddingVertical: moderateScale(22),
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "space-between",
+    position: "relative",
+    backgroundColor: "#12D88D",
+    overflow: "hidden",
+  },
+  scanFrameGlowSoft: {
     position: "absolute",
-    top: moderateScale(14),
-    left: moderateScale(14),
-    width: moderateScale(14),
-    height: moderateScale(14),
-    borderTopWidth: 2,
-    borderLeftWidth: 2,
-    borderColor: "#38C792",
+    top: moderateScale(-46),
+    right: moderateScale(-30),
+    width: moderateScale(230),
+    height: moderateScale(230),
+    borderRadius: moderateScale(130),
+    backgroundColor: "rgba(227, 255, 246, 0.18)",
   },
-  cornerTopRight: {
+  scanFrameGlow: {
     position: "absolute",
-    top: moderateScale(14),
-    right: moderateScale(14),
-    width: moderateScale(14),
-    height: moderateScale(14),
-    borderTopWidth: 2,
-    borderRightWidth: 2,
-    borderColor: "#38C792",
+    top: moderateScale(-28),
+    right: moderateScale(-14),
+    width: moderateScale(170),
+    height: moderateScale(170),
+    borderRadius: moderateScale(100),
+    backgroundColor: "rgba(226, 255, 245, 0.34)",
   },
-  cornerBottomLeft: {
-    position: "absolute",
-    bottom: moderateScale(14),
-    left: moderateScale(14),
-    width: moderateScale(14),
-    height: moderateScale(14),
-    borderBottomWidth: 2,
-    borderLeftWidth: 2,
-    borderColor: "#38C792",
-  },
-  cornerBottomRight: {
-    position: "absolute",
-    bottom: moderateScale(14),
-    right: moderateScale(14),
-    width: moderateScale(14),
-    height: moderateScale(14),
-    borderBottomWidth: 2,
-    borderRightWidth: 2,
-    borderColor: "#38C792",
-  },
-  scanCenterIconWrap: {
-    width: moderateScale(70),
-    height: moderateScale(70),
-    borderRadius: moderateScale(35),
-    backgroundColor: "#1D3A32",
-    borderWidth: 1,
-    borderColor: "#2F7460",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: moderateScale(18),
+  scanTextWrap: {
+    flex: 1,
+    paddingRight: moderateScale(16),
   },
   scanTitle: {
-    color: "#EEF2EF",
-    fontSize: moderateScale(FONT.md),
-    textAlign: "center",
+    color: "#031B12",
+    fontSize: moderateScale(FONT.xxl),
   },
   scanSubtitle: {
-    marginTop: moderateScale(3),
-    color: "#5E666A",
-    fontSize: moderateScale(FONT.sm),
-    textAlign: "center",
+    marginTop: moderateScale(8),
+    color: "rgba(3, 27, 18, 0.84)",
+    fontSize: moderateScale(FONT.md),
+  },
+  scanArrowWrap: {
+    width: moderateScale(68),
+    height: moderateScale(68),
+    borderRadius: moderateScale(22),
+    backgroundColor: "rgba(6, 145, 95, 0.32)",
+    borderWidth: 1,
+    borderColor: "rgba(227, 255, 246, 0.22)",
+    alignItems: "center",
+    justifyContent: "center",
   },
   actionRow: {
     paddingHorizontal: moderateScale(10),
@@ -138,14 +133,12 @@ const styles = StyleSheet.create({
   },
   primaryAction: {
     flex: 1,
-    backgroundColor: "#52B88F",
-    shadowColor: "#52B88F",
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
+    backgroundColor: "#252A2D",
+    borderWidth: 1,
+    borderColor: "#32383C",
   },
   primaryActionText: {
-    color: "#FFFFFF",
+    color: "#7B8388",
     fontSize: moderateScale(FONT.sm),
   },
   secondaryAction: {
