@@ -25,10 +25,10 @@ export default function PromoAdComponent() {
             이벤트
           </ThemedText>
           <ThemedText type="barlowHard" style={styles.title}>
-            스코어 디스크 무료 증정 이벤트
+            한달 이벤트 출시 임박!
           </ThemedText>
           <ThemedText type="barlowLight" style={styles.description}>
-            토코기록기 스코어 어플 출시 기념 이벤트
+            곧시작될 한달 이벤트 많은 관심 부탁드려요, 추후에 공지글에 올라갈 예정
           </ThemedText>
         </View>
 

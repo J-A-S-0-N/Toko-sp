@@ -1,18 +1,13 @@
 import { checkUserExistsByPhoneNumber } from '@/app/(auth)/functions/loginFetchUserFunction';
-import AdRequestModal from '@/components/AdRequestModal';
 import PromoAdComponent from '@/components/ads/PromoAdComponent';
 import SponsoredAdComponent from '@/components/ads/SponsoredAdComponent';
-import SecondAdRequestModal from '@/components/SecondAdRequestModal';
 // import DailyScanEventCard from '@/components/HomeFeedComponents/dailyScanEventCard';
 import DailyTipComponent from '@/components/HomeFeedComponents/dailyTipComponent';
 import GoalSetupPromptComponent from '@/components/HomeFeedComponents/goalSetupPromptComponent';
-import HomeFeedHeader from '@/components/HomeFeedComponents/homeFeedHeader';
-import HomeFeedSkeleton from '@/components/HomeFeedComponents/HomeFeedSkeleton';
 import HottestLocationsComponent from '@/components/HomeFeedComponents/hottestLocationsComponent';
 import LiveChatBannerComponent from '@/components/HomeFeedComponents/liveChatBannerComponent';
 import RecentRoundComponent from '@/components/HomeFeedComponents/recentRoundComponent';
 import RegionalRankComponent from '@/components/HomeFeedComponents/regionalRankComponent';
-import UsernameHeader from '@/components/HomeFeedComponents/usernameHeader';
 import UserStatComponent from '@/components/HomeFeedComponents/userStatComponent';
 import { ThemedText as Text } from '@/components/themed-text';
 import db from '@/config/firebase';
@@ -23,7 +18,7 @@ import { useRouter } from 'expo-router';
 import { collection, doc, getCountFromServer, query, setDoc, where } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { Alert, Linking, Pressable, StyleSheet, View } from 'react-native';
-import Animated, { FadeIn, FadeOut, useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { moderateScale } from 'react-native-size-matters';
 
@@ -31,14 +26,10 @@ export default function HomeScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const tabBarHeight = useBottomTabBarHeight();
-  const [showSkeleton, setShowSkeleton] = useState(true);
-  const [showAdRequestModal, setShowAdRequestModal] = useState(false);
-  const [showSecondAdRequestModal, setShowSecondAdRequestModal] = useState(false);
   const [roundCount, setRoundCount] = useState<number | null>(null);
   const [phoneModalVisible, setPhoneModalVisible] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isSavingPhone, setIsSavingPhone] = useState(false);
-  const scrollY = useSharedValue(0);
 
   const formattedPhoneNumber = phoneNumber
     .replace(/\D/g, '')
@@ -46,18 +37,6 @@ export default function HomeScreen() {
     .replace(/(\d{3})(\d{1,4})?(\d{1,4})?/, (_, p1, p2, p3) => [p1, p2, p3].filter(Boolean).join('-'));
   const isPhoneValid = phoneNumber.replace(/\D/g, '').length >= 10;
   const hasPhoneValue = phoneNumber.replace(/\D/g, '').length > 0;
-
-  const scrollHandler = useAnimatedScrollHandler((event) => {
-    scrollY.value = event.contentOffset.y;
-  });
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowSkeleton(false);
-      setShowAdRequestModal(true);
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, []);
 
   useEffect(() => {
     if (!user?.uid) return;
@@ -167,40 +146,13 @@ export default function HomeScreen() {
     ]);
   };
 
-  const handleCloseFirstAdModal = () => {
-    setShowAdRequestModal(false);
-    setShowSecondAdRequestModal(true);
-  };
-
-  const handleCloseSecondAdModal = () => {
-    setShowSecondAdRequestModal(false);
-  };
-
   return (
     <SafeAreaView edges={['top']} style={styles.safeArea}>
-      {showSkeleton ? (
-        <Animated.View
-          exiting={FadeOut.duration(400)}
-          style={styles.skeletonContainer}
-        >
-          <HomeFeedSkeleton />
-        </Animated.View>
-      ) : (
       <Animated.ScrollView
         entering={FadeIn.duration(400)}
         style={styles.container}
         contentContainerStyle={{ paddingBottom: tabBarHeight + moderateScale(150) }}
-        onScroll={scrollHandler}
-        scrollEventThrottle={16}
       >
-
-        <View style={{marginBottom: moderateScale(15)}}>
-          <HomeFeedHeader scrollY={scrollY}/>
-        </View>
-
-        <View style={{marginBottom: moderateScale(15)}}>
-          <UsernameHeader/>
-        </View>
 
         <View style={{marginBottom: moderateScale(15)}}>
           <UserStatComponent/>
@@ -262,16 +214,6 @@ export default function HomeScreen() {
         </Pressable>
 
       </Animated.ScrollView>
-      )}
-
-      {showAdRequestModal && (
-        <AdRequestModal onClose={handleCloseFirstAdModal} />
-      )}
-
-      {showSecondAdRequestModal && (
-        <SecondAdRequestModal onClose={handleCloseSecondAdModal} />
-      )}
-
       {/*
       <Modal
         visible={phoneModalVisible}
@@ -323,11 +265,6 @@ const styles = StyleSheet.create({
   },
   container: {
     backgroundColor: "#0F1010",
-    flex: 1,
-    paddingHorizontal: moderateScale(10),
-    paddingTop: moderateScale(12),
-  },
-  skeletonContainer: {
     flex: 1,
     paddingHorizontal: moderateScale(10),
     paddingTop: moderateScale(12),

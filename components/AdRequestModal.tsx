@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
     paddingTop: moderateScale(80),
-    paddingHorizontal: moderateScale(20),
+    paddingHorizontal: moderateScale(10),
     zIndex: 9999,
   },
   card: {

@@ -31,6 +31,6 @@ export default function EntryScreen() {
     );
   }
 
-  if (user) return <Redirect href="/(tabs)" />;
+  if (user) return <Redirect href="/(tabs)/scan" />;
   return <Redirect href="/(onboarding)" />;
 }

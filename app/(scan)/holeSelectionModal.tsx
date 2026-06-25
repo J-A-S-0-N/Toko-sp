@@ -363,13 +363,13 @@ const styles = StyleSheet.create({
     borderColor: '#3A3F45',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: moderateScale(10),
-    marginVertical: moderateScale(10),
-    marginBottom: moderateScale(15),
+    paddingVertical: moderateScale(20),
+    marginVertical: moderateScale(20),
+    marginBottom: moderateScale(25),
   },
   buttonText: {
     color: '#FFFFFF',
     fontWeight: '700',
-    fontSize: moderateScale(FONT.sm),
+    fontSize: moderateScale(FONT.md),
   },
 });
