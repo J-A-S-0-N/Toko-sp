@@ -8,22 +8,46 @@ import {
   ScanFrameSection
 } from "@/components/ScanPageComponent";
 import SecondAdRequestModal from "@/components/SecondAdRequestModal";
+import { useAuth } from "@/context/AuthContext";
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import { router } from "expo-router";
 import React from "react";
-import { StyleSheet, View } from "react-native";
+import { Alert, StyleSheet, View } from "react-native";
 import Animated, { FadeOut, useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
-import HoleSelectionModal from "../(scan)/holeSelectionModal";
+import { createManualScan } from "../(scan)/scanFirebase";
 
 export default function ScanScreen() {
+  const { user } = useAuth();
   const tabBarHeight = useBottomTabBarHeight();
   const [showSkeleton, setShowSkeleton] = React.useState(true);
   const [showAdRequestModal, setShowAdRequestModal] = React.useState(false);
   const [showSecondAdRequestModal, setShowSecondAdRequestModal] = React.useState(false);
-  const [isHoleModalVisible, setIsHoleModalVisible] = React.useState(false);
-  const [scanMode, setScanMode] = React.useState<"camera" | "manual">("camera");
   const scrollY = useSharedValue(0);
+  const defaultHolesCount = 9;
+  const defaultManualScores = React.useMemo(() => Array(defaultHolesCount).fill(3), [defaultHolesCount]);
+  const defaultFixedPars = React.useMemo(() => JSON.stringify(Array(defaultHolesCount).fill(3)), [defaultHolesCount]);
+
+  const handleDirectManualRoute = React.useCallback(async () => {
+    try {
+      const scanDocRef = await createManualScan(defaultHolesCount, user?.uid ?? "");
+
+      router.push({
+        pathname: "../(scan)/resultPreview",
+        params: {
+          holes: String(defaultHolesCount),
+          scores: JSON.stringify(defaultManualScores),
+          fixedPars: defaultFixedPars,
+          startParEdit: "1",
+          scanDocId: scanDocRef.id,
+        },
+      });
+    } catch (error) {
+      console.error("Failed to create manual scan from scan tab:", error);
+      Alert.alert("오류", "직접 입력 준비 중 문제가 발생했어요. 잠시 후 다시 시도해 주세요.");
+    }
+  }, [defaultFixedPars, defaultHolesCount, defaultManualScores, user?.uid]);
 
   React.useEffect(() => {
     const timer = setTimeout(() => {
@@ -73,16 +97,42 @@ export default function ScanScreen() {
           <RecentScansSection />
           <ScanFrameSection
             onCameraPress={() => {
-              setScanMode("camera");
-              setIsHoleModalVisible(true);
+              /*
+              router.push({
+                pathname: "../(scan)/ParSelectionPage",
+                params: {
+                  mode: "camera",
+                  holes: "9",
+                  fixedPars: JSON.stringify(Array(9).fill(3)),
+                  startParEdit: "1",
+                },
+              });
+              */
+
+              router.push({
+                pathname: "../(scan)/capture",
+                params: {
+                  holes: String(defaultHolesCount),
+                  shotIndex: "1",
+                  photos: JSON.stringify([]),
+                  fixedPars: defaultFixedPars,
+                  startParEdit: "1",
+                },
+              });
             }}
             onGalleryPress={() => {
-              setScanMode("manual");
-              setIsHoleModalVisible(true);
+              router.push({
+                pathname: "../(scan)/ParSelectionPage",
+                params: {
+                  mode: "camera",
+                  holes: "9",
+                  fixedPars: JSON.stringify(Array(9).fill(3)),
+                  startParEdit: "1",
+                },
+              });
             }}
             onFramePress={() => {
-              setScanMode("camera");
-              setIsHoleModalVisible(true);
+              void handleDirectManualRoute();
             }}
           />
           <View style={styles.adContainer}>
@@ -90,12 +140,6 @@ export default function ScanScreen() {
           </View>
         </Animated.ScrollView>
       )}
-
-      <HoleSelectionModal
-        visible={isHoleModalVisible}
-        mode={scanMode}
-        onClose={() => setIsHoleModalVisible(false)}
-      />
 
       {showAdRequestModal && (
         <AdRequestModal onClose={handleCloseFirstAdModal} />

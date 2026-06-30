@@ -9,7 +9,7 @@ import { moderateScale } from 'react-native-size-matters';
 
 import { EventItem, fetchEventById } from '@/services/eventService';
 
-export default function EventDetailModal() {
+export default function EventResultModal() {
   const { eventId } = useLocalSearchParams<{ eventId?: string }>();
   const [event, setEvent] = useState<EventItem | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -25,7 +25,7 @@ export default function EventDetailModal() {
         const fetched = await fetchEventById(eventId);
         setEvent(fetched);
       } catch (error) {
-        console.error('Failed to fetch event detail:', error);
+        console.error('Failed to fetch event result:', error);
       } finally {
         setIsLoading(false);
       }
@@ -49,7 +49,7 @@ export default function EventDetailModal() {
           <Feather name="chevron-left" size={moderateScale(24)} color="#FFFFFF" />
         </Pressable>
         <Text type="barlowHard" style={styles.headerTitle}>
-          이벤트
+          이벤트 결과
         </Text>
         <View style={styles.placeholder} />
       </View>
@@ -62,19 +62,33 @@ export default function EventDetailModal() {
         ) : null}
 
         <View style={styles.eventCard}>
-          <Text type="barlowLight" style={styles.eventBadge}>진행 중</Text>
+          <Text type="barlowLight" style={styles.eventBadge}>종료됨</Text>
           <Text type="barlowHard" style={styles.eventTitle}>
-            {event?.title || '진행중인 이벤트가 없습니다.'}
+            {event?.title || '종료된 이벤트가 없습니다.'}
           </Text>
           <Text type="barlowLight" style={styles.eventSubtitle}>
-            {event?.subtitle || '이벤트 정보가 없습니다.'}
+            {event?.subtitle || '결과 정보를 준비 중입니다.'}
           </Text>
         </View>
 
         <View style={styles.section}>
-          <Text type="barlowHard" style={styles.sectionTitle}>이벤트 내용</Text>
+          <Text type="barlowHard" style={styles.sectionTitle}>결과 요약</Text>
           <Text type="barlowLight" style={styles.sectionText}>
-            {event?.description || '등록된 이벤트 설명이 없습니다.'}
+            {event?.resultSummary || '등록된 결과 요약이 없습니다.'}
+          </Text>
+        </View>
+
+        <View style={styles.section}>
+          <Text type="barlowHard" style={styles.sectionTitle}>당첨자</Text>
+          <Text type="barlowLight" style={styles.sectionText}>
+            {event?.winnerText || '-'}
+          </Text>
+        </View>
+
+        <View style={styles.section}>
+          <Text type="barlowHard" style={styles.sectionTitle}>참여자 수</Text>
+          <Text type="barlowLight" style={styles.sectionText}>
+            {`${event?.participantCount ?? 0}명`}
           </Text>
         </View>
 
@@ -82,13 +96,6 @@ export default function EventDetailModal() {
           <Text type="barlowHard" style={styles.sectionTitle}>이벤트 기간</Text>
           <Text type="barlowLight" style={styles.sectionText}>
             {periodLabel}
-          </Text>
-        </View>
-
-        <View style={styles.section}>
-          <Text type="barlowHard" style={styles.sectionTitle}>참여 방법</Text>
-          <Text type="barlowLight" style={styles.sectionText}>
-            {event?.participationMethod || '참여 방식 정보가 없습니다.'}
           </Text>
         </View>
       </ScrollView>
@@ -131,15 +138,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   eventCard: {
-    backgroundColor: '#163429',
+    backgroundColor: '#2B2420',
     borderRadius: moderateScale(16),
     padding: moderateScale(20),
     marginBottom: moderateScale(24),
     borderWidth: moderateScale(0.5),
-    borderColor: '#4CAE82',
+    borderColor: '#8E7A5E',
   },
   eventBadge: {
-    color: '#4CAE82',
+    color: '#D8C3A5',
     fontSize: moderateScale(FONT.xs),
     marginBottom: moderateScale(8),
   },

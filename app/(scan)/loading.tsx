@@ -8,15 +8,15 @@ import { doc, type DocumentReference, onSnapshot } from "firebase/firestore";
 import React, { useEffect, useMemo, useState } from "react";
 import { Alert, LayoutChangeEvent, Pressable, StyleSheet, View } from "react-native";
 import Animated, {
-  Easing,
-  FadeIn,
-  FadeInUp,
-  FadeOut,
-  FadeOutUp,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withTiming
+    Easing,
+    FadeIn,
+    FadeInUp,
+    FadeOut,
+    FadeOutUp,
+    useAnimatedStyle,
+    useSharedValue,
+    withRepeat,
+    withTiming
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from 'react-native-size-matters';
@@ -61,11 +61,13 @@ const DOT_PHASE_STEP = (2 * Math.PI) / 3;
 export default function LoadingScreen() {
   const router = useRouter();
   const { user } = useAuth();
-  const { holes, photos, scanDocId, courseName } = useLocalSearchParams<{
+  const { holes, photos, scanDocId, courseName, fixedPars, startParEdit } = useLocalSearchParams<{
     holes?: string;
     photos?: string;
     scanDocId?: string;
     courseName?: string;
+    fixedPars?: string;
+    startParEdit?: string;
   }>();
 
   const [tipIndex, setTipIndex] = useState(0);
@@ -186,6 +188,8 @@ export default function LoadingScreen() {
               scores: JSON.stringify(scores),
               courseName: courseName ?? "",
               scanDocId: scanDocRef.id,
+              fixedPars,
+              startParEdit,
             },
           });
         }

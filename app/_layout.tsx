@@ -99,6 +99,22 @@ export default function RootLayout() {
               headerShown: false,
             }}
           />
+          <Stack.Screen name="(modals)/eventDetailModal"
+            options={{
+              presentation: 'modal',
+              animation: 'fade',
+              title: 'Event Detail',
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen name="(modals)/eventResultModal"
+            options={{
+              presentation: 'modal',
+              animation: 'fade',
+              title: 'Event Result',
+              headerShown: false,
+            }}
+          />
         </Stack>
       <StatusBar style="light" />
       </GestureHandlerRootView>

@@ -35,7 +35,7 @@ const ITEMS: TabItem[] = [
   },
   {
     key: 'stats',
-    label: '통계',
+    label: '이벤트',
     renderIcon: (color) => (
       <MaterialCommunityIcons name="waves" size={moderateScale(25)} color={color} />
     ),

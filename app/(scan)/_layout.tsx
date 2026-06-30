@@ -3,6 +3,7 @@ import { Stack } from "expo-router";
 export default function ScanFlowLayout() {
 	return (
 		<Stack>
+			<Stack.Screen name="ParSelectionPage" options={{ headerShown: false }} />
 			<Stack.Screen name="capture" options={{ headerShown: false }} />
 			<Stack.Screen name="preview" options={{
 				headerShown: false,

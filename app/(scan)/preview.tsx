@@ -1,11 +1,13 @@
 import { ThemedText as Text } from "@/components/themed-text";
 import { FONT } from "@/constants/theme";
+import { useAuth } from "@/context/AuthContext";
 import Feather from "@expo/vector-icons/Feather";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import { Alert, Animated, Image, Pressable, StyleSheet, View } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
+import { createPendingScan } from "./scanFirebase";
 
 const qualityChecks = [
   {
@@ -35,16 +37,21 @@ const AnimatedThemedText = Animated.createAnimatedComponent(Text);
 
 export default function PreviewScreen() {
   const router = useRouter();
+  const { user } = useAuth();
   const insets = useSafeAreaInsets();
   const { photoUri } = useLocalSearchParams<{ photoUri?: string | string[] }>();
-  const { holes, shotIndex, photos } = useLocalSearchParams<{
+  const { holes, shotIndex, photos, fixedPars, startParEdit, courseName } = useLocalSearchParams<{
     holes?: string;
     shotIndex?: string;
     photos?: string;
+    fixedPars?: string;
+    startParEdit?: string;
+    courseName?: string;
   }>();
   const [titleIndex, setTitleIndex] = useState(0);
   const titleSlideAnim = useRef(new Animated.Value(0)).current;
   const statusDotPulseAnim = useRef(new Animated.Value(0)).current;
+  const [isRouting, setIsRouting] = useState(false);
 
   const previewUri = Array.isArray(photoUri) ? photoUri[0] : photoUri;
   const holesCount = holes === "18" ? 18 : 9;
@@ -65,7 +72,9 @@ export default function PreviewScreen() {
     }
   }, [photos]);
 
-  const handleRoute = () => {
+  const handleRoute = async () => {
+    if (isRouting) return;
+
     if (currentShotIndex < requiredShots) {
       router.replace({
         pathname: "./capture",
@@ -73,6 +82,9 @@ export default function PreviewScreen() {
           holes: String(holesCount),
           shotIndex: String(currentShotIndex + 1),
           photos: JSON.stringify(parsedPhotos),
+          fixedPars,
+          startParEdit,
+          courseName,
         },
       });
       return;
@@ -83,16 +95,56 @@ export default function PreviewScreen() {
       return;
     }
 
-    router.replace({
-      pathname: "./roundInfo",
-      params: {
-        holes: String(holesCount),
-        photos: JSON.stringify(parsedPhotos),
-      },
-    });
+    try {
+      setIsRouting(true);
+      const scanDocRef = await createPendingScan(holesCount, parsedPhotos, user?.uid ?? "");
+      const defaultScores = Array(holesCount).fill(3);
+
+      router.replace({
+        pathname: "./resultPreview",
+        params: {
+          holes: String(holesCount),
+          scores: JSON.stringify(defaultScores),
+          fixedPars,
+          startParEdit,
+          courseName,
+          scanDocId: scanDocRef.id,
+        },
+      });
+
+      /*
+      router.replace({
+        pathname: "./loading",
+        params: {
+          holes: String(holesCount),
+          photos: JSON.stringify(parsedPhotos),
+          fixedPars,
+          startParEdit,
+          courseName,
+          scanDocId: scanDocRef.id,
+        },
+      });
+
+      router.replace({
+        pathname: "./roundInfo",
+        params: {
+          holes: String(holesCount),
+          photos: JSON.stringify(parsedPhotos),
+          fixedPars,
+          startParEdit,
+          courseName,
+        },
+      });
+      */
+    } catch (error) {
+      console.error("Failed to create pending scan from preview:", error);
+      Alert.alert("오류", "분석 준비 중 문제가 발생했어요. 잠시 후 다시 시도해 주세요.");
+    } finally {
+      setIsRouting(false);
+    }
   };
 
-  const primaryButtonLabel = currentShotIndex < requiredShots ? "후반 9홀 찍기" : "분석 시작";
+  const primaryButtonLabel = currentShotIndex < requiredShots ? "후반 9홀 찍기" : isRouting ? "준비 중..." : "분석 시작";
 
   const titleTranslateX = titleSlideAnim.interpolate({
     inputRange: [-1, 0, 1],
@@ -268,7 +320,7 @@ export default function PreviewScreen() {
               </View>
             </Pressable>
 
-            <Pressable style={styles.primaryButton} onPress={handleRoute}>
+            <Pressable style={styles.primaryButton} onPress={() => void handleRoute()}>
               <View style={styles.primaryButtonGapLayer}>
                 <View style={styles.primaryButtonInnerLayer}>
                   <Text type="barlowHard" style={styles.primaryButtonText}>

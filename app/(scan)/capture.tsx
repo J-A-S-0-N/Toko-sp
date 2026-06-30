@@ -13,10 +13,13 @@ export default function CaptureScreen() {
   const router = useRouter();
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = React.useRef<CameraView>(null);
-  const { holes, shotIndex, photos } = useLocalSearchParams<{
+  const { holes, shotIndex, photos, fixedPars, startParEdit, courseName } = useLocalSearchParams<{
     holes?: string;
     shotIndex?: string;
     photos?: string;
+    fixedPars?: string;
+    startParEdit?: string;
+    courseName?: string;
   }>();
   const currentShotIndex = shotIndex === "2" ? 2 : 1;
 
@@ -61,6 +64,9 @@ export default function CaptureScreen() {
           holes,
           shotIndex: String(currentShotIndex),
           photos: JSON.stringify(updatedPhotos),
+          fixedPars,
+          startParEdit,
+          courseName,
         },
       });
     } finally {

@@ -29,14 +29,17 @@ const ACTIVE_COLOR = "#53B88F";
 export default function RoundInfoScreen() {
   const router = useRouter();
   const { user } = useAuth();
-  const { holes, photos, manual } = useLocalSearchParams<{
+  const { holes, photos, manual, fixedPars, startParEdit, courseName: initialCourseName } = useLocalSearchParams<{
     holes?: string;
     photos?: string;
     manual?: string;
+    fixedPars?: string;
+    startParEdit?: string;
+    courseName?: string;
   }>();
   const isManual = manual === "1";
 
-  const [courseName, setCourseName] = useState("");
+  const [courseName, setCourseName] = useState((initialCourseName ?? "").trim());
   const [location, setLocation] = useState("");
   const [memo, setMemo] = useState("");
   const [isActivated, setIsActivated] = useState(false);
@@ -236,6 +239,8 @@ export default function RoundInfoScreen() {
           holes: String(holesCount),
           scores: JSON.stringify(defaultScores),
           courseName: courseName.trim(),
+          fixedPars,
+          startParEdit,
           ...(effectiveScanDocId ? { scanDocId: effectiveScanDocId } : {}),
         },
       });
@@ -246,6 +251,8 @@ export default function RoundInfoScreen() {
           holes: String(holesCount),
           scores: JSON.stringify(scores),
           courseName: courseName.trim(),
+          fixedPars,
+          startParEdit,
           ...(effectiveScanDocId ? { scanDocId: effectiveScanDocId } : {}),
         },
       });
@@ -256,6 +263,8 @@ export default function RoundInfoScreen() {
           holes: String(holesCount),
           photos,
           courseName: courseName.trim(),
+          fixedPars,
+          startParEdit,
           ...(effectiveScanDocId ? { scanDocId: effectiveScanDocId } : {}),
         },
       });
@@ -270,6 +279,9 @@ export default function RoundInfoScreen() {
         holes: String(holesCount),
         shotIndex: "1",
         photos: JSON.stringify([]),
+        courseName: courseName.trim(),
+        fixedPars,
+        startParEdit,
       },
     });
   };
@@ -284,6 +296,8 @@ export default function RoundInfoScreen() {
         holes: String(holesCount),
         scores: JSON.stringify(defaultScores),
         courseName: courseName.trim(),
+        fixedPars,
+        startParEdit,
         ...(effectiveScanDocId ? { scanDocId: effectiveScanDocId } : {}),
       },
     });

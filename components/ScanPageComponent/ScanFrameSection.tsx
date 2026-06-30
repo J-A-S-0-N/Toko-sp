@@ -3,8 +3,9 @@ import { FONT } from '@/constants/theme';
 import Feather from "@expo/vector-icons/Feather";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Pressable, Image as RNImage, StyleSheet, View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
+import { SvgUri } from "react-native-svg";
 
 type ScanFrameSectionProps = {
   onFramePress?: () => void;
@@ -13,6 +14,9 @@ type ScanFrameSectionProps = {
 };
 
 const ScanFrameSection = ({ onFramePress, onCameraPress, onGalleryPress }: ScanFrameSectionProps) => {
+  const cameraIconUri = RNImage.resolveAssetSource(require("@/assets/images/camera_open_icon_thick.svg")).uri;
+  const courseFlagIconUri = RNImage.resolveAssetSource(require("@/assets/images/course_hole_flag_icon_thick.svg")).uri;
+
   return (
     <>
       <Pressable style={styles.scanFrame} onPress={onFramePress}>
@@ -40,19 +44,53 @@ const ScanFrameSection = ({ onFramePress, onCameraPress, onGalleryPress }: ScanF
         </LinearGradient>
       </Pressable>
 
-      <View style={styles.actionRow}>
-        <Pressable style={[styles.actionButton, styles.primaryAction]} onPress={onCameraPress}>
-          <Feather name="camera" size={moderateScale(16)} color="#7B8388" />
-          <Text type="barlowHard" style={styles.primaryActionText}>
-            카메라 열기
-          </Text>
+      <View style={styles.actionList}>
+        <Pressable style={styles.actionButton} onPress={onCameraPress}>
+          <LinearGradient
+            colors={["#1B2125", "#11161A", "#0D1216"]}
+            start={{ x: 0, y: 0.2 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.actionGradient}
+          >
+            <View style={styles.actionLeftWrap}>
+              <View style={styles.actionIconWrap}>
+                <SvgUri uri={cameraIconUri} width={moderateScale(40)} height={moderateScale(40)} />
+              </View>
+              <View>
+                <Text type="barlowHard" style={styles.actionTitleText}>
+                  토코기록기 입력
+                </Text>
+                <Text type="barlowLight" style={styles.actionSubtitleText}>
+                  스코어카드 촬영하기
+                </Text>
+              </View>
+            </View>
+            <Feather name="chevron-right" size={moderateScale(24)} color="#AEB7BC" />
+          </LinearGradient>
         </Pressable>
 
-        <Pressable style={[styles.actionButton, styles.secondaryAction]} onPress={onGalleryPress}>
-          <Feather name="edit-3" size={moderateScale(16)} color="#E5E9E6" />
-          <Text type="barlowLight" style={styles.secondaryActionText}>
-            직접 입력
-          </Text>
+        <Pressable style={styles.actionButton} onPress={onGalleryPress}>
+          <LinearGradient
+            colors={["#1B2125", "#11161A", "#0D1216"]}
+            start={{ x: 0, y: 0.2 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.actionGradient}
+          >
+            <View style={styles.actionLeftWrap}>
+              <View style={styles.actionIconWrap}>
+                <SvgUri uri={courseFlagIconUri} width={moderateScale(40)} height={moderateScale(40)} />
+              </View>
+              <View>
+                <Text type="barlowHard" style={styles.actionTitleText}>
+                  코스 설정
+                </Text>
+                <Text type="barlowLight" style={styles.actionSubtitleText}>
+                  코스 / 홀 정보 선택
+                </Text>
+              </View>
+            </View>
+            <Feather name="chevron-right" size={moderateScale(24)} color="#AEB7BC" />
+          </LinearGradient>
         </Pressable>
       </View>
     </>
@@ -118,37 +156,44 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  actionRow: {
+  actionList: {
     paddingHorizontal: moderateScale(10),
-    flexDirection: "row",
-    gap: moderateScale(10),
+    gap: moderateScale(10.5),
   },
   actionButton: {
-    borderRadius: moderateScale(16),
+    borderRadius: moderateScale(19),
+    overflow: "hidden",
+  },
+  actionGradient: {
+    borderRadius: moderateScale(19),
+    borderWidth: 1,
+    borderColor: "#2A3237",
+    minHeight: moderateScale(90),
+    paddingHorizontal: moderateScale(18),
+    paddingVertical: moderateScale(20),
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  actionLeftWrap: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: moderateScale(12),
+  },
+  actionIconWrap: {
+    width: moderateScale(30),
+    height: moderateScale(30),
+    marginRight: moderateScale(10),
     justifyContent: "center",
     alignItems: "center",
-    height: moderateScale(70),
-    flexDirection: "row",
-    gap: moderateScale(7),
+    opacity: 0.95,
   },
-  primaryAction: {
-    flex: 1,
-    backgroundColor: "#252A2D",
-    borderWidth: 1,
-    borderColor: "#32383C",
+  actionTitleText: {
+    color: "#E7ECEF",
+    fontSize: moderateScale(FONT.xl),
   },
-  primaryActionText: {
-    color: "#7B8388",
-    fontSize: moderateScale(FONT.sm),
-  },
-  secondaryAction: {
-    flex: 1,
-    backgroundColor: "#1A1F22",
-    borderWidth: 1,
-    borderColor: "#2A2E30",
-  },
-  secondaryActionText: {
-    color: "#E5E9E6",
+  actionSubtitleText: {
+    color: "#838E94",
     fontSize: moderateScale(FONT.sm),
   },
 });

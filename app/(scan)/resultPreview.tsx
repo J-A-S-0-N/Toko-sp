@@ -1,14 +1,16 @@
 import AnimatedNumber from "@/components/AnimatedNumber";
-import HoleEditorModal from "@/components/ScanPageComponent/HoleEditorModal";
+// import HoleEditorModal from "@/components/ScanPageComponent/HoleEditorModal";
 import { submit } from "@/components/ScanPageComponent/backendLogic/submit";
 import { ThemedText as Text } from "@/components/themed-text";
+import { db } from "@/config/firebase";
 import { FONT } from '@/constants/theme';
 import { useAuth } from "@/context/AuthContext";
 import { newRoundSignal } from "@/store/newRoundSignal";
 import Feather from "@expo/vector-icons/Feather";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { collection, getDocs, limit, orderBy, query } from "firebase/firestore";
 import React, { useMemo, useState } from "react";
-import { Alert, Pressable, ScrollView, StyleSheet, Switch, View } from "react-native";
+import { Alert, Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
 import { deletePendingScan } from "./scanCleanup";
@@ -17,6 +19,32 @@ type HoleScore = {
   hole: number;
   score: number;
   par: number;
+};
+
+type SavedCourseSetup = {
+  id: string;
+  courseName: string;
+  holes: number;
+  pars: number[];
+  totalPar: number;
+};
+
+const normalizeParArray = (pars: unknown, holesCount: number) => {
+  if (!Array.isArray(pars)) return Array(holesCount).fill(3) as number[];
+
+  const mapped = pars
+    .slice(0, holesCount)
+    .map((value) => {
+      const asNumber = Number(value);
+      if (!Number.isFinite(asNumber)) return 3;
+      return Math.max(2, Math.min(5, Math.round(asNumber)));
+    });
+
+  if (mapped.length < holesCount) {
+    return [...mapped, ...Array(holesCount - mapped.length).fill(3)];
+  }
+
+  return mapped;
 };
 
 const HoleScoreTemplate: HoleScore[] = [
@@ -43,13 +71,38 @@ const HoleScoreTemplate: HoleScore[] = [
 export default function ResultPreviewScreen() {
   const router = useRouter();
   const { user } = useAuth();
-  const { holes, scores, courseName, scanDocId } = useLocalSearchParams<{ holes?: string; scores?: string; courseName?: string; scanDocId?: string }>();
+  const { holes, scores, courseName, scanDocId, fixedPars, startParEdit } = useLocalSearchParams<{
+    holes?: string;
+    scores?: string;
+    courseName?: string;
+    scanDocId?: string;
+    fixedPars?: string;
+    startParEdit?: string;
+  }>();
 
   const holesCount = holes === "18" ? 18 : 9;
   const standardCoursePar = holesCount === 18 ? 66 : 33;
 
-  const [parInputEnabled, setParInputEnabled] = useState(false);
-  const [coursePar, setCoursePar] = useState(standardCoursePar);
+  const [parInputEnabled] = useState(false);
+  const [coursePar] = useState(standardCoursePar);
+
+  const initialPars = useMemo(() => {
+    if (!fixedPars) return null;
+
+    try {
+      const parsed = JSON.parse(fixedPars);
+      if (!Array.isArray(parsed)) return null;
+
+      return parsed.map((value) => {
+        const parValue = Number(value);
+        if (!Number.isFinite(parValue)) return 3;
+        return Math.max(3, Math.min(5, Math.round(parValue)));
+      });
+    } catch {
+      return null;
+    }
+  }, [fixedPars]);
+
   const [holeScores, setHoleScores] = useState(() => {
     if (scores) {
       try {
@@ -58,16 +111,25 @@ export default function ResultPreviewScreen() {
           return HoleScoreTemplate.map((hole, i) => {
             const v = parsed[i];
             const score = v == null || v === 0 ? hole.score : Math.max(1, Math.min(9, v));
-            return { ...hole, score };
+            const par = initialPars?.[i] ?? hole.par;
+            return { ...hole, score, par };
           });
         }
       } catch {}
     }
-    return HoleScoreTemplate;
+    return HoleScoreTemplate.map((hole, i) => ({
+      ...hole,
+      par: initialPars?.[i] ?? hole.par,
+    }));
   });
-  const [selectedHoleIndex, setSelectedHoleIndex] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<"A" | "B">("A");
+  const [editableCourseName, setEditableCourseName] = useState(() => {
+    if (typeof courseName !== "string") return "";
+    return courseName.trim();
+  });
+  const [isLoadingSaved, setIsLoadingSaved] = useState(false);
+  const [savedSetups, setSavedSetups] = useState<SavedCourseSetup[]>([]);
 
   const allHoleScores = useMemo(() => holeScores.slice(0, holesCount), [holeScores, holesCount]);
 
@@ -76,10 +138,13 @@ export default function ResultPreviewScreen() {
     return selectedCourse === "A" ? allHoleScores.slice(0, 9) : allHoleScores.slice(9, 18);
   }, [allHoleScores, holesCount, selectedCourse]);
 
+  /*
+  const [selectedHoleIndex, setSelectedHoleIndex] = useState<number | null>(null);
   const selectedHole = useMemo(
     () => (selectedHoleIndex === null ? null : holeScores[selectedHoleIndex] ?? null),
     [selectedHoleIndex, holeScores]
   );
+  */
 
   // Per-course par when in 18-hole mode the displayed course uses half of the whole-round par.
   const displayedCoursePar = holesCount === 18 ? coursePar / 2 : coursePar;
@@ -130,11 +195,72 @@ export default function ResultPreviewScreen() {
     return { totalScore, appliedPar, diff, birdieCount, doubleCount };
   }, [allHoleScores, parInputEnabled, coursePar, holesCount]);
 
-  const handleHolePress = (visibleIndex: number) => {
-    const absoluteIndex = selectedCourse === "B" && holesCount === 18 ? visibleIndex + 9 : visibleIndex;
-    setSelectedHoleIndex(absoluteIndex);
+  const fetchSavedSetups = React.useCallback(async () => {
+    if (!user?.uid) {
+      setSavedSetups([]);
+      return;
+    }
+
+    try {
+      setIsLoadingSaved(true);
+      const setupsRef = collection(db, "Users", user.uid, "CourseSetups");
+      const setupsQuery = query(setupsRef, orderBy("updatedAt", "desc"), limit(20));
+      const snapshot = await getDocs(setupsQuery);
+
+      const fetched = snapshot.docs.map((item) => {
+        const data = item.data();
+        const normalizedPars = normalizeParArray(data?.pars, holesCount);
+
+        return {
+          id: item.id,
+          courseName: typeof data?.courseName === "string" ? data.courseName : "코스명 없음",
+          holes: data?.holes === 18 ? 18 : 9,
+          pars: normalizedPars,
+          totalPar: normalizedPars.reduce((sum, value) => sum + value, 0),
+        } as SavedCourseSetup;
+      });
+
+      setSavedSetups(fetched.filter((setup) => setup.holes === holesCount));
+    } catch (error) {
+      console.error("Failed to load saved course setups in result preview:", error);
+    } finally {
+      setIsLoadingSaved(false);
+    }
+  }, [holesCount, user?.uid]);
+
+  React.useEffect(() => {
+    void fetchSavedSetups();
+  }, [fetchSavedSetups]);
+
+  const handleLoadSavedSetup = (setup: SavedCourseSetup) => {
+    setEditableCourseName(setup.courseName);
+    setHoleScores((prev) =>
+      prev.map((item, index) => {
+        if (index >= holesCount) return item;
+        return {
+          ...item,
+          par: setup.pars[index] ?? item.par,
+        };
+      })
+    );
   };
 
+  const handleHolePress = (visibleIndex: number) => {
+    const absoluteIndex = selectedCourse === "B" && holesCount === 18 ? visibleIndex + 9 : visibleIndex;
+    setHoleScores((prev) =>
+      prev.map((item, holeIndex) =>
+        holeIndex === absoluteIndex
+          ? {
+              ...item,
+              score: parInputEnabled ? item.score : item.score === 9 ? 1 : item.score + 1,
+              par: parInputEnabled ? (item.par === 5 ? 2 : item.par + 1) : item.par,
+            }
+          : item
+      )
+    );
+  };
+
+  /*
   const handleCloseHoleEditor = () => {
     setSelectedHoleIndex(null);
   };
@@ -156,6 +282,7 @@ export default function ResultPreviewScreen() {
 
     setSelectedHoleIndex(null);
   };
+  */
 
   const handleRetake = () => {
     router.replace({
@@ -164,12 +291,21 @@ export default function ResultPreviewScreen() {
         holes: String(holesCount),
         shotIndex: "1",
         photos: JSON.stringify([]),
+        courseName,
+        fixedPars,
+        startParEdit,
       },
     });
   };
 
   const handleSave = async () => {
     if (isSubmitting) return;
+
+    const trimmedCourseName = editableCourseName.trim();
+    if (!trimmedCourseName) {
+      Alert.alert("코스 이름 필요", "코스 이름을 입력해 주세요.");
+      return;
+    }
 
     try {
       setIsSubmitting(true);
@@ -188,7 +324,7 @@ export default function ResultPreviewScreen() {
         scanDocId,
         userId: user.uid,
         holesCount,
-        courseName: courseName?.trim() || "코스명 없음",
+        courseName: trimmedCourseName,
         playedAt: new Date().toISOString(),
         parInputEnabled,
         appliedPar: roundStats.appliedPar,
@@ -201,14 +337,15 @@ export default function ResultPreviewScreen() {
 
 
       newRoundSignal.id = result.id;
-      router.replace("/(tabs)");
-    } catch (error) {
+      router.replace("/(tabs)/scan");
+    } catch {
       Alert.alert("저장 실패", "저장 중 오류가 발생했어요. 잠시 후 다시 시도해주세요.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  /*
   const handleDecreaseCoursePar = () => {
     setCoursePar((prev) => Math.max(27, prev - 1));
   };
@@ -216,6 +353,7 @@ export default function ResultPreviewScreen() {
   const handleIncreaseCoursePar = () => {
     setCoursePar((prev) => Math.min(90, prev + 1));
   };
+  */
 
   return (
     <SafeAreaView edges={["top", "bottom"]} style={styles.safeArea}>
@@ -246,9 +384,56 @@ export default function ResultPreviewScreen() {
             </Text>
           </View>
 
+          {/*
           <Text type="barlowHard" style={styles.courseTitle}>
             {courseName || "코스명 없음"}
           </Text>
+          */}
+          <Text type="barlowLight" style={styles.courseInputLabel}>
+            코스 이름
+          </Text>
+          <TextInput
+            value={editableCourseName}
+            onChangeText={setEditableCourseName}
+            placeholder="코스 이름을 입력해 주세요"
+            placeholderTextColor="#5F686D"
+            style={styles.courseNameInput}
+            autoCapitalize="words"
+            returnKeyType="done"
+          />
+
+          <Text type="barlowLight" style={styles.sectionLabelSavedCourse}>
+            저장된 코스 (탭하여 불러오기)
+          </Text>
+
+          <View style={styles.savedWrap}>
+            {isLoadingSaved ? (
+              <Text type="barlowLight" style={styles.savedEmptyText}>
+                저장된 코스 불러오는 중...
+              </Text>
+            ) : savedSetups.length === 0 ? (
+              <Text type="barlowLight" style={styles.savedEmptyText}>
+                저장된 코스가 없습니다.
+              </Text>
+            ) : (
+              <ScrollView style={styles.savedListScroll} nestedScrollEnabled showsVerticalScrollIndicator={false}>
+                {savedSetups.map((setup) => (
+                  <Pressable key={setup.id} style={styles.savedCard} onPress={() => handleLoadSavedSetup(setup)}>
+                    <View>
+                      <Text type="barlowHard" style={styles.savedName}>
+                        {setup.courseName}
+                      </Text>
+                      <Text type="barlowLight" style={styles.savedMeta}>
+                        Par {setup.totalPar} · {setup.holes}홀
+                      </Text>
+                    </View>
+                    <Feather name="rotate-ccw" size={moderateScale(16)} color="#45D5CB" />
+                  </Pressable>
+                ))}
+              </ScrollView>
+            )}
+          </View>
+
           <Text type="barlowLight" style={styles.dateText}>
             2026년 3월 28일 · {holesCount === 18 ? "2개 코스" : "1개 코스"}
           </Text>
@@ -414,13 +599,14 @@ export default function ResultPreviewScreen() {
           </View>
 
           <Text type="barlowLight" style={styles.helperText}>
-            탭하면 홀 상세 수정창이 열립니다
+            탭하면 값이 1씩 증가합니다
           </Text>
         </ScrollView>
 
         <View style={styles.bottomControls}>
           <View style={styles.sectionDivider} />
 
+          {/*
           <View style={styles.switchRow}>
             <Text type="barlowHard" style={styles.switchLabel}>
               홀별 파 수정
@@ -432,6 +618,7 @@ export default function ResultPreviewScreen() {
               thumbColor="#EFF3F4"
             />
           </View>
+          */}
 
           <View style={styles.bottomButtonsRow}>
             <Pressable style={styles.secondaryButton} onPress={handleRetake}>
@@ -448,6 +635,7 @@ export default function ResultPreviewScreen() {
         </View>
       </View>
 
+      {/*
       {selectedHole ? (
         <HoleEditorModal
           visible={selectedHoleIndex !== null}
@@ -460,6 +648,7 @@ export default function ResultPreviewScreen() {
           editPar={parInputEnabled}
         />
       ) : null}
+      */}
     </SafeAreaView>
   );
 }
@@ -539,6 +728,67 @@ const styles = StyleSheet.create({
     color: "#F4F6F7",
     fontSize: moderateScale(FONT.xxl),
     marginTop: moderateScale(14),
+  },
+  courseInputLabel: {
+    color: "#8B9396",
+    fontSize: moderateScale(FONT.sm),
+    marginTop: moderateScale(12),
+    marginBottom: moderateScale(7),
+  },
+  courseNameInput: {
+    borderRadius: moderateScale(14),
+    borderWidth: 1,
+    borderColor: "#2A3032",
+    backgroundColor: "#151A1C",
+    color: "#EEF2F3",
+    fontSize: moderateScale(FONT.md),
+    minHeight: moderateScale(52),
+    paddingHorizontal: moderateScale(14),
+    marginBottom: moderateScale(8),
+  },
+  sectionLabelSavedCourse: {
+    color: "#8B9396",
+    fontSize: moderateScale(FONT.sm),
+    marginBottom: moderateScale(8),
+    marginTop: moderateScale(4),
+  },
+  savedWrap: {
+    borderRadius: moderateScale(14),
+    borderWidth: 1,
+    borderColor: "#23292D",
+    backgroundColor: "#121619",
+    padding: moderateScale(12),
+    minHeight: moderateScale(72),
+    maxHeight: moderateScale(168),
+    marginBottom: moderateScale(12),
+  },
+  savedListScroll: {
+    maxHeight: moderateScale(144),
+  },
+  savedEmptyText: {
+    color: "#70787D",
+    fontSize: moderateScale(FONT.xs),
+  },
+  savedCard: {
+    borderRadius: moderateScale(12),
+    borderWidth: 1,
+    borderColor: "#283035",
+    backgroundColor: "#161C1F",
+    paddingHorizontal: moderateScale(12),
+    paddingVertical: moderateScale(11),
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: moderateScale(8),
+  },
+  savedName: {
+    color: "#E6EAEC",
+    fontSize: moderateScale(FONT.md),
+  },
+  savedMeta: {
+    color: "#8A9398",
+    fontSize: moderateScale(FONT.xs),
+    marginTop: moderateScale(2),
   },
   dateText: {
     color: "#80878B",
@@ -643,7 +893,8 @@ const styles = StyleSheet.create({
   sectionDivider: {
     height: 1,
     backgroundColor: "#1F2425",
-    marginVertical: moderateScale(12),
+    marginBottom: moderateScale(12),
+    elevation: moderateScale(5),
   },
   sectionTitle: {
     color: "#8B9396",
@@ -684,19 +935,19 @@ const styles = StyleSheet.create({
     rowGap: moderateScale(8),
   },
   holeItem: {
-    minHeight: moderateScale(66),
+    minHeight: moderateScale(88),
     borderRadius: moderateScale(12),
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: moderateScale(6),
+    paddingVertical: moderateScale(10),
     gap: moderateScale(1),
   },
   holeItemNine: {
-    width: "22%",
+    width: "30.5%",
   },
   holeItemEighteen: {
-    width: "22%",
+    width: "30.5%",
   },
   holeItemNormal: {
     backgroundColor: "#1D2223",
@@ -711,7 +962,7 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(FONT.xxs),
   },
   holeScore: {
-    fontSize: moderateScale(FONT.xl),
+    fontSize: moderateScale(FONT.xxl),
   },
   holeScoreNormal: {
     color: "#C1C7C8",
