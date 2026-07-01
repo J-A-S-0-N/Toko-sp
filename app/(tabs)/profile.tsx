@@ -1,3 +1,4 @@
+import { updateUserName } from '@/app/(auth)/functions/updateUserNameFunction';
 import { ThemedText as Text } from '@/components/themed-text';
 import { db } from '@/config/firebase';
 import { FONT } from '@/constants/theme';
@@ -11,7 +12,7 @@ import { useIsFocused } from '@react-navigation/native';
 import { router } from 'expo-router';
 import { doc, getDoc } from 'firebase/firestore';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Animated, Easing, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Animated, Easing, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { moderateScale } from 'react-native-size-matters';
 
@@ -80,12 +81,15 @@ const AnimatedNumber = ({ value, style, delay = 0, duration = 1000, trigger }: A
 
 export default function ProfileScreen() {
   const tabBarHeight = useBottomTabBarHeight();
-  const { user, username } = useAuth();
+  const { user, username, setUsername } = useAuth();
   const initial = (username ?? '').slice(0, 1);
   const isFocused = useIsFocused();
   const [animationTrigger, setAnimationTrigger] = useState(0);
 
   const [memberSince, setMemberSince] = useState<string | null>(null);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editingName, setEditingName] = useState('');
+  const [isSavingName, setIsSavingName] = useState(false);
   
   // Use cached rounds
   const { rounds, loading: roundsLoading, clearRounds } = useRounds();
@@ -135,6 +139,54 @@ export default function ProfileScreen() {
     }
   }, [isFocused]);
 
+  const handleStartEditName = () => {
+    if (isSavingName) {
+      return;
+    }
+    setEditingName(username ?? '');
+    setIsEditingName(true);
+  };
+
+  const handleSaveName = async () => {
+    if (!user?.uid || isSavingName) {
+      return;
+    }
+
+    const trimmedName = editingName.trim();
+
+    if (!trimmedName) {
+      Alert.alert('이름 확인', '이름을 입력해주세요.');
+      return;
+    }
+
+    if (trimmedName.length > 10) {
+      Alert.alert('이름 확인', '이름은 10자 이하로 입력해주세요.');
+      return;
+    }
+
+    if (/[^가-힣a-zA-Z0-9\s]/.test(trimmedName)) {
+      Alert.alert('이름 확인', '한글, 영문, 숫자만 사용할 수 있어요.');
+      return;
+    }
+
+    setIsSavingName(true);
+    const result = await updateUserName(user.uid, trimmedName);
+    setIsSavingName(false);
+
+    if (!result.success) {
+      if (result.reason === 'name_taken') {
+        Alert.alert('이름 중복', '이미 사용 중인 이름이에요. 다른 이름을 입력해주세요.');
+        return;
+      }
+      Alert.alert('저장 실패', '이름 변경 중 오류가 발생했어요. 다시 시도해주세요.');
+      return;
+    }
+
+    setUsername(result.username);
+    setEditingName(result.username);
+    setIsEditingName(false);
+  };
+
   return (
     <SafeAreaView edges={['top']} style={styles.safeArea}>
       <ScrollView
@@ -181,9 +233,40 @@ export default function ProfileScreen() {
             </Text>
           </View>
 
-          <Text type="barlowHard" style={styles.nameText}>
-            {username ?? ''}
-          </Text>
+          <View style={styles.nameRow}>
+            {isEditingName ? (
+              <TextInput
+                value={editingName}
+                onChangeText={setEditingName}
+                style={styles.nameInput}
+                maxLength={10}
+                autoFocus
+                editable={!isSavingName}
+                placeholder="이름 입력"
+                placeholderTextColor="#7C8489"
+              />
+            ) : (
+              <Text type="barlowHard" style={styles.nameText}>
+                {username ?? ''}
+              </Text>
+            )}
+
+            <Pressable
+              onPress={isEditingName ? handleSaveName : handleStartEditName}
+              disabled={isSavingName}
+              style={({ pressed }) => [
+                styles.nameActionButton,
+                isSavingName && styles.nameActionButtonDisabled,
+                pressed && !isSavingName ? { opacity: 0.7 } : null,
+              ]}
+            >
+              <Ionicons
+                name={isEditingName ? 'checkmark' : 'create-outline'}
+                size={moderateScale(17)}
+                color={isEditingName ? '#49C895' : '#AAB1B6'}
+              />
+            </Pressable>
+          </View>
 
           <Text type="barlowLight" style={styles.memberSinceText}>
             {memberSince ?? ''}
@@ -341,9 +424,37 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(FONT.xl),
   },
   nameText: {
-    marginTop: moderateScale(16),
     color: '#F2F3F3',
     fontSize: moderateScale(FONT.xl),
+  },
+  nameRow: {
+    marginTop: moderateScale(16),
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: moderateScale(8),
+  },
+  nameInput: {
+    minWidth: moderateScale(120),
+    maxWidth: moderateScale(220),
+    borderBottomWidth: 1,
+    borderBottomColor: '#3A4044',
+    color: '#F2F3F3',
+    fontSize: moderateScale(FONT.xl),
+    paddingVertical: moderateScale(2),
+    textAlign: 'center',
+  },
+  nameActionButton: {
+    width: moderateScale(28),
+    height: moderateScale(28),
+    borderRadius: moderateScale(14),
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#202425',
+    borderWidth: 1,
+    borderColor: '#2E3336',
+  },
+  nameActionButtonDisabled: {
+    opacity: 0.55,
   },
   memberSinceText: {
     marginTop: moderateScale(8),

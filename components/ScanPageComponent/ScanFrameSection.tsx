@@ -5,7 +5,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import { Pressable, Image as RNImage, StyleSheet, View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
-import { SvgUri } from "react-native-svg";
 
 type ScanFrameSectionProps = {
   onFramePress?: () => void;
@@ -14,8 +13,8 @@ type ScanFrameSectionProps = {
 };
 
 const ScanFrameSection = ({ onFramePress, onCameraPress, onGalleryPress }: ScanFrameSectionProps) => {
-  const cameraIconUri = RNImage.resolveAssetSource(require("@/assets/images/camera_open_icon_thick.svg")).uri;
-  const courseFlagIconUri = RNImage.resolveAssetSource(require("@/assets/images/course_hole_flag_icon_thick.svg")).uri;
+  const cameraIconSource = require("@/assets/images/camera_open_icon_thick.png");
+  const courseFlagIconSource = require("@/assets/images/course_hole_flag_icon_thick.png");
 
   return (
     <>
@@ -54,11 +53,11 @@ const ScanFrameSection = ({ onFramePress, onCameraPress, onGalleryPress }: ScanF
           >
             <View style={styles.actionLeftWrap}>
               <View style={styles.actionIconWrap}>
-                <SvgUri uri={cameraIconUri} width={moderateScale(40)} height={moderateScale(40)} />
+                <RNImage source={cameraIconSource} style={styles.actionIconImage} resizeMode="contain" />
               </View>
               <View>
                 <Text type="barlowHard" style={styles.actionTitleText}>
-                  토코기록기 입력
+                  기록기 촬영 입력
                 </Text>
                 <Text type="barlowLight" style={styles.actionSubtitleText}>
                   스코어카드 촬영하기
@@ -78,7 +77,7 @@ const ScanFrameSection = ({ onFramePress, onCameraPress, onGalleryPress }: ScanF
           >
             <View style={styles.actionLeftWrap}>
               <View style={styles.actionIconWrap}>
-                <SvgUri uri={courseFlagIconUri} width={moderateScale(40)} height={moderateScale(40)} />
+                <RNImage source={courseFlagIconSource} style={styles.actionIconImage} resizeMode="contain" />
               </View>
               <View>
                 <Text type="barlowHard" style={styles.actionTitleText}>
@@ -187,6 +186,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     opacity: 0.95,
+  },
+  actionIconImage: {
+    width: moderateScale(42),
+    height: moderateScale(42),
   },
   actionTitleText: {
     color: "#E7ECEF",

@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 
+import AppFooter from '@/components/AppFooter';
 import OfflineBlocker from '@/components/OfflineBlocker';
 import { AuthProvider } from '@/context/AuthContext';
 import { NetworkProvider } from '@/context/NetworkContext';
@@ -116,6 +117,7 @@ export default function RootLayout() {
             }}
           />
         </Stack>
+        <AppFooter />
       <StatusBar style="light" />
       </GestureHandlerRootView>
     </ThemeProvider>

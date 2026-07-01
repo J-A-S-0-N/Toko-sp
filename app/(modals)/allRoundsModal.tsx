@@ -6,8 +6,8 @@ import Feather from "@expo/vector-icons/Feather";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, LayoutChangeEvent, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import React, { useEffect, useMemo, useState } from "react";
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from 'react-native-size-matters';
@@ -87,13 +87,8 @@ export default function AllRoundsModal() {
   const { user } = useAuth();
   const [activeFilter, setActiveFilter] = useState(0);
   const [sortByScore, setSortByScore] = useState(false);
-  const [headerHeight, setHeaderHeight] = useState(0);
   const [rounds, setRounds] = useState<Round[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-
-  const onHeaderLayout = useCallback((e: LayoutChangeEvent) => {
-    setHeaderHeight(e.nativeEvent.layout.height);
-  }, []);
 
   useEffect(() => {
     const fetchRounds = async () => {
@@ -217,7 +212,7 @@ export default function AllRoundsModal() {
     >
       <SafeAreaView edges={["top"]} style={styles.safeArea}>
         {/* Fixed header area */}
-        <Animated.View style={styles.fixedHeader} onLayout={onHeaderLayout} entering={FadeInDown.delay(80).duration(350)}>
+        <Animated.View style={styles.fixedHeader} entering={FadeInDown.delay(80).duration(350)}>
           {/* Header */}
           <View style={styles.headerRow}>
             <Pressable style={styles.backButton} onPress={() => router.back()}>
@@ -273,74 +268,74 @@ export default function AllRoundsModal() {
           </View>
         </Animated.View>
 
-        {/* Scrollable round list */}
-        <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-          {isLoading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="small" color="#4CAE82" />
-            </View>
-          ) : filteredGroups.length === 0 ? (
-            <View style={styles.loadingContainer}>
-              <Text type="barlowLight" style={{ color: "#6E7171", fontSize: moderateScale(FONT.xxs) }}>기록된 라운드가 없습니다</Text>
-            </View>
-          ) : filteredGroups.map((group) => (
-            <View key={group.label} style={styles.monthGroup}>
-              <View style={styles.monthHeaderRow}>
-                <Text type="barlowLight" style={styles.monthLabel}>{group.label}</Text>
-                <Text type="barlowLight" style={styles.monthCount}>{group.roundCount}라운드</Text>
+        <View style={styles.scrollContainer}>
+          {/* Scrollable round list */}
+          <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+            {isLoading ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="small" color="#4CAE82" />
               </View>
+            ) : filteredGroups.length === 0 ? (
+              <View style={styles.loadingContainer}>
+                <Text type="barlowLight" style={{ color: "#6E7171", fontSize: moderateScale(FONT.xxs) }}>기록된 라운드가 없습니다</Text>
+              </View>
+            ) : filteredGroups.map((group) => (
+              <View key={group.label} style={styles.monthGroup}>
+                <View style={styles.monthHeaderRow}>
+                  <Text type="barlowLight" style={styles.monthLabel}>{group.label}</Text>
+                  <Text type="barlowLight" style={styles.monthCount}>{group.roundCount}라운드</Text>
+                </View>
 
-              {group.rounds.map((round) => (
-                <Pressable key={round.id} style={styles.roundRow} onPress={() => router.push(`/(modals)/activityModal?id=${round.id}`)}>
-                  {/* Score circle */}
-                  <View style={[styles.scoreCircle, { backgroundColor: getScoreBg(round.score) }]}>
-                    <Text type="barlowHard" style={[styles.scoreCircleText, { color: getScoreColor(round.score) }]}>
-                      {round.score}
-                    </Text>
-                  </View>
-
-                  {/* Info */}
-                  <View style={styles.roundInfo}>
-                    <Text type="barlowHard" style={styles.roundCourseName}>{round.courseName}</Text>
-                    <View style={styles.roundMeta}>
-                      <Text type="barlowLight" style={styles.roundDate}>{round.date}</Text>
-                      {round.starred && <Text style={styles.starIcon}>⭐</Text>}
+                {group.rounds.map((round) => (
+                  <Pressable key={round.id} style={styles.roundRow} onPress={() => router.push(`/(modals)/activityModal?id=${round.id}`)}>
+                    {/* Score circle */}
+                    <View style={[styles.scoreCircle, { backgroundColor: getScoreBg(round.score) }]}>
+                      <Text type="barlowHard" style={[styles.scoreCircleText, { color: getScoreColor(round.score) }]}>
+                        {round.score}
+                      </Text>
                     </View>
-                  </View>
 
-                  {/* Right side */}
-                  <View style={styles.roundRight}>
-                    <Text type="barlowHard" style={[styles.roundDelta, { color: getDeltaColor(round.delta) }]}>
-                      +{round.delta}
-                    </Text>
-                    <View style={styles.roundBadges}>
-                      {round.streakCount != null && (
-                        <View style={styles.badge}>
-                          <Text style={styles.badgeIcon}>🔥</Text>
-                          <Text type="barlowLight" style={styles.badgeText}>{round.streakCount}</Text>
-                        </View>
-                      )}
-                      <View style={styles.badge}>
-                        <Text type="barlowLight" style={styles.badgeText}>{round.holes}홀</Text>
+                    {/* Info */}
+                    <View style={styles.roundInfo}>
+                      <Text type="barlowHard" style={styles.roundCourseName}>{round.courseName}</Text>
+                      <View style={styles.roundMeta}>
+                        <Text type="barlowLight" style={styles.roundDate}>{round.date}</Text>
+                        {round.starred && <Text style={styles.starIcon}>⭐</Text>}
                       </View>
                     </View>
-                  </View>
 
-                  <Feather name="chevron-right" size={moderateScale(FONT.sm)} color="#4A5053" style={styles.chevron} />
-                </Pressable>
-              ))}
-            </View>
-          ))}
-        </ScrollView>
+                    {/* Right side */}
+                    <View style={styles.roundRight}>
+                      <Text type="barlowHard" style={[styles.roundDelta, { color: getDeltaColor(round.delta) }]}>
+                        +{round.delta}
+                      </Text>
+                      <View style={styles.roundBadges}>
+                        {round.streakCount != null && (
+                          <View style={styles.badge}>
+                            <Text style={styles.badgeIcon}>🔥</Text>
+                            <Text type="barlowLight" style={styles.badgeText}>{round.streakCount}</Text>
+                          </View>
+                        )}
+                        <View style={styles.badge}>
+                          <Text type="barlowLight" style={styles.badgeText}>{round.holes}홀</Text>
+                        </View>
+                      </View>
+                    </View>
 
-        {/* Fade overlay on top of scroll */}
-        {headerHeight > 0 && (
+                    <Feather name="chevron-right" size={moderateScale(FONT.sm)} color="#4A5053" style={styles.chevron} />
+                  </Pressable>
+                ))}
+              </View>
+            ))}
+          </ScrollView>
+
+          {/* Fade overlay on top of scroll */}
           <LinearGradient
             colors={["#0F1010", "rgba(15,16,16,0)"]}
-            style={[styles.fadeOverlay, { top: headerHeight }]}
+            style={styles.fadeOverlay}
             pointerEvents="none"
           />
-        )}
+        </View>
       </SafeAreaView>
     </Animated.View>
   );
@@ -358,11 +353,16 @@ const styles = StyleSheet.create({
     paddingTop: moderateScale(15),
     zIndex: 1,
   },
+  scrollContainer: {
+    flex: 1,
+    position: "relative",
+  },
   fadeOverlay: {
     position: "absolute",
+    top: 0,
     left: 0,
     right: 0,
-    height: moderateScale(28),
+    height: moderateScale(18),
     zIndex: 2,
   },
   scroll: {
