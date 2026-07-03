@@ -32,7 +32,7 @@ function getScoreCircleColors(delta: string) {
 
 
 export default function ActivityModal() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, fromSave } = useLocalSearchParams<{ id: string; fromSave?: string }>();
 
   const [fieldName, setFieldName] = useState<string>("");
   const [location, setLocation] = useState<string>("");
@@ -109,6 +109,14 @@ export default function ActivityModal() {
 
   const animationTrigger = selectedCourse === "A" ? 1 : 2;
 
+  const handleBackPress = () => {
+    if (fromSave === "1") {
+      router.replace("/(tabs)/scan");
+      return;
+    }
+    router.back();
+  };
+
   if (isLoading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: "#0F0F0F" }}>
@@ -132,7 +140,7 @@ export default function ActivityModal() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.headerRow}>
-            <Pressable style={styles.backButton} onPress={() => router.back()}>
+            <Pressable style={styles.backButton} onPress={handleBackPress}>
               <Feather name="chevron-left" size={moderateScale(18)} color="#B8BEC1" />
             </Pressable>
             <Text type="barlowLight" style={styles.backLabel}>피드</Text>

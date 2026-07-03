@@ -8,15 +8,15 @@ import { doc, type DocumentReference, onSnapshot } from "firebase/firestore";
 import React, { useEffect, useMemo, useState } from "react";
 import { Alert, LayoutChangeEvent, Pressable, StyleSheet, View } from "react-native";
 import Animated, {
-    Easing,
-    FadeIn,
-    FadeInUp,
-    FadeOut,
-    FadeOutUp,
-    useAnimatedStyle,
-    useSharedValue,
-    withRepeat,
-    withTiming
+  Easing,
+  FadeIn,
+  FadeInUp,
+  FadeOut,
+  FadeOutUp,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from 'react-native-size-matters';
@@ -165,7 +165,24 @@ export default function LoadingScreen() {
       unsubscribeStatusListener = onSnapshot(scanDocRef, (snapshot) => {
         const data = snapshot.data();
         const status = data?.status;
-        if (status === "pending") return;
+        if (!status || status === "pending") return;
+
+        if (status === "error") {
+          unsubscribeStatusListener?.();
+          unsubscribeStatusListener = null;
+
+          if (isActive) {
+            Alert.alert("분석 실패", "스코어카드 분석에 실패했어요. 다시 시도해 주세요.", [
+              {
+                text: "확인",
+                onPress: () => router.replace("/(tabs)/scan"),
+              },
+            ]);
+          }
+          return;
+        }
+
+        if (status !== "done") return;
 
         const scores: number[] = [];
         for (let i = 1; i <= 9; i++) {

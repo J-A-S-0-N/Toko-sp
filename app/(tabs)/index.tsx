@@ -1,4 +1,5 @@
 import { checkUserExistsByPhoneNumber } from '@/app/(auth)/functions/loginFetchUserFunction';
+import ParkPromotionAdComponent from '@/components/ads/ParkPromotionAdComponent';
 import PromoAdComponent from '@/components/ads/PromoAdComponent';
 import SponsoredAdComponent from '@/components/ads/SponsoredAdComponent';
 // import DailyScanEventCard from '@/components/HomeFeedComponents/dailyScanEventCard';
@@ -8,7 +9,6 @@ import HottestLocationsComponent from '@/components/HomeFeedComponents/hottestLo
 import LiveChatBannerComponent from '@/components/HomeFeedComponents/liveChatBannerComponent';
 import RecentRoundComponent from '@/components/HomeFeedComponents/recentRoundComponent';
 import RegionalRankComponent from '@/components/HomeFeedComponents/regionalRankComponent';
-import UserStatComponent from '@/components/HomeFeedComponents/userStatComponent';
 import { ThemedText as Text } from '@/components/themed-text';
 import db from '@/config/firebase';
 import { FONT } from '@/constants/theme';
@@ -154,9 +154,9 @@ export default function HomeScreen() {
         contentContainerStyle={{ paddingBottom: tabBarHeight + moderateScale(150) }}
       >
 
-        <View style={{marginBottom: moderateScale(15)}}>
+{/*         <View style={{marginBottom: moderateScale(15)}}>
           <UserStatComponent/>
-        </View>
+        </View> */}
 
 {/*         <View style={{marginBottom: moderateScale(15)}}>
           <WeeklySummaryComponent/>
@@ -179,7 +179,7 @@ export default function HomeScreen() {
         </View> */}
 
         <View style={{marginBottom: moderateScale(25)}}>
-          <SponsoredAdComponent/>
+          <ParkPromotionAdComponent/>
         </View>
 
         <View style={{marginBottom: moderateScale(25)}}>
@@ -192,6 +192,10 @@ export default function HomeScreen() {
 
         <View style={{marginBottom: moderateScale(15)}}>
           <DailyTipComponent/>
+        </View>
+
+        <View style={{marginBottom: moderateScale(25)}}>
+          <SponsoredAdComponent/>
         </View>
 
         <View style={{marginBottom: moderateScale(25)}}>

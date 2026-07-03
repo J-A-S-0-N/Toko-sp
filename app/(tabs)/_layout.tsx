@@ -16,6 +16,7 @@ const BAR_BG = '#161717';
 const SELECTED_BG = '#262828';
 const SELECTED_BORDER = '#383B3B';
 const BORDER = '#22262A';
+const TAB_BAR_FOOTER_GAP = moderateScale(4);
 
 type TabKey = 'index' | 'stats' | 'scan' | 'profile' | 'notice';
 
@@ -56,6 +57,8 @@ const ITEMS: TabItem[] = [
 function CustomTabBar({ state, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
   const focusedRouteName = state.routes[state.index]?.name;
+  const safeInsetOffset = insets.bottom > 0 ? Math.min(insets.bottom, moderateScale(2)) : 0;
+  const tabBarBottomOffset = TAB_BAR_FOOTER_GAP + safeInsetOffset;
 
   const handlePress = (item: TabItem) => {
     if (item.disabled) return;
@@ -68,7 +71,7 @@ function CustomTabBar({ state, navigation }: BottomTabBarProps) {
       pointerEvents="box-none"
       style={[
         styles.outer,
-        { paddingBottom: Math.max(insets.bottom + moderateScale(4), moderateScale(4)) },
+        { paddingBottom: tabBarBottomOffset },
       ]}
     >
       <Shadow

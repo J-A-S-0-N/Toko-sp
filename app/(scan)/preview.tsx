@@ -98,21 +98,7 @@ export default function PreviewScreen() {
     try {
       setIsRouting(true);
       const scanDocRef = await createPendingScan(holesCount, parsedPhotos, user?.uid ?? "");
-      const defaultScores = Array(holesCount).fill(3);
 
-      router.replace({
-        pathname: "./resultPreview",
-        params: {
-          holes: String(holesCount),
-          scores: JSON.stringify(defaultScores),
-          fixedPars,
-          startParEdit,
-          courseName,
-          scanDocId: scanDocRef.id,
-        },
-      });
-
-      /*
       router.replace({
         pathname: "./loading",
         params: {
@@ -124,18 +110,6 @@ export default function PreviewScreen() {
           scanDocId: scanDocRef.id,
         },
       });
-
-      router.replace({
-        pathname: "./roundInfo",
-        params: {
-          holes: String(holesCount),
-          photos: JSON.stringify(parsedPhotos),
-          fixedPars,
-          startParEdit,
-          courseName,
-        },
-      });
-      */
     } catch (error) {
       console.error("Failed to create pending scan from preview:", error);
       Alert.alert("오류", "분석 준비 중 문제가 발생했어요. 잠시 후 다시 시도해 주세요.");

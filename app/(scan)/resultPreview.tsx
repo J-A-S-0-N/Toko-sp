@@ -8,8 +8,8 @@ import { useAuth } from "@/context/AuthContext";
 import { newRoundSignal } from "@/store/newRoundSignal";
 import Feather from "@expo/vector-icons/Feather";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { collection, getDocs, limit, orderBy, query } from "firebase/firestore";
-import React, { useMemo, useState } from "react";
+import { collection, deleteDoc, doc, getDocs, limit, orderBy, query } from "firebase/firestore";
+import React, { useEffect, useMemo, useState } from "react";
 import { Alert, Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
@@ -86,6 +86,19 @@ export default function ResultPreviewScreen() {
   const [parInputEnabled] = useState(false);
   const [coursePar] = useState(standardCoursePar);
 
+  const [datePlayedAt, setDatePlayedAt] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    const DateNow = new Date();
+
+    const formatted = DateNow.toLocaleDateString("ko-KR", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+    setDatePlayedAt(formatted);
+  }, []);
+
   const initialPars = useMemo(() => {
     if (!fixedPars) return null;
 
@@ -129,6 +142,7 @@ export default function ResultPreviewScreen() {
     return courseName.trim();
   });
   const [isLoadingSaved, setIsLoadingSaved] = useState(false);
+  const [deletingSetupId, setDeletingSetupId] = useState<string | null>(null);
   const [savedSetups, setSavedSetups] = useState<SavedCourseSetup[]>([]);
 
   const allHoleScores = useMemo(() => holeScores.slice(0, holesCount), [holeScores, holesCount]);
@@ -245,6 +259,33 @@ export default function ResultPreviewScreen() {
     );
   };
 
+  const handleDeleteSavedSetup = React.useCallback(
+    (setup: SavedCourseSetup) => {
+      Alert.alert("코스 삭제", `\"${setup.courseName}\" 코스를 삭제할까요?`, [
+        { text: "취소", style: "cancel" },
+        {
+          text: "삭제",
+          style: "destructive",
+          onPress: async () => {
+            if (!user?.uid) return;
+
+            try {
+              setDeletingSetupId(setup.id);
+              await deleteDoc(doc(db, "Users", user.uid, "CourseSetups", setup.id));
+              setSavedSetups((prev) => prev.filter((item) => item.id !== setup.id));
+            } catch (error) {
+              console.error("Failed to delete saved course setup in result preview:", error);
+              Alert.alert("삭제 실패", "코스 삭제 중 오류가 발생했어요.");
+            } finally {
+              setDeletingSetupId(null);
+            }
+          },
+        },
+      ]);
+    },
+    [user?.uid]
+  );
+
   const handleHolePress = (visibleIndex: number) => {
     const absoluteIndex = selectedCourse === "B" && holesCount === 18 ? visibleIndex + 9 : visibleIndex;
     setHoleScores((prev) =>
@@ -337,7 +378,13 @@ export default function ResultPreviewScreen() {
 
 
       newRoundSignal.id = result.id;
-      router.replace("/(tabs)/scan");
+      router.replace({
+        pathname: "/(modals)/activityModal",
+        params: {
+          id: result.id,
+          fromSave: "1",
+        },
+      });
     } catch {
       Alert.alert("저장 실패", "저장 중 오류가 발생했어요. 잠시 후 다시 시도해주세요.");
     } finally {
@@ -427,7 +474,19 @@ export default function ResultPreviewScreen() {
                         Par {setup.totalPar} · {setup.holes}홀
                       </Text>
                     </View>
-                    <Feather name="rotate-ccw" size={moderateScale(16)} color="#45D5CB" />
+                    <View style={styles.savedActions}>
+                      <Feather name="rotate-ccw" size={moderateScale(16)} color="#45D5CB" />
+                      <Pressable
+                        style={styles.savedDeleteButton}
+                        onPress={(event) => {
+                          event.stopPropagation();
+                          handleDeleteSavedSetup(setup);
+                        }}
+                        disabled={deletingSetupId === setup.id}
+                      >
+                        <Feather name="x" size={moderateScale(14)} color="#E37D7D" />
+                      </Pressable>
+                    </View>
                   </Pressable>
                 ))}
               </ScrollView>
@@ -435,7 +494,7 @@ export default function ResultPreviewScreen() {
           </View>
 
           <Text type="barlowLight" style={styles.dateText}>
-            2026년 3월 28일 · {holesCount === 18 ? "2개 코스" : "1개 코스"}
+            {datePlayedAt} · {holesCount === 18 ? "2개 코스" : "1개 코스"}
           </Text>
 
 {/*           <View style={[styles.courseParCard, parInputEnabled && styles.courseParCardDisabled]}>
@@ -576,9 +635,17 @@ export default function ResultPreviewScreen() {
                     isGood ? styles.holeItemGood : styles.holeItemNormal,
                   ]}
                 >
-                  <Text type="barlowLight" style={styles.holeNumber}>
-                    {displayHole}
-                  </Text>
+                  <View style={styles.holeMetaRow}>
+                    <Text type="barlowLight" style={styles.holeNumber}>
+                      {displayHole}
+                    </Text>
+                    <Text type="barlowLight" style={styles.holeMetaDot}>
+                      ·
+                    </Text>
+                    <Text type="barlowLight" style={styles.holeParInline}>
+                      파{item.par}
+                    </Text>
+                  </View>
                   {parInputEnabled ? (
                     <Text type="barlowHard" style={styles.holeParPrimary}>
                       p{item.par}
@@ -676,7 +743,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#090B0B",
     paddingHorizontal: moderateScale(10),
     paddingTop: moderateScale(6),
-    paddingBottom: moderateScale(16),
   },
   mainContentScroll: {
     flex: 1,
@@ -789,6 +855,21 @@ const styles = StyleSheet.create({
     color: "#8A9398",
     fontSize: moderateScale(FONT.xs),
     marginTop: moderateScale(2),
+  },
+  savedActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: moderateScale(10),
+  },
+  savedDeleteButton: {
+    width: moderateScale(24),
+    height: moderateScale(24),
+    borderRadius: moderateScale(12),
+    borderWidth: 1,
+    borderColor: "#3A2626",
+    backgroundColor: "#1D1515",
+    alignItems: "center",
+    justifyContent: "center",
   },
   dateText: {
     color: "#80878B",
@@ -961,8 +1042,21 @@ const styles = StyleSheet.create({
     color: "#7A8387",
     fontSize: moderateScale(FONT.xxs),
   },
+  holeMetaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: moderateScale(10),
+  },
+  holeMetaDot: {
+    color: "#7A8387",
+    fontSize: moderateScale(FONT.xxs),
+  },
+  holeParInline: {
+    color: "#7A8387",
+    fontSize: moderateScale(FONT.xxs),
+  },
   holeScore: {
-    fontSize: moderateScale(FONT.xxl),
+    fontSize: moderateScale(FONT.h2),
   },
   holeScoreNormal: {
     color: "#C1C7C8",

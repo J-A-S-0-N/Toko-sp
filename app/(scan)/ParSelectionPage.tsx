@@ -4,12 +4,11 @@ import { FONT } from "@/constants/theme";
 import { useAuth } from "@/context/AuthContext";
 import Feather from "@expo/vector-icons/Feather";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { collection, doc, getDocs, limit, orderBy, query, serverTimestamp, setDoc } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDocs, limit, orderBy, query, serverTimestamp, setDoc } from "firebase/firestore";
 import React from "react";
 import { Alert, Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
-import { createManualScan } from "./scanFirebase";
 
 type SavedCourseSetup = {
   id: string;
@@ -76,18 +75,17 @@ const buildCourseSetupId = (courseName: string, holesCount: number) => {
 export default function ParSelectionPage() {
   const router = useRouter();
   const { user } = useAuth();
-  const { mode, holes, fixedPars, courseName: initialCourseName } = useLocalSearchParams<{
-    mode?: string;
+  const { holes, fixedPars, courseName: initialCourseName } = useLocalSearchParams<{
     holes?: string;
     fixedPars?: string;
     courseName?: string;
   }>();
 
-  const modeValue = mode === "manual" ? "manual" : "camera";
   const holesCount = holes === "18" ? 18 : 9;
   const [courseName, setCourseName] = React.useState("");
   const [isSaving, setIsSaving] = React.useState(false);
   const [isLoadingSaved, setIsLoadingSaved] = React.useState(false);
+  const [deletingSetupId, setDeletingSetupId] = React.useState<string | null>(null);
   const [savedSetups, setSavedSetups] = React.useState<SavedCourseSetup[]>([]);
   const [pars, setPars] = React.useState<number[]>(() => buildInitialPars(fixedPars, holesCount));
 
@@ -192,7 +190,18 @@ export default function ParSelectionPage() {
   };
 
   const handleSave = async () => {
-    await persistCurrentSetup();
+    const trimmedCourseName = courseName.trim();
+    const saved = await persistCurrentSetup();
+    if (!saved) return;
+
+    Alert.alert("저장 완료", `저장되었습니다: ${trimmedCourseName}`, [
+      {
+        text: "확인",
+        onPress: () => {
+          router.replace("/(tabs)/scan");
+        },
+      },
+    ]);
   };
 
   const handleLoadSavedSetup = (setup: SavedCourseSetup) => {
@@ -200,80 +209,32 @@ export default function ParSelectionPage() {
     setPars(normalizeParArray(setup.pars, holesCount));
   };
 
-  const handleNext = async () => {
-    const trimmedCourseName = courseName.trim();
-    if (!trimmedCourseName) {
-      Alert.alert("코스 이름 필요", "코스 이름을 입력해 주세요.");
-      return;
-    }
+  const handleDeleteSavedSetup = React.useCallback(
+    (setup: SavedCourseSetup) => {
+      Alert.alert("코스 삭제", `\"${setup.courseName}\" 코스를 삭제할까요?`, [
+        { text: "취소", style: "cancel" },
+        {
+          text: "삭제",
+          style: "destructive",
+          onPress: async () => {
+            if (!user?.uid) return;
 
-    const saved = await persistCurrentSetup();
-    if (!saved) return;
-
-    if (modeValue === "manual") {
-      const defaultScores = Array(holesCount).fill(3);
-
-      try {
-        const scanDocRef = await createManualScan(holesCount, user?.uid ?? "");
-
-        router.push({
-          pathname: "./resultPreview",
-          params: {
-            holes: String(holesCount),
-            scores: JSON.stringify(defaultScores),
-            courseName: trimmedCourseName,
-            fixedPars: JSON.stringify(pars),
-            startParEdit: "1",
-            scanDocId: scanDocRef.id,
+            try {
+              setDeletingSetupId(setup.id);
+              await deleteDoc(doc(db, "Users", user.uid, "CourseSetups", setup.id));
+              setSavedSetups((prev) => prev.filter((item) => item.id !== setup.id));
+            } catch (error) {
+              console.error("Failed to delete saved course setup:", error);
+              Alert.alert("삭제 실패", "코스 삭제 중 오류가 발생했어요.");
+            } finally {
+              setDeletingSetupId(null);
+            }
           },
-        });
-
-        /*
-        router.push({
-          pathname: "./roundInfo",
-          params: {
-            holes: String(holesCount),
-            manual: "1",
-            courseName: trimmedCourseName,
-            fixedPars: JSON.stringify(pars),
-            startParEdit: "1",
-          },
-        });
-        */
-      } catch (error) {
-        console.error("Failed to create manual scan from ParSelectionPage:", error);
-        Alert.alert("오류", "직접 입력 준비 중 문제가 발생했어요. 잠시 후 다시 시도해 주세요.");
-      }
-
-      return;
-
-      /*
-      router.push({
-        pathname: "./roundInfo",
-        params: {
-          holes: String(holesCount),
-          manual: "1",
-          courseName: trimmedCourseName,
-          fixedPars: JSON.stringify(pars),
-          startParEdit: "1",
         },
-      });
-      return;
-      */
-    }
-
-    router.push({
-      pathname: "./capture",
-      params: {
-        holes: String(holesCount),
-        shotIndex: "1",
-        photos: JSON.stringify([]),
-        courseName: trimmedCourseName,
-        fixedPars: JSON.stringify(pars),
-        startParEdit: "1",
-      },
-    });
-  };
+      ]);
+    },
+    [user?.uid]
+  );
 
   return (
     <SafeAreaView edges={["top", "bottom"]} style={styles.safeArea}>
@@ -285,11 +246,7 @@ export default function ParSelectionPage() {
           <Text type="barlowHard" style={styles.title}>
             코스 설정
           </Text>
-          <Pressable disabled={isSaving} onPress={handleSave} style={styles.saveButton}>
-            <Text type="barlowHard" style={[styles.saveButtonText, isSaving && styles.saveButtonTextDisabled]}>
-              {isSaving ? "저장중" : "저장"}
-            </Text>
-          </Pressable>
+          <View style={styles.headerRightPlaceholder} />
         </View>
 
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -330,7 +287,19 @@ export default function ParSelectionPage() {
                         Par {setup.totalPar} · {setup.holes}홀
                       </Text>
                     </View>
-                    <Feather name="rotate-ccw" size={moderateScale(16)} color="#45D5CB" />
+                    <View style={styles.savedActions}>
+                      <Feather name="rotate-ccw" size={moderateScale(16)} color="#45D5CB" />
+                      <Pressable
+                        style={styles.savedDeleteButton}
+                        onPress={(event) => {
+                          event.stopPropagation();
+                          handleDeleteSavedSetup(setup);
+                        }}
+                        disabled={deletingSetupId === setup.id}
+                      >
+                        <Feather name="x" size={moderateScale(14)} color="#E37D7D" />
+                      </Pressable>
+                    </View>
                   </Pressable>
                 ))}
               </ScrollView>
@@ -365,11 +334,10 @@ export default function ParSelectionPage() {
 
         </ScrollView>
 
-        <Pressable style={styles.primaryButton} onPress={() => void handleNext()}>
-          <Text type="barlowHard" style={styles.primaryButtonText}>
-            스코어 입력 시작
+        <Pressable style={[styles.primaryButton, isSaving && styles.primaryButtonDisabled]} onPress={() => void handleSave()} disabled={isSaving}>
+          <Text type="barlowHard" style={[styles.primaryButtonText, isSaving && styles.primaryButtonTextDisabled]}>
+            {isSaving ? "저장중" : "저장하기"}
           </Text>
-          <Feather name="arrow-right" size={moderateScale(18)} color="#0A1112" />
         </Pressable>
       </View>
     </SafeAreaView>
@@ -384,8 +352,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: moderateScale(16),
-    paddingTop: moderateScale(10),
-    paddingBottom: moderateScale(16),
+    paddingTop: moderateScale(5),
+    paddingBottom: moderateScale(5),
   },
   headerRow: {
     flexDirection: "row",
@@ -407,17 +375,9 @@ const styles = StyleSheet.create({
     color: "#F2F4F5",
     fontSize: moderateScale(FONT.lg),
   },
-  saveButton: {
-    minWidth: moderateScale(42),
-    alignItems: "flex-end",
-    justifyContent: "center",
-  },
-  saveButtonText: {
-    color: "#53B88F",
-    fontSize: moderateScale(FONT.md),
-  },
-  saveButtonTextDisabled: {
-    color: "#4D6968",
+  headerRightPlaceholder: {
+    width: moderateScale(42),
+    height: moderateScale(42),
   },
   scrollContent: {
     paddingBottom: moderateScale(18),
@@ -523,6 +483,21 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(FONT.xs),
     marginTop: moderateScale(2),
   },
+  savedActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: moderateScale(10),
+  },
+  savedDeleteButton: {
+    width: moderateScale(24),
+    height: moderateScale(24),
+    borderRadius: moderateScale(12),
+    borderWidth: 1,
+    borderColor: "#3A2626",
+    backgroundColor: "#1D1515",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   primaryButton: {
     marginTop: moderateScale(8),
     borderRadius: moderateScale(16),
@@ -533,8 +508,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: moderateScale(8),
   },
+  primaryButtonDisabled: {
+    backgroundColor: "#3D7E64",
+  },
   primaryButtonText: {
     color: "#0A1112",
     fontSize: moderateScale(FONT.md),
+  },
+  primaryButtonTextDisabled: {
+    color: "#1E2C24",
   },
 });

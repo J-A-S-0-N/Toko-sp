@@ -1,4 +1,5 @@
 import AdRequestModal from "@/components/AdRequestModal";
+import ParkPromotionAdComponent from "@/components/ads/ParkPromotionAdComponent";
 import PromoAdComponent from "@/components/ads/PromoAdComponent";
 import HomeFeedHeader from "@/components/HomeFeedComponents/homeFeedHeader";
 import HomeFeedSkeleton from "@/components/HomeFeedComponents/HomeFeedSkeleton";
@@ -135,6 +136,9 @@ export default function ScanScreen() {
               void handleDirectManualRoute();
             }}
           />
+          <View style={styles.adContainer}>
+            <ParkPromotionAdComponent />
+          </View>
           <View style={styles.adContainer}>
             <PromoAdComponent />
           </View>
