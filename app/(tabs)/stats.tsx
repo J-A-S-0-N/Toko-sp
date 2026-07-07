@@ -3,7 +3,7 @@ import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
 
@@ -16,6 +16,8 @@ const TAB_ITEMS: { key: EventTab; label: string }[] = [
   { key: "upcoming", label: "예정" },
   { key: "ended", label: "종료됨" },
 ];
+
+const ONGOING_EVENT_URL = "https://www.youtube.com/@토코스포츠파크골프/posts";
 
 export default function StatsScreen() {
   const tabBarHeight = useBottomTabBarHeight();
@@ -57,28 +59,21 @@ export default function StatsScreen() {
     };
   };
 
-  const formatRange = (startAt: Date | null, endAt: Date | null) => {
-    if (!startAt || !endAt) return "일정 정보 없음";
-    return `${startAt.getMonth() + 1}월 ${startAt.getDate()}일 - ${endAt.getMonth() + 1}월 ${endAt.getDate()}일`;
-  };
-
-  const getRemainingLabel = (endAt: Date | null) => {
-    if (!endAt) return "진행중";
-    const diffMs = endAt.getTime() - Date.now();
-    const daysLeft = Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
-    return `${daysLeft}일 남음`;
+  const openOngoingEventUrl = async () => {
+    try {
+      await Linking.openURL(ONGOING_EVENT_URL);
+    } catch (error) {
+      console.error("Failed to open ongoing event URL:", error);
+    }
   };
 
   const onPressActionButton = () => {
-    if (!activeEvent) return;
-
     if (activeTab === "ongoing") {
-      router.push({
-        pathname: "/(modals)/eventDetailModal",
-        params: { eventId: activeEvent.id },
-      });
+      openOngoingEventUrl();
       return;
     }
+
+    if (!activeEvent) return;
 
     router.push({
       pathname: "/(modals)/eventResultModal",
@@ -161,51 +156,50 @@ export default function StatsScreen() {
                 <Text type="barlowHard" style={styles.smallPillText}>{activeTab === "ongoing" ? "진행중" : "종료됨"}</Text>
               </View>
               <Text type="barlowLight" style={styles.cardTopMeta}>
-                {activeTab === "ongoing" ? getRemainingLabel(activeEvent?.endAt ?? null) : "이벤트 종료"}
+                {activeTab === "ongoing" ? "상시 확인" : "이벤트 종료"}
               </Text>
             </View>
 
-            <LinearGradient
-              colors={["#0B4F2D", "#1F8245", "#6AD48D"]}
-              locations={[0, 0.45, 1]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.banner}
+            <Pressable
+              style={styles.bannerPressable}
+              onPress={activeTab === "ongoing" ? openOngoingEventUrl : undefined}
+              disabled={activeTab !== "ongoing"}
             >
-              <View style={styles.bannerGlow} />
-              <Text type="barlowLight" style={styles.bannerLabel}>{activeTab === "ongoing" ? "이번 달 경품" : "지난 이벤트"}</Text>
-              <Text type="barlowHard" style={styles.bannerTitle}>
-                {activeEvent?.prize || (activeTab === "ongoing" ? "진행중 이벤트" : "종료된 이벤트")}
-              </Text>
-              <Text type="barlowHard" style={styles.bannerGift}>🎁</Text>
-            </LinearGradient>
+              <LinearGradient
+                colors={["#00A45A", "#17C975", "#43DB90"]}
+                locations={[0, 0.45, 1]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.banner}
+              >
+                <View style={styles.bannerGlow} />
+                <Text type="barlowLight" style={styles.bannerLabel}>
+                  {activeTab === "ongoing" ? "토코기록기 공식 유튜브" : "지난 이벤트"}
+                </Text>
+                <Text type="barlowHard" style={styles.bannerTitle}>
+                  {activeTab === "ongoing" ? "이벤트와\n당첨 결과 확인" : activeEvent?.prize || "종료된 이벤트"}
+                </Text>
+                {activeTab === "ongoing" ? (
+                  <View style={styles.bannerPlayCircle}>
+                    <Text type="barlowHard" style={styles.bannerPlayIcon}>▶</Text>
+                  </View>
+                ) : (
+                  <Text type="barlowHard" style={styles.bannerGift}>🎁</Text>
+                )}
+              </LinearGradient>
+            </Pressable>
 
             <Text type="barlowHard" style={styles.cardTitle}>
-              {activeEvent?.title || "이벤트 정보 없음"}
+              {activeTab === "ongoing" ? "진행중인 이벤트와\n당첨 결과를 확인해보세요!" : activeEvent?.title || "이벤트 정보 없음"}
             </Text>
             <Text type="barlowLight" style={styles.cardDescription}>
               {activeTab === "ongoing"
-                ? activeEvent?.description || "진행중인 이벤트가 없습니다."
+                ? "토코기록기 공식 유튜브 커뮤니티에서 현재 진행 중인 이벤트, 참여 안내, 추첨 결과를 확인할 수 있습니다."
                 : activeEvent?.resultSummary || "지난 이벤트 결과를 확인할 수 없습니다."}
             </Text>
 
-            <View style={styles.detailBox}>
-              {activeTab === "ongoing" ? (
-                <>
-                  <View style={styles.detailRow}>
-                    <Text type="barlowLight" style={styles.detailKey}>경품</Text>
-                    <Text type="barlowHard" style={styles.detailValue}>{activeEvent?.prize || "-"}</Text>
-                  </View>
-                  <View style={styles.detailRow}>
-                    <Text type="barlowLight" style={styles.detailKey}>이벤트 기간</Text>
-                    <Text type="barlowHard" style={styles.detailValue}>{formatRange(activeEvent?.startAt ?? null, activeEvent?.endAt ?? null)}</Text>
-                  </View>
-                  <View style={styles.detailRow}>
-                    <Text type="barlowLight" style={styles.detailKey}>참여 방식</Text>
-                    <Text type="barlowHard" style={styles.detailValue}>{activeEvent?.participationMethod || "-"}</Text>
-                  </View>
-                </>
-              ) : (
+            {activeTab === "ended" ? (
+              <View style={styles.detailBox}>
                 <>
                   <View style={styles.detailRow}>
                     <Text type="barlowLight" style={styles.detailKey}>경품</Text>
@@ -220,20 +214,22 @@ export default function StatsScreen() {
                     <Text type="barlowHard" style={styles.detailValue}>{activeEvent?.winnerText || "-"}</Text>
                   </View>
                 </>
-              )}
-            </View>
+              </View>
+            ) : (
+              <Text type="barlowLight" style={styles.ongoingHint}>버튼을 누르면 유튜브 채널로 이동합니다.</Text>
+            )}
 
             <Pressable
               style={[
                 styles.actionButton,
                 activeTab === "ended" && styles.actionButtonEnded,
-                !activeEvent && { opacity: 0.5 },
+                activeTab === "ended" && !activeEvent && { opacity: 0.5 },
               ]}
               onPress={onPressActionButton}
-              disabled={!activeEvent}
+              disabled={activeTab === "ended" && !activeEvent}
             >
               <Text type="barlowHard" style={[styles.actionButtonText, activeTab === "ended" && styles.actionButtonTextEnded]}>
-                {activeTab === "ongoing" ? "스코어 기록하고 참여하기" : "결과 보기"}
+                {activeTab === "ongoing" ? "결과 및 이벤트 확인하기" : "결과 보기"}
               </Text>
             </Pressable>
           </View>
@@ -284,8 +280,8 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   tabButtonSelected: {
-    backgroundColor: "#238545",
-    shadowColor: "#238545",
+    backgroundColor: "#1CD37A",
+    shadowColor: "#1CD37A",
     shadowOpacity: 0.34,
     shadowRadius: 14,
     shadowOffset: { width: 0, height: 6 },
@@ -335,7 +331,7 @@ const styles = StyleSheet.create({
   },
   banner: {
     borderRadius: moderateScale(24),
-    backgroundColor: "#238545",
+    backgroundColor: "#1CD37A",
     paddingHorizontal: moderateScale(20),
     paddingVertical: moderateScale(18),
     minHeight: moderateScale(136),
@@ -359,6 +355,27 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: moderateScale(20),
     marginTop: moderateScale(8),
+    lineHeight: moderateScale(25),
+  },
+  bannerPressable: {
+    borderRadius: moderateScale(24),
+    overflow: "hidden",
+  },
+  bannerPlayCircle: {
+    position: "absolute",
+    right: moderateScale(22),
+    bottom: moderateScale(16),
+    width: moderateScale(56),
+    height: moderateScale(56),
+    borderRadius: moderateScale(28),
+    backgroundColor: "rgba(196, 255, 222, 0.3)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  bannerPlayIcon: {
+    color: "#E8FFF2",
+    fontSize: moderateScale(18),
+    marginLeft: moderateScale(3),
   },
   bannerGift: {
     position: "absolute",
@@ -413,7 +430,7 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     borderRadius: moderateScale(18),
-    backgroundColor: "#238545",
+    backgroundColor: "#0DDC7A",
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: moderateScale(18),
@@ -422,11 +439,16 @@ const styles = StyleSheet.create({
     backgroundColor: "#2A2D2C",
   },
   actionButtonText: {
-    color: "#FFFFFF",
+    color: "#08130D",
     fontSize: moderateScale(18),
   },
   actionButtonTextEnded: {
     color: "#D4D9D7",
+  },
+  ongoingHint: {
+    textAlign: "center",
+    color: "#7F8A86",
+    fontSize: moderateScale(12),
   },
   upcomingCard: {
     backgroundColor: "#171919",

@@ -6,22 +6,21 @@ import React from "react";
 import { Image, Pressable, StyleSheet, TouchableOpacity, View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
 
-interface AdRequestModalProps {
+interface InitialAdModalProps {
   onClose: () => void;
 }
 
-export default function AdRequestModal({ onClose }: AdRequestModalProps) {
+export default function InitialAdModal({ onClose }: InitialAdModalProps) {
   const router = useRouter();
 
   const handlePrimaryPress = () => {
     onClose();
-    router.replace("/(tabs)/notice");
+    router.replace("/(tabs)/stats");
   };
 
   return (
     <View style={styles.overlay}>
       <View style={styles.card}>
-        {/* Header with badge and close button */}
         <View style={styles.header}>
           <View style={styles.badge}>
             <Ionicons name="megaphone" size={moderateScale(10)} color="#E8B923" />
@@ -35,17 +34,15 @@ export default function AdRequestModal({ onClose }: AdRequestModalProps) {
           </Pressable>
         </View>
 
-        {/* Ad Request Banner Image */}
         <Image
-          source={require('../assets/images/gurillaEventFinalImage1.png')}
+          source={require("../assets/images/gurillaEventFinalImage1.png")}
           style={styles.bannerImage}
           resizeMode="stretch"
         />
 
-        {/* Buttons */}
         <TouchableOpacity style={styles.primaryButton} onPress={handlePrimaryPress}>
           <ThemedText type="barlowLight" style={styles.primaryButtonText}>
-            확인하러 가러 
+            🎁 이벤트 보러가기
           </ThemedText>
         </TouchableOpacity>
 

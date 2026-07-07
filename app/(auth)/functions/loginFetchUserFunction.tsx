@@ -9,6 +9,12 @@ type LoginFetchUserResult = {
   source: 'firestore' | 'cache' | 'none';
 };
 
+export type UserProfileGateSnapshot = {
+  exists: boolean;
+  name: string | null;
+  phoneNumber: string | null;
+};
+
 //depreceated code
 
 /* export const getCurrentUid = () => auth().currentUser?.uid ?? null;
@@ -48,6 +54,97 @@ export const checkUserExistsByUid = async (uid: string) => {
   } catch (error) {
     console.error('Error checking user existence by uid:', error);
     return false;
+  }
+};
+
+export const getUserProfileGateSnapshot = async (uid: string): Promise<UserProfileGateSnapshot> => {
+  if (!uid) {
+    return {
+      exists: false,
+      name: null,
+      phoneNumber: null,
+    };
+  }
+
+  try {
+    const userDocRef = doc(db, 'Users', uid);
+    const userDoc = await getDoc(userDocRef);
+
+    if (!userDoc.exists()) {
+      return {
+        exists: false,
+        name: null,
+        phoneNumber: null,
+      };
+    }
+
+    const data = userDoc.data();
+    const name = typeof data?.name === 'string' && data.name.trim().length > 0 ? data.name.trim() : null;
+    const phoneNumber =
+      typeof data?.phoneNumber === 'string' && data.phoneNumber.trim().length > 0
+        ? data.phoneNumber.trim()
+        : null;
+
+    return {
+      exists: true,
+      name,
+      phoneNumber,
+    };
+  } catch (error) {
+    console.error('Error fetching user profile gate snapshot:', error);
+    return {
+      exists: false,
+      name: null,
+      phoneNumber: null,
+    };
+  }
+};
+
+export const getUidByPhoneNumber = async (phoneNumber: string): Promise<string | null> => {
+  if (!phoneNumber) {
+    return null;
+  }
+
+  try {
+    const usersRef = collection(db, 'Users');
+    const q = query(usersRef, where('phoneNumber', '==', phoneNumber));
+    const snapshot = await getDocs(q);
+
+    if (snapshot.empty) {
+      return null;
+    }
+
+    const firstDoc = snapshot.docs[0];
+    const dataUid = typeof firstDoc.data()?.uid === 'string' ? firstDoc.data().uid : null;
+    return dataUid ?? firstDoc.id;
+  } catch (error) {
+    console.error('Error fetching uid by phone number:', error);
+    return null;
+  }
+};
+
+export const getUidByUsernameExact = async (name: string): Promise<string | null> => {
+  const trimmedName = name.trim();
+
+  if (!trimmedName) {
+    return null;
+  }
+
+  try {
+    const usersRef = collection(db, 'Users');
+    const q = query(usersRef, where('name', '==', trimmedName));
+    const snapshot = await getDocs(q);
+
+    if (snapshot.empty) {
+      return null;
+    }
+
+    const firstDoc = snapshot.docs[0];
+    const dataUid = typeof firstDoc.data()?.uid === 'string' ? firstDoc.data().uid : null;
+    return dataUid ?? firstDoc.id;
+  } catch (error) {
+    console.error('Error fetching uid by username:', error);
+    return null;
   }
 };
 

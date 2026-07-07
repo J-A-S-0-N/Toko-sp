@@ -2,31 +2,31 @@ import { ThemedText } from "@/components/themed-text";
 import { FONT } from "@/constants/theme";
 import { useAuth } from "@/context/AuthContext";
 import {
-    ChatMessage,
-    getAdminUsernameSet,
-    getKoreanClockLabel,
-    getOlderChatMessages,
-    MAX_CHAT_MESSAGE_LENGTH,
-    sendChatMessage,
-    subscribeToRecentChatMessages,
+  ChatMessage,
+  getAdminUsernameSet,
+  getKoreanClockLabel,
+  getOlderChatMessages,
+  MAX_CHAT_MESSAGE_LENGTH,
+  sendChatMessage,
+  subscribeToRecentChatMessages,
 } from "@/services/chatService";
 import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    FlatList,
-    Keyboard,
-    KeyboardAvoidingView,
-    NativeScrollEvent,
-    NativeSyntheticEvent,
-    Platform,
-    StyleSheet,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  FlatList,
+  Keyboard,
+  KeyboardAvoidingView,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  Platform,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
 
 /* ─── Types ────────────────────────────────────────────────────────────────── */
@@ -41,6 +41,7 @@ type ChatItem =
     mine: boolean;
     name?: string;
     isAdmin?: boolean;
+    isHighlightedUsername?: boolean;
     initial?: string;
     text: string;
     time: string;
@@ -115,8 +116,10 @@ function MessageRow({ item }: { item: Extract<ChatItem, { kind: "message" }> }) 
       </View>
       <View style={styles.otherContent}>
         <View style={styles.otherNameRow}>
-          <ThemedText style={styles.otherName}>{item.name}</ThemedText>
-          {item.isAdmin && <ThemedText style={styles.adminBadge}>관계자</ThemedText>}
+          <ThemedText style={[styles.otherName, item.isHighlightedUsername && styles.highlightedOtherName]}>
+            {item.name}
+          </ThemedText>
+          {item.isAdmin && !item.isHighlightedUsername && <ThemedText style={styles.adminBadge}>관계자</ThemedText>}
         </View>
         <View style={styles.otherBubbleRow}>
           <View style={styles.otherBubble}>
@@ -134,7 +137,6 @@ function MessageRow({ item }: { item: Extract<ChatItem, { kind: "message" }> }) 
 export default function ChatRoomScreen() {
   const router = useRouter();
   const { user, username } = useAuth();
-  const insets = useSafeAreaInsets();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState("");
   const [pendingMessageIds, setPendingMessageIds] = useState<string[]>([]);
@@ -234,12 +236,14 @@ export default function ChatRoomScreen() {
     const pendingSet = new Set(pendingMessageIds);
     const mappedMessages: ChatItem[] = messages.map((message) => {
       const mine = message.userId === user?.uid;
+      const isHighlightedUsername = !mine && message.username === "개선 관리자";
       return {
         kind: "message",
         id: message.id,
         mine,
         name: mine ? undefined : message.username,
         isAdmin: mine ? false : adminUsernames.has(message.username),
+        isHighlightedUsername,
         initial: mine ? undefined : message.userInitial,
         text: message.text,
         time: getKoreanClockLabel(message.createdAtMs),
@@ -381,7 +385,7 @@ export default function ChatRoomScreen() {
         )}
 
         {/* Input bar */}
-        <View style={[styles.inputBar, { paddingBottom: moderateScale(8) + insets.bottom }]}>
+        <View style={[styles.inputBar, { paddingBottom: moderateScale(8) }]}>
           <TouchableOpacity style={styles.plusBtn} activeOpacity={0.7}>
             <Feather name="plus" size={moderateScale(20)} color="#9BA1A6" />
           </TouchableOpacity>
@@ -564,6 +568,9 @@ const styles = StyleSheet.create({
   otherName: {
     color: "#9BA1A6",
     fontSize: moderateScale(FONT.xxs),
+  },
+  highlightedOtherName: {
+    color: "#F04A4A",
   },
   adminBadge: {
     color: "#3CC06E",

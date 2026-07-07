@@ -1,14 +1,13 @@
-import AdRequestModal from "@/components/AdRequestModal";
 import ParkPromotionAdComponent from "@/components/ads/ParkPromotionAdComponent";
 import PromoAdComponent from "@/components/ads/PromoAdComponent";
 import HomeFeedHeader from "@/components/HomeFeedComponents/homeFeedHeader";
 import HomeFeedSkeleton from "@/components/HomeFeedComponents/HomeFeedSkeleton";
 import UsernameHeader from "@/components/HomeFeedComponents/usernameHeader";
+import InitialAdModal from "@/components/InitialAdModal";
 import {
   RecentScansSection,
   ScanFrameSection
 } from "@/components/ScanPageComponent";
-import SecondAdRequestModal from "@/components/SecondAdRequestModal";
 import { useAuth } from "@/context/AuthContext";
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { router } from "expo-router";
@@ -23,8 +22,7 @@ export default function ScanScreen() {
   const { user } = useAuth();
   const tabBarHeight = useBottomTabBarHeight();
   const [showSkeleton, setShowSkeleton] = React.useState(true);
-  const [showAdRequestModal, setShowAdRequestModal] = React.useState(false);
-  const [showSecondAdRequestModal, setShowSecondAdRequestModal] = React.useState(false);
+  const [showInitialAdModal, setShowInitialAdModal] = React.useState(false);
   const scrollY = useSharedValue(0);
   const defaultHolesCount = 9;
   const defaultManualScores = React.useMemo(() => Array(defaultHolesCount).fill(3), [defaultHolesCount]);
@@ -53,7 +51,7 @@ export default function ScanScreen() {
   React.useEffect(() => {
     const timer = setTimeout(() => {
       setShowSkeleton(false);
-      setShowAdRequestModal(true);
+      setShowInitialAdModal(true);
     }, 2000);
 
     return () => clearTimeout(timer);
@@ -63,13 +61,8 @@ export default function ScanScreen() {
     scrollY.value = event.contentOffset.y;
   });
 
-  const handleCloseFirstAdModal = () => {
-    setShowAdRequestModal(false);
-    setShowSecondAdRequestModal(true);
-  };
-
-  const handleCloseSecondAdModal = () => {
-    setShowSecondAdRequestModal(false);
+  const handleCloseInitialAdModal = () => {
+    setShowInitialAdModal(false);
   };
 
   return (
@@ -145,12 +138,8 @@ export default function ScanScreen() {
         </Animated.ScrollView>
       )}
 
-      {showAdRequestModal && (
-        <AdRequestModal onClose={handleCloseFirstAdModal} />
-      )}
-
-      {showSecondAdRequestModal && (
-        <SecondAdRequestModal onClose={handleCloseSecondAdModal} />
+      {showInitialAdModal && (
+        <InitialAdModal onClose={handleCloseInitialAdModal} />
       )}
     </SafeAreaView>
   );
