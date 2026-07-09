@@ -1,4 +1,6 @@
 import GlobalChatCard from "@/components/ChatComponents/GlobalChatCard";
+import ParkPromotionAdComponent from "@/components/ads/ParkPromotionAdComponent";
+import PromoAdComponent from "@/components/ads/PromoAdComponent";
 import { ThemedText } from "@/components/themed-text";
 import { db } from "@/config/firebase";
 import { FONT } from "@/constants/theme";
@@ -414,6 +416,8 @@ export default function NoticeScreen() {
     );
   }
 
+  const latestNotice = recentNotices[0];
+
   return (
     <SafeAreaView edges={["top"]} style={styles.container}>
       <ScrollView
@@ -472,6 +476,13 @@ export default function NoticeScreen() {
           </View>
         )}
 
+        <View style={styles.adSectionContainer}>
+          <ParkPromotionAdComponent />
+        </View>
+        <View style={styles.adSectionContainer}>
+          <PromoAdComponent />
+        </View>
+
         {/* 최근 공지 */}
         {recentNotices.length > 0 && (
           <View style={styles.sectionContainer}>
@@ -481,47 +492,39 @@ export default function NoticeScreen() {
               </ThemedText>
             </View>
 
-            <View style={styles.noticeList}>
-              {recentNotices.map((notice, index) => {
-                const badge = getBadgeConfig(notice.type);
-                return (
-                  <TouchableOpacity
-                    key={notice.id}
-                    activeOpacity={0.75}
-                    onPress={() => setSelected(notice)}
-                    style={[
-                      styles.noticeCard,
-                      index === recentNotices.length - 1 && styles.noticeCardLast,
-                    ]}
-                  >
-                    <View style={styles.noticeCardInner}>
-                      <View style={styles.noticeTopRow}>
-                        <View style={[styles.badge, { backgroundColor: badge.bg }]}>
-                          <ThemedText style={[styles.badgeText, { color: badge.color }]}>
-                            {badge.label}
-                          </ThemedText>
-                        </View>
-                        <ThemedText type="barlowLight" style={styles.noticeDate}>
-                          {notice.date}
-                        </ThemedText>
-                      </View>
-                      <ThemedText type="barlowLight" style={styles.noticeTitle} numberOfLines={1}>
-                        {notice.title}
-                      </ThemedText>
-                      <ThemedText type="barlowLight" style={styles.noticeDesc} numberOfLines={2}>
-                        {notice.description}
-                      </ThemedText>
-                    </View>
-                    <Feather
-                      name="chevron-right"
-                      size={moderateScale(16)}
-                      color="#4A5055"
-                      style={styles.chevron}
-                    />
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
+            <TouchableOpacity
+              activeOpacity={0.85}
+              onPress={() => setSelected(latestNotice)}
+              style={styles.recentEventTouchable}
+            >
+              <LinearGradient
+                colors={["#1A1F22", "#171B1E", "#1A1F22"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.recentEventCard}
+              >
+                <View style={styles.recentEventContent}>
+                  <View style={styles.recentEventBadge}>
+                    <ThemedText type="barlowHard" style={styles.recentEventBadgeText}>
+                      진행중 이벤트
+                    </ThemedText>
+                  </View>
+                  <ThemedText type="barlowHard" style={styles.recentEventTitle} numberOfLines={2}>
+                    지금 진행중인 이벤트 확인하기
+                  </ThemedText>
+                  <ThemedText type="barlowLight" style={styles.recentEventDesc} numberOfLines={2}>
+                    당첨자 발표, 참여 방법, 현재 이벤트를 한눈에 확인하세요.
+                  </ThemedText>
+                </View>
+
+                <View style={styles.recentEventRight}>
+                  <View style={styles.recentEventIconBox}>
+                    <ThemedText style={styles.recentEventIcon}>🎁</ThemedText>
+                  </View>
+                  <Feather name="chevron-right" size={moderateScale(18)} color="#8A989D" />
+                </View>
+              </LinearGradient>
+            </TouchableOpacity>
           </View>
         )}
       </ScrollView>
@@ -565,6 +568,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: moderateScale(14),
     marginTop: moderateScale(16),
   },
+  adSectionContainer: {
+    paddingHorizontal: moderateScale(14),
+    marginTop: moderateScale(16),
+  },
   sectionLabel: {
     color: "#9BA1A6",
     fontSize: moderateScale(FONT.sm),
@@ -575,6 +582,63 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     marginBottom: moderateScale(10),
+  },
+  recentEventTouchable: {
+    width: "100%",
+  },
+  recentEventCard: {
+    borderRadius: moderateScale(24),
+    borderWidth: 1,
+    borderColor: "#2A2E30",
+    paddingHorizontal: moderateScale(18),
+    paddingVertical: moderateScale(18),
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    minHeight: moderateScale(150),
+  },
+  recentEventContent: {
+    flex: 1,
+    paddingRight: moderateScale(12),
+  },
+  recentEventBadge: {
+    alignSelf: "flex-start",
+    backgroundColor: "rgba(255,255,255,0.12)",
+    borderRadius: moderateScale(14),
+    paddingHorizontal: moderateScale(12),
+    paddingVertical: moderateScale(8),
+    marginBottom: moderateScale(14),
+  },
+  recentEventBadgeText: {
+    color: "#C8D0D4",
+    fontSize: moderateScale(FONT.xs),
+  },
+  recentEventTitle: {
+    color: "#F1F5F6",
+    fontSize: moderateScale(FONT.md),
+    //lineHeight: moderateScale(32),
+    marginBottom: moderateScale(10),
+  },
+  recentEventDesc: {
+    color: "#A0ADB2",
+    fontSize: moderateScale(FONT.sm),
+    lineHeight: moderateScale(20),
+  },
+  recentEventRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: moderateScale(12),
+  },
+  recentEventIconBox: {
+    borderRadius: moderateScale(24),
+    backgroundColor: "#244E49",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  recentEventIcon: {
+    padding: moderateScale(10),
+    fontSize: moderateScale(30),
+    lineHeight: moderateScale(38),
   },
   viewAllBtn: {
     flexDirection: "row",

@@ -380,19 +380,19 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     marginLeft: "auto",
-    borderRadius: moderateScale(10),
+    borderRadius: moderateScale(12),
     borderWidth: 1,
     borderColor: "#3A2626",
     backgroundColor: "#1D1515",
-    paddingHorizontal: moderateScale(10),
-    paddingVertical: moderateScale(7),
+    paddingHorizontal: moderateScale(14),
+    paddingVertical: moderateScale(10),
   },
   deleteButtonDisabled: {
     opacity: 0.6,
   },
   deleteButtonText: {
     color: "#E37D7D",
-    fontSize: moderateScale(FONT.xxs),
+    fontSize: moderateScale(FONT.xs),
   },
   courseName: {
     fontSize: moderateScale(FONT.xxl),

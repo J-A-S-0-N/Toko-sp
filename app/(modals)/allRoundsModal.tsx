@@ -334,7 +334,7 @@ export default function AllRoundsModal() {
                     {/* Right side */}
                     <View style={styles.roundRight}>
                       <Text type="barlowHard" style={[styles.roundDelta, { color: getDeltaColor(round.delta) }]}>
-                        +{round.delta}
+                        {round.delta > 0 ? `+${round.delta}` : `${round.delta}`}
                       </Text>
                       <View style={styles.roundBadges}>
                         {round.streakCount != null && (
