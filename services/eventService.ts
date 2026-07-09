@@ -18,6 +18,16 @@ export interface EventItem {
   participantCount: number;
 }
 
+export interface EventYoutubeVideoItem {
+  id: string;
+  title: string;
+  url: string;
+  thumbnailUrl: string;
+  order: number;
+}
+
+export const DEFAULT_YOUTUBE_CHANNEL_ID = 'UC_x5XG1OV2P6uZZ5FSM9Ttw';
+
 const EVENT_COLLECTIONS: Record<EventStatus, string> = {
   ongoing: 'EventsOngoing',
   upcoming: 'EventsUpcoming',
@@ -48,6 +58,71 @@ function toDate(value: unknown): Date | null {
   }
 
   return null;
+}
+
+function decodeXmlEntities(input: string): string {
+  return input
+    .replaceAll('&amp;', '&')
+    .replaceAll('&quot;', '"')
+    .replaceAll('&apos;', "'")
+    .replaceAll('&lt;', '<')
+    .replaceAll('&gt;', '>');
+}
+
+function extractTagValue(xml: string, tagName: string): string {
+  const match = xml.match(new RegExp(`<${tagName}>([\\s\\S]*?)<\\/${tagName}>`, 'i'));
+  if (!match?.[1]) return '';
+  return decodeXmlEntities(match[1].trim());
+}
+
+function parseYoutubeFeedEntries(xmlText: string): EventYoutubeVideoItem[] {
+  const entries = [...xmlText.matchAll(/<entry>([\s\S]*?)<\/entry>/g)].map((match) => match[1]);
+
+  return entries
+    .map((entryXml) => {
+      const videoId = extractTagValue(entryXml, 'yt:videoId');
+      const title = extractTagValue(entryXml, 'title');
+      const publishedAt = extractTagValue(entryXml, 'published');
+
+      if (!videoId || !title) return null;
+
+      return {
+        id: videoId,
+        title,
+        url: `https://www.youtube.com/watch?v=${videoId}`,
+        thumbnailUrl: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
+        order: 0,
+        publishedAt,
+      };
+    })
+    .filter((item): item is EventYoutubeVideoItem & { publishedAt: string } => item !== null)
+    .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+}
+
+export async function fetchLatestYoutubeVideosByChannelId(
+  channelId: string = DEFAULT_YOUTUBE_CHANNEL_ID,
+  limit: number = 5,
+): Promise<EventYoutubeVideoItem[]> {
+  const trimmedChannelId = channelId.trim();
+  if (!trimmedChannelId) return [];
+
+  const feedUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${encodeURIComponent(trimmedChannelId)}`;
+  const response = await fetch(feedUrl);
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch YouTube feed (${response.status}).`);
+  }
+
+  const xmlText = await response.text();
+  return parseYoutubeFeedEntries(xmlText)
+    .slice(0, Math.max(0, limit))
+    .map((item, index) => ({
+      id: item.id,
+      title: item.title,
+      url: item.url,
+      thumbnailUrl: item.thumbnailUrl,
+      order: index + 1,
+    }));
 }
 
 function toString(value: unknown, fallback = ''): string {

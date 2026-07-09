@@ -5,9 +5,9 @@ import { useAuth } from "@/context/AuthContext";
 import Feather from "@expo/vector-icons/Feather";
 import { useIsFocused } from "@react-navigation/native";
 import { useRouter } from "expo-router";
-import { collection, getDocs, limit, orderBy, query, where } from "firebase/firestore";
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { ActivityIndicator, Animated, Easing, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import { collection, deleteDoc, doc, getDocs, limit, orderBy, query, where } from "firebase/firestore";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ActivityIndicator, Alert, Animated, Easing, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
 
 type RecentScan = {
@@ -143,54 +143,87 @@ const RecentScansSection = ({ scans: propScans }: RecentScansSectionProps) => {
   const [animationTrigger, setAnimationTrigger] = useState(0);
   const [scans, setScans] = useState<RecentScan[]>(propScans ?? []);
   const [loading, setLoading] = useState(!propScans);
+  const [deletingScanId, setDeletingScanId] = useState<string | null>(null);
+
+  const fetchRecentScans = useCallback(async () => {
+    if (propScans) {
+      setScans(propScans);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const scansRef = collection(db, "Scans");
+      const q = query(
+        scansRef,
+        where("userId", "==", user?.uid ?? ""),
+        where("status", "==", "completed"),
+        orderBy("playedAt", "desc"),
+        limit(6)
+      );
+      const snapshot = await getDocs(q);
+
+      const fetched: RecentScan[] = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        const playedAt = data.playedAt ? new Date(data.playedAt) : new Date();
+        const formattedDate = `${playedAt.getMonth() + 1}월 ${playedAt.getDate()}일`;
+        const diff = data.diff ?? 0;
+
+        return {
+          id: doc.id,
+          date: formattedDate,
+          course: data.courseName ?? "코스명 없음",
+          score: data.totalScore ?? 0,
+          diff: diff > 0 ? `+${diff}` : `${diff}`,
+          holeCount: data.holesCount ?? 18,
+        };
+      });
+
+      setScans(fetched);
+    } catch (error) {
+      console.error("Failed to fetch recent scans:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [propScans, user?.uid]);
+
+  const handleDeleteRecentScan = (scan: RecentScan) => {
+    Alert.alert(
+      "기록 삭제 확인",
+      `${scan.course}\n${scan.date} 기록을 삭제할까요?`,
+      [
+        { text: "취소", style: "cancel" },
+        {
+          text: "삭제",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              setDeletingScanId(scan.id);
+              await deleteDoc(doc(db, "Scans", scan.id));
+              setScans((prev) => prev.filter((item) => item.id !== scan.id));
+            } catch (error) {
+              console.error("Failed to delete recent scan:", error);
+              Alert.alert("삭제 실패", "기록 삭제 중 오류가 발생했어요.");
+            } finally {
+              setDeletingScanId(null);
+            }
+          },
+        },
+      ]
+    );
+  };
 
   useEffect(() => {
-    if (propScans) return;
-
-    const fetchRecentScans = async () => {
-      try {
-        const scansRef = collection(db, "Scans");
-        const q = query(
-          scansRef,
-          where("userId", "==", user?.uid ?? ""),
-          where("status", "==", "completed"),
-          orderBy("playedAt", "desc"),
-          limit(6)
-        );
-        const snapshot = await getDocs(q);
-
-        const fetched: RecentScan[] = snapshot.docs.map((doc) => {
-          const data = doc.data();
-          const playedAt = data.playedAt ? new Date(data.playedAt) : new Date();
-          const formattedDate = `${playedAt.getMonth() + 1}월 ${playedAt.getDate()}일`;
-          const diff = data.diff ?? 0;
-
-          return {
-            id: doc.id,
-            date: formattedDate,
-            course: data.courseName ?? "코스명 없음",
-            score: data.totalScore ?? 0,
-            diff: diff > 0 ? `+${diff}` : `${diff}`,
-            holeCount: data.holesCount ?? 18,
-          };
-        });
-
-        setScans(fetched);
-      } catch (error) {
-        console.error("Failed to fetch recent scans:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchRecentScans();
-  }, [user?.uid, propScans]);
+  }, [fetchRecentScans]);
 
   useEffect(() => {
     if (isFocused) {
       setAnimationTrigger(prev => prev + 1);
+      void fetchRecentScans();
     }
-  }, [isFocused]);
+  }, [isFocused, fetchRecentScans]);
 
   return (
     <>
@@ -237,6 +270,18 @@ const RecentScansSection = ({ scans: propScans }: RecentScansSectionProps) => {
               activeOpacity={0.8}
               onPress={() => router.push(`/(modals)/activityModal?id=${item.id}`)}
             >
+              <TouchableOpacity
+                style={styles.deleteButton}
+                onPress={(event) => {
+                  event.stopPropagation();
+                  handleDeleteRecentScan(item);
+                }}
+                disabled={deletingScanId === item.id}
+              >
+                <Text type="barlowHard" style={styles.deleteButtonText}>
+                  x
+                </Text>
+              </TouchableOpacity>
               <Text type="barlowLight" style={styles.recentDate}>
                 {item.date}
               </Text>
@@ -295,6 +340,7 @@ const styles = StyleSheet.create({
     paddingRight: moderateScale(8),
   },
   recentCard: {
+    position: "relative",
     width: moderateScale(140),
     borderRadius: moderateScale(16),
     borderWidth: 1,
@@ -307,6 +353,24 @@ const styles = StyleSheet.create({
   recentDate: {
     color: "#636A6C",
     fontSize: moderateScale(FONT.xs),
+    paddingRight: moderateScale(34),
+  },
+  deleteButton: {
+    position: "absolute",
+    top: moderateScale(10),
+    right: moderateScale(10),
+    width: moderateScale(24),
+    height: moderateScale(24),
+    borderRadius: moderateScale(12),
+    borderWidth: 1,
+    borderColor: "#3A2626",
+    backgroundColor: "#1D1515",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  deleteButtonText: {
+    color: "#E37D7D",
+    fontSize: moderateScale(FONT.xxs),
   },
   recentCourse: {
     color: "#EDF0ED",

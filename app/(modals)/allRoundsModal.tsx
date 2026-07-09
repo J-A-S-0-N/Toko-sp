@@ -5,9 +5,9 @@ import { useAuth } from "@/context/AuthContext";
 import Feather from "@expo/vector-icons/Feather";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDocs, orderBy, query, where } from "firebase/firestore";
 import React, { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from 'react-native-size-matters';
@@ -89,6 +89,33 @@ export default function AllRoundsModal() {
   const [sortByScore, setSortByScore] = useState(false);
   const [rounds, setRounds] = useState<Round[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [deletingRoundId, setDeletingRoundId] = useState<string | null>(null);
+
+  const handleDeleteRound = (round: Round) => {
+    Alert.alert(
+      "기록 삭제 확인",
+      `${round.courseName}\n${round.date} 기록을 삭제할까요?`,
+      [
+        { text: "취소", style: "cancel" },
+        {
+          text: "삭제",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              setDeletingRoundId(round.id);
+              await deleteDoc(doc(db, "Scans", round.id));
+              setRounds((prev) => prev.filter((item) => item.id !== round.id));
+            } catch (error) {
+              console.error("Failed to delete round in allRoundsModal:", error);
+              Alert.alert("삭제 실패", "기록 삭제 중 오류가 발생했어요.");
+            } finally {
+              setDeletingRoundId(null);
+            }
+          },
+        },
+      ]
+    );
+  };
 
   useEffect(() => {
     const fetchRounds = async () => {
@@ -321,6 +348,17 @@ export default function AllRoundsModal() {
                         </View>
                       </View>
                     </View>
+
+                    <Pressable
+                      style={styles.deleteButton}
+                      onPress={(event) => {
+                        event.stopPropagation();
+                        handleDeleteRound(round);
+                      }}
+                      disabled={deletingRoundId === round.id}
+                    >
+                      <Text type="barlowHard" style={styles.deleteButtonText}>x</Text>
+                    </Pressable>
 
                     <Feather name="chevron-right" size={moderateScale(FONT.sm)} color="#4A5053" style={styles.chevron} />
                   </Pressable>
@@ -578,6 +616,21 @@ const styles = StyleSheet.create({
   },
   chevron: {
     marginLeft: moderateScale(2),
+  },
+  deleteButton: {
+    width: moderateScale(24),
+    height: moderateScale(24),
+    borderRadius: moderateScale(12),
+    borderWidth: 1,
+    borderColor: "#3A2626",
+    backgroundColor: "#1D1515",
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: moderateScale(8),
+  },
+  deleteButtonText: {
+    color: "#E37D7D",
+    fontSize: moderateScale(FONT.xxs),
   },
   loadingContainer: {
     paddingVertical: moderateScale(40),

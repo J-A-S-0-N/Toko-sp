@@ -5,9 +5,9 @@ import { FONT } from '@/constants/theme';
 import Feather from "@expo/vector-icons/Feather";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
-import { doc, getDoc } from "firebase/firestore";
+import { deleteDoc, doc, getDoc } from "firebase/firestore";
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from 'react-native-size-matters';
@@ -43,6 +43,7 @@ export default function ActivityModal() {
   const [selectedCourse, setSelectedCourse] = useState<"A" | "B">("A");
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -117,6 +118,40 @@ export default function ActivityModal() {
     router.back();
   };
 
+  const handleDeletePress = () => {
+    if (!id || isDeleting) return;
+
+    Alert.alert(
+      "기록 삭제 확인",
+      `${fieldName || "코스명 없음"}\n${date || "날짜 정보 없음"} 기록을 삭제할까요?`,
+      [
+        { text: "취소", style: "cancel" },
+        {
+          text: "삭제",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              setIsDeleting(true);
+              await deleteDoc(doc(db, "Scans", id));
+
+              if (fromSave === "1") {
+                router.replace("/(tabs)/scan");
+                return;
+              }
+
+              router.back();
+            } catch (error) {
+              console.error("Failed to delete round in activityModal:", error);
+              Alert.alert("삭제 실패", "기록 삭제 중 오류가 발생했어요.");
+            } finally {
+              setIsDeleting(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   if (isLoading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: "#0F0F0F" }}>
@@ -144,6 +179,13 @@ export default function ActivityModal() {
               <Feather name="chevron-left" size={moderateScale(18)} color="#B8BEC1" />
             </Pressable>
             <Text type="barlowLight" style={styles.backLabel}>피드</Text>
+            <Pressable
+              style={[styles.deleteButton, isDeleting && styles.deleteButtonDisabled]}
+              onPress={handleDeletePress}
+              disabled={isDeleting}
+            >
+              <Text type="barlowHard" style={styles.deleteButtonText}>삭제하기</Text>
+            </Pressable>
           </View>
 
           {/* Course info */}
@@ -335,6 +377,22 @@ const styles = StyleSheet.create({
   backLabel: {
     color: "#7B8083",
     fontSize: moderateScale(FONT.xs),
+  },
+  deleteButton: {
+    marginLeft: "auto",
+    borderRadius: moderateScale(10),
+    borderWidth: 1,
+    borderColor: "#3A2626",
+    backgroundColor: "#1D1515",
+    paddingHorizontal: moderateScale(10),
+    paddingVertical: moderateScale(7),
+  },
+  deleteButtonDisabled: {
+    opacity: 0.6,
+  },
+  deleteButtonText: {
+    color: "#E37D7D",
+    fontSize: moderateScale(FONT.xxs),
   },
   courseName: {
     fontSize: moderateScale(FONT.xxl),
