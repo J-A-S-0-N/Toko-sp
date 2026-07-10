@@ -40,6 +40,8 @@
     },
     "plugins": [
       "expo-router",
+      "expo-notifications",
+      "expo-router",
       [
         "expo-splash-screen",
         {

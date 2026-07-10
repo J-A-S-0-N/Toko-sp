@@ -1,14 +1,15 @@
 import { DarkTheme, ThemeProvider } from '@react-navigation/native';
-import { SplashScreen, Stack } from 'expo-router';
+import * as Notifications from 'expo-notifications';
+import { SplashScreen, Stack, router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 
 import AppFooter from '@/components/AppFooter';
 import OfflineBlocker from '@/components/OfflineBlocker';
-import { AuthProvider } from '@/context/AuthContext';
+import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { NetworkProvider } from '@/context/NetworkContext';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { registerPushToken } from '@/utils/registerPushToken';
 
 import { BarlowCondensed_400Regular, BarlowCondensed_500Medium_Italic, BarlowCondensed_900Black_Italic, useFonts } from '@expo-google-fonts/barlow-condensed';
 import { useEffect } from 'react';
@@ -20,8 +21,17 @@ import { Text } from 'react-native';
 
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowBanner: true,
+    shouldShowList: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+  }),
+});
+
+function RootLayoutContent() {
+  const { user, loading } = useAuth();
 
   const [loadedPretendard, errorPretendard] = useFonts({
     'Pretendard-Regular': require('@/assets/fonts/Pretendard-Regular.ttf'),
@@ -46,10 +56,44 @@ export default function RootLayout() {
     }
   }, [loadedBarlow, errorBarlow, loadedPretendard, errorPretendard]);
 
+  useEffect(() => {
+    if (loading || !user) {
+      return;
+    }
+
+    registerPushToken().catch((error) => {
+      console.error('[Push] Registration failed:', error);
+    });
+
+    const receivedSubscription = Notifications.addNotificationReceivedListener((notification) => {
+      console.log('[Push] Notification received:', notification.request.content);
+    });
+
+    const responseSubscription = Notifications.addNotificationResponseReceivedListener((response) => {
+      const data = response.notification.request.content.data as {
+        screen?: string;
+        eventId?: string | number;
+      };
+
+      console.log('[Push] Notification pressed:', data);
+
+      if (data?.screen === 'event' && data?.eventId != null) {
+        router.push({
+          pathname: '/(modals)/eventDetailModal',
+          params: { eventId: String(data.eventId) },
+        });
+      }
+    });
+
+    return () => {
+      receivedSubscription.remove();
+      responseSubscription.remove();
+    };
+  }, [loading, user]);
+
   if (!loadedBarlow && !errorBarlow && !loadedPretendard && !errorPretendard) return null;
 
   return (
-    <AuthProvider>
     <NetworkProvider>
     <ThemeProvider value={DarkTheme}>
       <GestureHandlerRootView style={{ flex: 1 }}>
@@ -122,6 +166,13 @@ export default function RootLayout() {
       </GestureHandlerRootView>
     </ThemeProvider>
     </NetworkProvider>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <AuthProvider>
+      <RootLayoutContent />
     </AuthProvider>
   );
 }
