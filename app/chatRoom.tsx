@@ -2,29 +2,29 @@ import { ThemedText } from "@/components/themed-text";
 import { FONT } from "@/constants/theme";
 import { useAuth } from "@/context/AuthContext";
 import {
-  ChatMessage,
-  getAdminUsernameSet,
-  getKoreanClockLabel,
-  getOlderChatMessages,
-  MAX_CHAT_MESSAGE_LENGTH,
-  sendChatMessage,
-  subscribeToRecentChatMessages,
+    ChatMessage,
+    getAdminUsernameSet,
+    getKoreanClockLabel,
+    getOlderChatMessages,
+    MAX_CHAT_MESSAGE_LENGTH,
+    sendChatMessage,
+    subscribeToRecentChatMessages,
 } from "@/services/chatService";
 import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  ActivityIndicator,
-  FlatList,
-  Keyboard,
-  KeyboardAvoidingView,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
-  Platform,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    FlatList,
+    Keyboard,
+    KeyboardAvoidingView,
+    NativeScrollEvent,
+    NativeSyntheticEvent,
+    Platform,
+    StyleSheet,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
@@ -122,8 +122,8 @@ function MessageRow({ item }: { item: Extract<ChatItem, { kind: "message" }> }) 
           {item.isAdmin && !item.isHighlightedUsername && <ThemedText style={styles.adminBadge}>관계자</ThemedText>}
         </View>
         <View style={styles.otherBubbleRow}>
-          <View style={styles.otherBubble}>
-            <ThemedText style={styles.otherText}>{item.text}</ThemedText>
+          <View style={[styles.otherBubble, item.isHighlightedUsername && styles.highlightedOtherBubble]}>
+            <ThemedText style={[styles.otherText, item.isHighlightedUsername && styles.highlightedOtherText]}>{item.text}</ThemedText>
           </View>
           <ThemedText style={styles.otherTime}>{item.time}</ThemedText>
         </View>
@@ -570,7 +570,7 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(FONT.xxs),
   },
   highlightedOtherName: {
-    color: "#F04A4A",
+    color: "#F4D84A",
   },
   adminBadge: {
     color: "#3CC06E",
@@ -589,10 +589,16 @@ const styles = StyleSheet.create({
     borderRadius: moderateScale(14),
     borderTopLeftRadius: moderateScale(4),
   },
+  highlightedOtherBubble: {
+    backgroundColor: "#CBE6C7",
+  },
   otherText: {
     color: "#EEF2EF",
     fontSize: moderateScale(FONT.sm),
     lineHeight: moderateScale(20),
+  },
+  highlightedOtherText: {
+    color: "#0F1010",
   },
   otherTime: {
     color: "#5A6065",

@@ -7,17 +7,54 @@ import { Pressable, Image as RNImage, StyleSheet, View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
 
 type ScanFrameSectionProps = {
+  onSwingAnalysisPress?: () => void;
   onFramePress?: () => void;
   onCameraPress?: () => void;
   onGalleryPress?: () => void;
 };
 
-const ScanFrameSection = ({ onFramePress, onCameraPress, onGalleryPress }: ScanFrameSectionProps) => {
+const ScanFrameSection = ({ onSwingAnalysisPress, onFramePress, onCameraPress, onGalleryPress }: ScanFrameSectionProps) => {
   const cameraIconSource = require("@/assets/images/camera_open_icon_thick.png");
   const courseFlagIconSource = require("@/assets/images/course_hole_flag_icon_thick.png");
 
   return (
     <>
+      <Pressable style={styles.swingAnalysisButton} onPress={onSwingAnalysisPress}>
+        <LinearGradient
+          colors={["#0C1E19", "#0A1815", "#071311"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.swingAnalysisGradient}
+        >
+          <View style={styles.swingAnalysisLeft}>
+            <View style={styles.swingIconWrap}>
+              <Feather name="star" size={moderateScale(15)} color="#4BEFC1" />
+            </View>
+
+            <View>
+              <View style={styles.swingTitleRow}>
+                <Text type="barlowHard" style={styles.swingTitle}>
+                  AI 스윙 분석
+                </Text>
+                <View style={styles.swingNewBadge}>
+                  <Text type="barlowHard" style={styles.swingNewBadgeText}>
+                    NEW
+                  </Text>
+                </View>
+              </View>
+
+              <Text type="barlowLight" style={styles.swingSubtitle}>
+                내 스윙을 촬영하고 AI로 분석해보세요
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.swingArrowWrap}>
+            <Feather name="arrow-right" size={moderateScale(22)} color="#4BEFC1" />
+          </View>
+        </LinearGradient>
+      </Pressable>
+
       <Pressable style={styles.scanFrame} onPress={onFramePress}>
         <LinearGradient
           colors={["#13D58B", "#12D88D", "#11CC84"]}
@@ -97,6 +134,75 @@ const ScanFrameSection = ({ onFramePress, onCameraPress, onGalleryPress }: ScanF
 };
 
 const styles = StyleSheet.create({
+  swingAnalysisButton: {
+    marginHorizontal: moderateScale(10),
+    borderRadius: moderateScale(22),
+    overflow: "hidden",
+    marginBottom: 0,
+  },
+  swingAnalysisGradient: {
+    minHeight: moderateScale(84),
+    borderRadius: moderateScale(22),
+    borderWidth: 1,
+    borderColor: "#14493D",
+    paddingHorizontal: moderateScale(14),
+    paddingVertical: moderateScale(12),
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  swingAnalysisLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: moderateScale(10),
+    flex: 1,
+  },
+  swingIconWrap: {
+    width: moderateScale(42),
+    height: moderateScale(42),
+    borderRadius: moderateScale(14),
+    borderWidth: 1,
+    borderColor: "#1F7260",
+    backgroundColor: "rgba(8, 51, 42, 0.82)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  swingTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: moderateScale(6),
+  },
+  swingTitle: {
+    color: "#F0F9F6",
+    fontSize: moderateScale(FONT.md),
+  },
+  swingNewBadge: {
+    borderRadius: moderateScale(999),
+    backgroundColor: "#14D89A",
+    paddingHorizontal: moderateScale(8),
+    paddingVertical: moderateScale(3),
+  },
+  swingNewBadgeText: {
+    color: "#03231A",
+    fontSize: moderateScale(FONT.xxxs),
+  },
+  swingSubtitle: {
+    marginTop: moderateScale(4),
+    color: "#90A9A1",
+    fontSize: moderateScale(FONT.xxs),
+    fontFamily: "Pretendard-Regular",
+  },
+  swingArrowWrap: {
+    width: moderateScale(46),
+    height: moderateScale(46),
+    borderRadius: moderateScale(16),
+    borderWidth: 1,
+    borderColor: "#1A5A4C",
+    backgroundColor: "rgba(8, 32, 27, 0.78)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: moderateScale(8),
+  },
   scanFrame: {
     marginHorizontal: moderateScale(10),
     borderRadius: moderateScale(34),

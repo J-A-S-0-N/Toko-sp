@@ -92,11 +92,7 @@ export const getUserProfileGateSnapshot = async (uid: string): Promise<UserProfi
     };
   } catch (error) {
     console.error('Error fetching user profile gate snapshot:', error);
-    return {
-      exists: false,
-      name: null,
-      phoneNumber: null,
-    };
+    throw error;
   }
 };
 

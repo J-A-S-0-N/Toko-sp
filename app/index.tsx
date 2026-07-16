@@ -1,14 +1,14 @@
 import {
-  getUserProfileGateSnapshot,
+    getUserProfileGateSnapshot,
 } from '@/app/(auth)/functions/loginFetchUserFunction';
 import {
-  ProfileGateSaveError,
-  ProfileGateStatus,
-  formatPhoneNumber,
-  isValidName,
-  isValidPhoneDigits,
-  normalizePhoneDigits,
-  saveMissingProfile,
+    ProfileGateSaveError,
+    ProfileGateStatus,
+    formatPhoneNumber,
+    isValidName,
+    isValidPhoneDigits,
+    normalizePhoneDigits,
+    saveMissingProfile,
 } from '@/app/(auth)/functions/profileGateShared';
 import CustomSplash from '@/components/CustomSplash';
 import { CompleteProfileModal, PhoneRequiredModal } from '@/components/ProfileCompletionModals';
@@ -22,6 +22,7 @@ export default function EntryScreen() {
   const [showSplash, setShowSplash] = useState(true);
   const [minTimeElapsed, setMinTimeElapsed] = useState(false);
   const [profileGateLoading, setProfileGateLoading] = useState(false);
+  const [profileGateRetryKey, setProfileGateRetryKey] = useState(0);
   const [profileGateStatus, setProfileGateStatus] = useState<ProfileGateStatus>('ready');
   const [userDocExists, setUserDocExists] = useState(false);
   const [nameInput, setNameInput] = useState('');
@@ -98,6 +99,21 @@ export default function EntryScreen() {
         console.error('Failed to resolve profile gate:', error);
         if (!cancelled) {
           setProfileGateStatus('ready');
+          Alert.alert(
+            '네트워크 오류',
+            '인터넷 연결을 확인한 뒤 다시 시도해주세요.',
+            [
+              {
+                text: '나중에',
+                style: 'cancel',
+              },
+              {
+                text: '다시 시도',
+                onPress: () => setProfileGateRetryKey((prev) => prev + 1),
+              },
+            ],
+            { cancelable: true }
+          );
         }
       } finally {
         if (!cancelled) {
@@ -111,7 +127,7 @@ export default function EntryScreen() {
     return () => {
       cancelled = true;
     };
-  }, [setUsername, user?.uid]);
+  }, [profileGateRetryKey, setUsername, user?.uid]);
 
   const handlePhoneChange = (value: string) => {
     setPhoneDigits(normalizePhoneDigits(value));

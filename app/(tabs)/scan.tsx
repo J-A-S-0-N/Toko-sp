@@ -5,8 +5,8 @@ import HomeFeedSkeleton from "@/components/HomeFeedComponents/HomeFeedSkeleton";
 import UsernameHeader from "@/components/HomeFeedComponents/usernameHeader";
 import InitialAdModal from "@/components/InitialAdModal";
 import {
-  RecentScansSection,
-  ScanFrameSection
+    RecentScansSection,
+    ScanFrameSection
 } from "@/components/ScanPageComponent";
 import { useAuth } from "@/context/AuthContext";
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
@@ -84,12 +84,15 @@ export default function ScanScreen() {
               <HomeFeedHeader scrollY={scrollY} />
             </View>
             <View style={styles.usernameHeaderBlock}>
-              <UsernameHeader />
+              <UsernameHeader hideStats />
             </View>
           </View>
 
           <RecentScansSection />
           <ScanFrameSection
+            onSwingAnalysisPress={() => {
+              router.push('/(swing)' as never);
+            }}
             onCameraPress={() => {
               /*
               router.push({

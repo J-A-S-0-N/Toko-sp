@@ -9,6 +9,7 @@ import HottestLocationsComponent from '@/components/HomeFeedComponents/hottestLo
 import LiveChatBannerComponent from '@/components/HomeFeedComponents/liveChatBannerComponent';
 import RecentRoundComponent from '@/components/HomeFeedComponents/recentRoundComponent';
 import RegionalRankComponent from '@/components/HomeFeedComponents/regionalRankComponent';
+import SwingAnalyzerHero from '@/components/HomeFeedComponents/swingAnalyzerHero';
 import { ThemedText as Text } from '@/components/themed-text';
 import db from '@/config/firebase';
 import { FONT } from '@/constants/theme';
@@ -153,6 +154,10 @@ export default function HomeScreen() {
         style={styles.container}
         contentContainerStyle={{ paddingBottom: tabBarHeight + moderateScale(150) }}
       >
+
+        <View style={{marginBottom: moderateScale(15)}}>
+          <SwingAnalyzerHero onPress={() => router.push('/(swing)' as never)} />
+        </View>
 
 {/*         <View style={{marginBottom: moderateScale(15)}}>
           <UserStatComponent/>

@@ -1,12 +1,14 @@
 import { ThemedText as Text } from "@/components/themed-text";
+import Feather from "@expo/vector-icons/Feather";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Image, Linking, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Alert, Image, Linking, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
 
 import { EventItem, EventYoutubeVideoItem, fetchEventsByStatus, fetchLatestYoutubeVideosByChannelId } from "@/services/eventService";
+import { acceptEventPushNotification, hasAcceptedEventPushNotification } from "@/utils/registerPushToken";
 
 const ONGOING_EVENT_URL = "https://www.youtube.com/@토코스포츠파크골프/posts";
 const EVENT_VIDEO_CHANNEL_ID = "UCxFGRoEhJ9bdBIGoblsVrUA";
@@ -46,6 +48,8 @@ export default function StatsScreen() {
   const [videoLoadError, setVideoLoadError] = useState<string>("");
   const [ongoingEvent, setOngoingEvent] = useState<EventItem | null>(null);
   const [youtubeVideos, setYoutubeVideos] = useState<EventYoutubeVideoItem[]>([]);
+  const [isEventPushAccepted, setIsEventPushAccepted] = useState(false);
+  const [isEventPushLoading, setIsEventPushLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -73,11 +77,67 @@ export default function StatsScreen() {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    const loadAcceptedState = async () => {
+      try {
+        const accepted = await hasAcceptedEventPushNotification();
+        setIsEventPushAccepted(accepted);
+      } catch (error) {
+        console.error("Failed to load event push accepted state:", error);
+      } finally {
+        setIsEventPushLoading(false);
+      }
+    };
+
+    loadAcceptedState();
+  }, []);
+
   const openOngoingEventUrl = async () => {
     try {
       await Linking.openURL(ONGOING_EVENT_URL);
     } catch (error) {
       console.error("Failed to open ongoing event URL:", error);
+    }
+  };
+
+  const handlePressEventPushButton = async () => {
+    if (isEventPushAccepted) {
+      Alert.alert("알림 설정", "이미 알림 받기를 완료했습니다.");
+      return;
+    }
+
+    if (isEventPushLoading) {
+      return;
+    }
+
+    setIsEventPushLoading(true);
+
+    try {
+      const result = await acceptEventPushNotification();
+
+      if (result === "already_accepted") {
+        setIsEventPushAccepted(true);
+        Alert.alert("알림 설정", "이미 알림 받기를 완료했습니다.");
+        return;
+      }
+
+      if (result === "not_logged_in") {
+        Alert.alert("알림 설정", "로그인 후 이용할 수 있습니다.");
+        return;
+      }
+
+      if (result === "permission_denied") {
+        Alert.alert("알림 설정", "알림 권한이 허용되지 않았습니다. 기기 설정에서 알림을 허용해주세요.");
+        return;
+      }
+
+      setIsEventPushAccepted(true);
+      Alert.alert("알림 설정", "이벤트 알림 받기가 완료되었습니다.");
+    } catch (error) {
+      console.error("Failed to accept event push notification:", error);
+      Alert.alert("알림 설정", "알림 설정 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+    } finally {
+      setIsEventPushLoading(false);
     }
   };
 
@@ -99,6 +159,31 @@ export default function StatsScreen() {
         <View>
           <Text type="barlowHard" style={styles.pageTitle}>경품 이벤트</Text>
           <Text type="barlowLight" style={styles.pageSubtitle}>스코어를 기록하고 경품 이벤트에 참여해보세요.</Text>
+        </View>
+
+        <View style={styles.eventPushCard}>
+          <View style={styles.eventPushIconWrap}>
+            <Feather name="bell" size={moderateScale(22)} color="#06E78A" />
+          </View>
+
+          <View style={styles.eventPushTextWrap}>
+            <Text type="barlowHard" style={styles.eventPushTitle}>이벤트 소식을 놓치지 마세요</Text>
+            <Text type="barlowLight" style={styles.eventPushDescription}>새로운 이벤트와 당첨 결과를 알림으로 받아보세요.</Text>
+          </View>
+
+          <Pressable
+            style={[
+              styles.eventPushActionButton,
+              isEventPushAccepted ? styles.eventPushActionButtonAccepted : null,
+              isEventPushLoading ? styles.eventPushActionButtonLoading : null,
+            ]}
+            onPress={handlePressEventPushButton}
+            disabled={isEventPushLoading}
+          >
+            <Text type="barlowHard" style={styles.eventPushActionButtonText}>
+              {isEventPushAccepted ? "수신 중" : "알림 받기"}
+            </Text>
+          </Pressable>
         </View>
 
         <View style={styles.mainCard}>
@@ -205,6 +290,56 @@ const styles = StyleSheet.create({
   pageSubtitle: {
     fontSize: moderateScale(15),
     color: "#8E9592",
+  },
+  eventPushCard: {
+    borderRadius: moderateScale(22),
+    borderWidth: moderateScale(1),
+    borderColor: "#1E2B25",
+    backgroundColor: "#121615",
+    paddingHorizontal: moderateScale(14),
+    paddingVertical: moderateScale(14),
+    flexDirection: "row",
+    alignItems: "center",
+    gap: moderateScale(12),
+  },
+  eventPushIconWrap: {
+    width: moderateScale(52),
+    height: moderateScale(52),
+    borderRadius: moderateScale(26),
+    backgroundColor: "#0C2A1D",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  eventPushTextWrap: {
+    flex: 1,
+    gap: moderateScale(4),
+  },
+  eventPushTitle: {
+    fontSize: moderateScale(18),
+    color: "#F3F7F5",
+  },
+  eventPushDescription: {
+    fontSize: moderateScale(13),
+    color: "#8A9490",
+    lineHeight: moderateScale(18),
+  },
+  eventPushActionButton: {
+    minHeight: moderateScale(44),
+    paddingHorizontal: moderateScale(14),
+    borderRadius: moderateScale(14),
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#06E78A",
+  },
+  eventPushActionButtonAccepted: {
+    backgroundColor: "#148C5D",
+  },
+  eventPushActionButtonLoading: {
+    opacity: 0.7,
+  },
+  eventPushActionButtonText: {
+    color: "#042013",
+    fontSize: moderateScale(15),
   },
   mainCard: {
     backgroundColor: "#171919",

@@ -1,7 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 import { Buffer } from "buffer";
 import { onDocumentCreated } from "firebase-functions/v2/firestore";
-
 import fetch from "node-fetch";
 
 import { getApps, initializeApp } from "firebase-admin/app";
@@ -9,38 +8,130 @@ import { getFirestore } from "firebase-admin/firestore";
 
 import { defineSecret } from "firebase-functions/params";
 
-import { getStorage } from "firebase-admin/storage";
 import { polarUnwrap } from "./unwrap.js";
 
 
 if (!getApps().length) initializeApp();
 const db = getFirestore();
 
-const bucket = getStorage().bucket();
-
 
 const GEMINI_API_KEY = defineSecret("GEMINI_API_KEY")
+const SWING_ANALYSIS_MODEL = "gemini-3-flash-preview";
 
+const SWING_SCORE_FIELDS = [
+  "overallScore",
+  "addressAngleScore",
+  "headUpScore",
+  "backswingAngleScore",
+  "takebackScore",
+];
 
-/*
-async function uploadAndGetDownloadUrl(buffer, path, contentType = "image/jpeg") {
-  const file = bucket.file(path);
-  const token = randomUUID();
- 
-  await file.save(buffer, {
-    resumable: false,
-    metadata: {
-      contentType,
-      metadata: {
-        firebaseStorageDownloadTokens: token,
-      },
+function clampScore(value) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return 0;
+  return Math.max(0, Math.min(100, Math.round(parsed)));
+}
+
+function normalizeText(value, fallback) {
+  if (typeof value !== "string") return fallback;
+  const trimmed = value.trim();
+  return trimmed ? trimmed : fallback;
+}
+
+function hasCompletedSwingAnalysis(data) {
+  if (data?.status !== "done") return false;
+  return SWING_SCORE_FIELDS.every((field) => Number.isFinite(Number(data?.[field])));
+}
+
+async function fetchImageAsBase64(imageUrl) {
+  const response = await fetch(imageUrl);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch screenshot (${response.status}): ${imageUrl}`);
+  }
+  const arrayBuffer = await response.arrayBuffer();
+  return Buffer.from(arrayBuffer).toString("base64");
+}
+
+function parseJsonObject(responseText) {
+  const raw = typeof responseText === "string" ? responseText.trim() : "";
+  if (!raw) throw new Error("Gemini response was empty");
+
+  const withoutFence = raw
+    .replace(/^```json\s*/i, "")
+    .replace(/^```\s*/i, "")
+    .replace(/\s*```$/i, "")
+    .trim();
+
+  const parsed = JSON.parse(withoutFence);
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    throw new Error("Gemini response was not a JSON object");
+  }
+
+  return parsed;
+}
+
+async function analyzeSwingScreenshots(screenshotUrls) {
+  const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY.value() });
+  const imageBase64List = await Promise.all(screenshotUrls.map((url) => fetchImageAsBase64(url)));
+
+  const prompt = `You are analyzing a sequence of 5 screenshots from one park golf swing.
+This is a park golf swing (not regular golf).
+Evaluate the full sequence and return ONLY a strict JSON object with this exact schema:
+{
+  "overallScore": number,
+  "addressAngleScore": number,
+  "headUpScore": number,
+  "backswingAngleScore": number,
+  "takebackScore": number,
+  "addressAngleFeedback": string,
+  "headUpFeedback": string,
+  "backswingAngleFeedback": string,
+  "takebackFeedback": string,
+  "summary": string
+}
+
+Rules:
+- All score fields must be integers between 0 and 100.
+- Feedback and summary must be concise Korean coaching style.
+- Return JSON only. No markdown or extra text.`;
+
+  const response = await ai.models.generateContent({
+    model: SWING_ANALYSIS_MODEL,
+    contents: [
+      { text: prompt },
+      ...imageBase64List.map((imageBase64) => ({
+        inlineData: {
+          mimeType: "image/jpeg",
+          data: imageBase64,
+        },
+      })),
+    ],
+    config: {
+      responseMimeType: "application/json",
     },
   });
- 
-  const encodedPath = encodeURIComponent(path);
-  return `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodedPath}?alt=media&token=${token}`;
+
+  const parsed = parseJsonObject(response.text);
+
+  return {
+    overallScore: clampScore(parsed.overallScore),
+    addressAngleScore: clampScore(parsed.addressAngleScore),
+    headUpScore: clampScore(parsed.headUpScore),
+    backswingAngleScore: clampScore(parsed.backswingAngleScore),
+    takebackScore: clampScore(parsed.takebackScore),
+    addressAngleFeedback: normalizeText(
+      parsed.addressAngleFeedback,
+      "어드레스 각도 피드백을 생성하지 못했습니다."
+    ),
+    headUpFeedback: normalizeText(parsed.headUpFeedback, "헤드업 피드백을 생성하지 못했습니다."),
+    backswingAngleFeedback: normalizeText(
+      parsed.backswingAngleFeedback,
+      "백스윙 각도 피드백을 생성하지 못했습니다."
+    ),
+    takebackFeedback: normalizeText(parsed.takebackFeedback, "테이크백 피드백을 생성하지 못했습니다."),
+    summary: normalizeText(parsed.summary, "스윙 요약을 생성하지 못했습니다."),
+  };
 }
-*/
 
 async function main(imageBase64) {
   const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY.value() });
@@ -178,3 +269,65 @@ export const onNewDocument = onDocumentCreated({
     // Function completes gracefully - don't re-throw
   }
 });
+
+export const onNewSwingVideo = onDocumentCreated(
+  {
+    document: "SwingVideos/{docId}",
+    secrets: [GEMINI_API_KEY],
+    memory: "2GiB",
+    timeoutSeconds: 120,
+  },
+  async (event) => {
+    const docId = event.params.docId;
+    const docRef = db.collection("SwingVideos").doc(docId);
+
+    try {
+      const snapshot = event.data;
+      if (!snapshot?.exists) return;
+
+      const data = snapshot.data() ?? {};
+      const screenshots = Array.isArray(data.screenshots)
+        ? data.screenshots
+            .filter((item) => item && typeof item.url === "string" && item.url.trim() !== "")
+            .sort((a, b) => Number(a.index ?? 0) - Number(b.index ?? 0))
+        : [];
+
+      if (!screenshots.length) {
+        console.log(`Skipping swing analysis for ${docId}: no valid screenshots`);
+        return;
+      }
+
+      if (hasCompletedSwingAnalysis(data)) {
+        console.log(`Skipping swing analysis for ${docId}: already analyzed`);
+        return;
+      }
+
+      await docRef.update({
+        status: "analyzing",
+        analysisErrorMessage: "",
+        updatedAt: new Date(),
+      });
+
+      const screenshotUrls = screenshots.map((item) => item.url).slice(0, 5);
+      const analysis = await analyzeSwingScreenshots(screenshotUrls);
+
+      await docRef.update({
+        ...analysis,
+        analysisModel: SWING_ANALYSIS_MODEL,
+        analysisCompletedAt: new Date(),
+        analysisErrorMessage: "",
+        status: "done",
+        updatedAt: new Date(),
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Swing analysis failed";
+      console.error(`Swing analysis failed for ${docId}:`, error);
+      await docRef.update({
+        status: "error",
+        analysisErrorMessage: message,
+        updatedAt: new Date(),
+      });
+    }
+  }
+);
+

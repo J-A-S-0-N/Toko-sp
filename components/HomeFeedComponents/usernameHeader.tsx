@@ -6,7 +6,11 @@ import { useRounds } from '@/hooks/useRounds';
 import { View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
 
-const UsernameHeader = () => {
+type UsernameHeaderProps = {
+  hideStats?: boolean;
+};
+
+const UsernameHeader = ({ hideStats = false }: UsernameHeaderProps) => {
   const { username } = useAuth();
   const { rounds } = useRounds();
   const { stats } = useComputedStats(rounds);
@@ -35,18 +39,19 @@ const UsernameHeader = () => {
       </View>
       <View>
         <Text type="barlowHard" style={{fontSize: moderateScale(FONT.lg), color: "white"}}>{username}</Text>
-        {/*Stats View*/}
-        <View style={{flexDirection: 'row', alignItems: 'center', gap: moderateScale(5)}}>
-          <Text
-          style={{fontSize: moderateScale(FONT.xs), color: "#6E7171"}}
-          >{averageDelta != null ? `${averageDelta >= 0 ? '+' : ''}${averageDelta}` : '-'} 평타</Text>
-         <View
-          style={{width: moderateScale(4), height: moderateScale(4), borderRadius: moderateScale(5), backgroundColor: "#6E7171"}}
-          ></View>
-          <Text
-          style={{fontSize: moderateScale(FONT.xs), color: "#6E7171"}}
-          >{roundCount}회 라운딩</Text>
-        </View>
+        {!hideStats && (
+          <View style={{flexDirection: 'row', alignItems: 'center', gap: moderateScale(5)}}>
+            <Text
+            style={{fontSize: moderateScale(FONT.xs), color: "#6E7171"}}
+            >{averageDelta != null ? `${averageDelta >= 0 ? '+' : ''}${averageDelta}` : '-'} 평타</Text>
+           <View
+            style={{width: moderateScale(4), height: moderateScale(4), borderRadius: moderateScale(5), backgroundColor: "#6E7171"}}
+            ></View>
+            <Text
+            style={{fontSize: moderateScale(FONT.xs), color: "#6E7171"}}
+            >{roundCount}회 라운딩</Text>
+          </View>
+        )}
       </View>
     </View>
   );
