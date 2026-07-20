@@ -23,6 +23,30 @@ import Animated, { FadeIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { moderateScale } from 'react-native-size-matters';
 
+const MOCK_SWING_HISTORY_ROWS = [
+  {
+    id: 'swing-1',
+    title: '7월 16일 스윙',
+    summary: '자세 77 · 템포 74 · 밸런스 82',
+    score: '78점',
+    delta: '+6',
+  },
+  {
+    id: 'swing-2',
+    title: '7월 10일 스윙',
+    summary: '자세 72 · 템포 70 · 밸런스 74',
+    score: '72점',
+    delta: '+3',
+  },
+  {
+    id: 'swing-3',
+    title: '7월 3일 스윙',
+    summary: '자세 68 · 템포 69 · 밸런스 70',
+    score: '69점',
+    delta: '첫 분석',
+  },
+];
+
 export default function HomeScreen() {
   const router = useRouter();
   const { user } = useAuth();
@@ -158,6 +182,56 @@ export default function HomeScreen() {
         <View style={{marginBottom: moderateScale(15)}}>
           <SwingAnalyzerHero onPress={() => router.push('/(swing)' as never)} />
         </View>
+
+        <Pressable
+          style={styles.swingHistoryEntryButton}
+          onPress={() => router.push('/(swing)/history' as never)}
+        >
+          <View style={styles.swingHistoryHeaderRow}>
+            <Text type="barlowHard" style={styles.swingHistoryHeaderTitle}>
+              이전 분석 기록
+            </Text>
+            <View style={styles.swingHistoryHeaderAction}>
+              <Text type="barlowHard" style={styles.swingHistoryHeaderActionText}>
+                전체 보기
+              </Text>
+              <Text type="barlowHard" style={styles.swingHistoryHeaderActionArrow}>
+                →
+              </Text>
+            </View>
+          </View>
+
+          {MOCK_SWING_HISTORY_ROWS.map((row, index) => {
+            const isLast = index === MOCK_SWING_HISTORY_ROWS.length - 1;
+            return (
+              <View key={row.id} style={[styles.swingHistoryRow, !isLast && styles.swingHistoryRowDivider]}>
+                <View style={styles.swingHistoryThumbBox}>
+                  <Text type="barlowHard" style={styles.swingHistoryThumbPlay}>
+                    ▶
+                  </Text>
+                </View>
+
+                <View style={styles.swingHistoryRowBody}>
+                  <Text type="barlowHard" style={styles.swingHistoryRowTitle}>
+                    {row.title}
+                  </Text>
+                  <Text type="barlowLight" style={styles.swingHistoryRowSummary}>
+                    {row.summary}
+                  </Text>
+                </View>
+
+                <View style={styles.swingHistoryScoreColumn}>
+                  <Text type="barlowHard" style={styles.swingHistoryScoreText}>
+                    {row.score}
+                  </Text>
+                  <Text type="barlowHard" style={styles.swingHistoryDeltaText}>
+                    {row.delta}
+                  </Text>
+                </View>
+              </View>
+            );
+          })}
+        </Pressable>
 
 {/*         <View style={{marginBottom: moderateScale(15)}}>
           <UserStatComponent/>
@@ -300,6 +374,88 @@ const styles = StyleSheet.create({
   allRoundsButtonText: {
     color: '#A2AAAE',
     fontSize: moderateScale(FONT.sm),
+  },
+  swingHistoryEntryButton: {
+    borderRadius: moderateScale(30),
+    borderWidth: 1,
+    borderColor: '#2A3835',
+    backgroundColor: '#171E1D',
+    paddingHorizontal: moderateScale(14),
+    paddingTop: moderateScale(16),
+    paddingBottom: moderateScale(8),
+    marginBottom: moderateScale(15),
+  },
+  swingHistoryHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: moderateScale(10),
+  },
+  swingHistoryHeaderTitle: {
+    color: '#F2F6F4',
+    fontSize: moderateScale(FONT.md),
+  },
+  swingHistoryHeaderAction: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: moderateScale(3),
+  },
+  swingHistoryHeaderActionText: {
+    color: '#13E4B0',
+    fontSize: moderateScale(FONT.xxxs),
+  },
+  swingHistoryHeaderActionArrow: {
+    color: '#13E4B0',
+    fontSize: moderateScale(FONT.xxs),
+  },
+  swingHistoryRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: moderateScale(11),
+  },
+  swingHistoryRowDivider: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#2A3431',
+  },
+  swingHistoryThumbBox: {
+    width: moderateScale(56),
+    height: moderateScale(56),
+    borderRadius: moderateScale(16),
+    backgroundColor: '#1E312C',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: moderateScale(12),
+  },
+  swingHistoryThumbPlay: {
+    color: '#08DFAF',
+    fontSize: moderateScale(FONT.sm),
+  },
+  swingHistoryRowBody: {
+    flex: 1,
+    marginRight: moderateScale(8),
+  },
+  swingHistoryRowTitle: {
+    color: '#EDF2F0',
+    fontSize: moderateScale(FONT.sm),
+    marginBottom: moderateScale(2),
+  },
+  swingHistoryRowSummary: {
+    color: '#86918E',
+    fontSize: moderateScale(FONT.xxxs),
+    fontFamily: 'Pretendard-Regular',
+  },
+  swingHistoryScoreColumn: {
+    minWidth: moderateScale(64),
+    alignItems: 'flex-end',
+  },
+  swingHistoryScoreText: {
+    color: '#F2F6F4',
+    fontSize: moderateScale(FONT.lg),
+    marginBottom: moderateScale(2),
+  },
+  swingHistoryDeltaText: {
+    color: '#11E0AE',
+    fontSize: moderateScale(FONT.xxxs),
   },
   phoneModalBackdrop: {
     flex: 1,

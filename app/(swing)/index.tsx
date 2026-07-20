@@ -5,7 +5,12 @@ import { CameraView, useCameraPermissions } from "expo-camera";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React from "react";
-import { Alert, Pressable, StyleSheet, View } from "react-native";
+import {
+    Alert,
+    Pressable,
+    StyleSheet,
+    View
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
 
@@ -18,6 +23,7 @@ function formatDuration(seconds: number) {
     .padStart(2, "0");
   return `${mins}:${secs}`;
 }
+
 
 export default function SwingCaptureScreen() {
   const router = useRouter();
@@ -151,7 +157,9 @@ export default function SwingCaptureScreen() {
           </View>
 
           <Text pointerEvents="none" type="barlowLight" style={styles.guideText}>
-            {isRecording ? `${formatDuration(elapsedSeconds)} · 스윙 동작을 끝까지 촬영해주세요` : "전신이 화면 안에 들어오도록 맞춰주세요"}
+            {isRecording
+              ? `${formatDuration(elapsedSeconds)} · 스윙 동작을 끝까지 촬영해주세요`
+              : "전신이 화면 안에 들어오도록 맞춰주세요"}
           </Text>
 
           <View style={styles.captureButtonRow}>

@@ -12,12 +12,12 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { addDoc, collection, doc, getDoc, getDocs, query, serverTimestamp, where } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
-  ActivityIndicator, Image, KeyboardAvoidingView, Modal, Platform, Pressable,
-  ScrollView,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  View
+    ActivityIndicator, Image, KeyboardAvoidingView, Modal, Platform, Pressable,
+    ScrollView,
+    StyleSheet,
+    TextInput,
+    TouchableOpacity,
+    View
 } from "react-native";
 import Animated, { FadeIn, FadeOut, SlideInDown, SlideOutDown } from "react-native-reanimated";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
@@ -494,7 +494,7 @@ export default function NoticeScreen() {
 
             <TouchableOpacity
               activeOpacity={0.85}
-              onPress={() => setSelected(latestNotice)}
+              onPress={() => router.push("/(tabs)/stats")}
               style={styles.recentEventTouchable}
             >
               <LinearGradient

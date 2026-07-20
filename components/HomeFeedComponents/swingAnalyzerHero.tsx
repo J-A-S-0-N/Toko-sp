@@ -1,3 +1,4 @@
+import FirstRankingUserCard from "@/components/HomeFeedComponents/FirstRankingUserCard";
 import { ThemedText as Text } from "@/components/themed-text";
 import { FONT } from "@/constants/theme";
 import Feather from "@expo/vector-icons/Feather";
@@ -12,42 +13,49 @@ type SwingAnalyzerHeroProps = {
 
 export default function SwingAnalyzerHero({ onPress }: SwingAnalyzerHeroProps) {
   return (
-    <LinearGradient
-      colors={["#03251D", "#032016", "#071814"]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={styles.container}
-    >
-      <View style={styles.glowOne} />
-      <View style={styles.glowTwo} />
+    <View style={styles.stack}>
+      <FirstRankingUserCard onPress={onPress} />
 
-      <View style={styles.badge}>
-        <View style={styles.badgeDot} />
-        <Text type="barlowHard" style={styles.badgeText}>
-          AI 분석 준비 완료
+      <LinearGradient
+        colors={["#03251D", "#032016", "#071814"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.legacyContainer}
+      >
+        <View style={styles.legacyGlowOne} />
+        <View style={styles.legacyGlowTwo} />
+
+        <View style={styles.legacyBadge}>
+          <View style={styles.legacyBadgeDot} />
+          <Text type="barlowHard" style={styles.legacyBadgeText}>
+            AI 분석 준비 완료
+          </Text>
+        </View>
+
+        <Text type="barlowHard" style={styles.legacyTitle}>
+          내 스윙을 찍으면{"\n"}AI가 바로 분석해드려요
         </Text>
-      </View>
 
-      <Text type="barlowHard" style={styles.title}>
-        내 스윙을 찍으면{"\n"}AI가 바로 분석해드려요
-      </Text>
-
-      <Text type="barlowLight" style={styles.subtitle}>
-        자세, 템포, 밸런스를 점수로 확인하고 가장 먼저 고칠 한 가지를 알려드립니다.
-      </Text>
-
-      <Pressable style={styles.ctaButton} onPress={onPress}>
-        <Text type="barlowHard" style={styles.ctaText}>
-          스윙 분석 시작하기
+        <Text type="barlowLight" style={styles.legacySubtitle}>
+          자세, 템포, 밸런스를 점수로 확인하고 가장 먼저 고칠 한 가지를 알려드립니다.
         </Text>
-        <Feather name="arrow-right" size={moderateScale(18)} color="#02130F" />
-      </Pressable>
-    </LinearGradient>
+
+        <Pressable style={styles.legacyCtaButton} onPress={onPress}>
+          <Text type="barlowHard" style={styles.legacyCtaText}>
+            스윙 분석 시작하기
+          </Text>
+          <Feather name="arrow-right" size={moderateScale(18)} color="#02130F" />
+        </Pressable>
+      </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  stack: {
+    gap: moderateScale(12),
+  },
+  legacyContainer: {
     borderRadius: moderateScale(24),
     borderWidth: 1,
     borderColor: "#135243",
@@ -56,7 +64,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     backgroundColor: "#06211A",
   },
-  glowOne: {
+  legacyGlowOne: {
     position: "absolute",
     right: moderateScale(-90),
     bottom: moderateScale(-120),
@@ -66,7 +74,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(19,217,160,0.2)",
   },
-  glowTwo: {
+  legacyGlowTwo: {
     position: "absolute",
     right: moderateScale(-20),
     bottom: moderateScale(-70),
@@ -76,7 +84,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(19,217,160,0.2)",
   },
-  badge: {
+  legacyBadge: {
     alignSelf: "flex-start",
     flexDirection: "row",
     alignItems: "center",
@@ -89,22 +97,22 @@ const styles = StyleSheet.create({
     marginBottom: moderateScale(12),
     gap: moderateScale(7),
   },
-  badgeDot: {
+  legacyBadgeDot: {
     width: moderateScale(10),
     height: moderateScale(10),
     borderRadius: moderateScale(10),
     backgroundColor: "#8CF4D3",
   },
-  badgeText: {
+  legacyBadgeText: {
     color: "#9BF6D7",
     fontSize: moderateScale(FONT.xxs),
   },
-  title: {
+  legacyTitle: {
     color: "#F1F8F4",
     fontSize: moderateScale(FONT.xl),
     lineHeight: moderateScale(34),
   },
-  subtitle: {
+  legacySubtitle: {
     marginTop: moderateScale(6),
     marginBottom: moderateScale(12),
     color: "#AABBB6",
@@ -112,7 +120,7 @@ const styles = StyleSheet.create({
     lineHeight: moderateScale(22),
     fontFamily: "Pretendard-Regular",
   },
-  ctaButton: {
+  legacyCtaButton: {
     minHeight: moderateScale(50),
     borderRadius: moderateScale(16),
     backgroundColor: "#12E2A0",
@@ -121,7 +129,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: moderateScale(8),
   },
-  ctaText: {
+  legacyCtaText: {
     color: "#02130F",
     fontSize: moderateScale(FONT.sm),
   },
