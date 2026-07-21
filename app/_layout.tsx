@@ -13,7 +13,7 @@ import { registerPushToken } from '@/utils/registerPushToken';
 
 import { BarlowCondensed_400Regular, BarlowCondensed_500Medium_Italic, BarlowCondensed_900Black_Italic, useFonts } from '@expo-google-fonts/barlow-condensed';
 import { useEffect } from 'react';
-import { Text } from 'react-native';
+import { Linking, Text } from 'react-native';
 
 //{rop to disable font scaling
 (Text as any).defaultProps = (Text as any).defaultProps || {};
@@ -73,6 +73,7 @@ function RootLayoutContent() {
       const data = response.notification.request.content.data as {
         screen?: string;
         eventId?: string | number;
+        liveUrl?: string;
       };
 
       console.log('[Push] Notification pressed:', data);
@@ -81,6 +82,18 @@ function RootLayoutContent() {
         router.push({
           pathname: '/(modals)/eventDetailModal',
           params: { eventId: String(data.eventId) },
+        });
+        return;
+      }
+
+      if (data?.screen === 'live') {
+        const liveUrl = typeof data.liveUrl === 'string' ? data.liveUrl.trim() : '';
+        if (!liveUrl) {
+          return;
+        }
+
+        Linking.openURL(liveUrl).catch((error) => {
+          console.error('[Push] Failed to open live URL:', error);
         });
       }
     });
