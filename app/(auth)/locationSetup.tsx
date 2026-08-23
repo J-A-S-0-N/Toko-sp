@@ -1,9 +1,6 @@
-import { getCurrentUid } from '@/app/(auth)/functions/loginFetchUserFunction';
-import { db } from '@/config/firebase';
 import { FONT } from '@/constants/theme';
 import * as Location from 'expo-location';
 import { router } from 'expo-router';
-import { doc, updateDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import Animated, {
@@ -151,15 +148,16 @@ export default function LocationSetupScreen() {
 
   const handleNext = async () => {
     if (!isNextEnabled) return;
-    const uid = getCurrentUid();
-    if (uid && selectedLocation) {
-      try {
-        await updateDoc(doc(db, 'Users', uid), { city: selectedLocation });
-      } catch (e) {
-        console.error('Failed to save city:', e);
-      }
-    }
-    router.push('/(auth)/courseSelection');
+    // const uid = getCurrentUid();
+    // if (uid && selectedLocation) {
+    //   try {
+    //     await updateDoc(doc(db, 'Users', uid), { city: selectedLocation });
+    //   } catch (e) {
+    //     console.error('Failed to save city:', e);
+    //   }
+    // }
+    // router.push('/(auth)/courseSelection');
+    router.replace('/(tabs)');
   };
 
   const handleCancelDetection = () => {

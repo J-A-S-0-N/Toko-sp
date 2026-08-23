@@ -32,5 +32,5 @@
     "firebase-functions-test": "^3.4.1"
   },
   "private": true,
-  "version": "1.0.0"
+  "version": "1.0.1"
 }

@@ -1,4 +1,5 @@
 import GlobalChatCard from "@/components/ChatComponents/GlobalChatCard";
+import TabEnterTransition from "@/components/TabEnterTransition";
 import ParkPromotionAdComponent from "@/components/ads/ParkPromotionAdComponent";
 import PromoAdComponent from "@/components/ads/PromoAdComponent";
 import { ThemedText } from "@/components/themed-text";
@@ -12,12 +13,12 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { addDoc, collection, doc, getDoc, getDocs, query, serverTimestamp, where } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
-    ActivityIndicator, Image, KeyboardAvoidingView, Modal, Platform, Pressable,
-    ScrollView,
-    StyleSheet,
-    TextInput,
-    TouchableOpacity,
-    View
+  ActivityIndicator, Image, KeyboardAvoidingView, Modal, Platform, Pressable,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View
 } from "react-native";
 import Animated, { FadeIn, FadeOut, SlideInDown, SlideOutDown } from "react-native-reanimated";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
@@ -386,40 +387,47 @@ export default function NoticeScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView edges={["top"]} style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#3CC06E" />
-          <ThemedText style={styles.loadingText}>공지사항을 불러오는 중...</ThemedText>
-        </View>
-      </SafeAreaView>
+      <TabEnterTransition>
+        <SafeAreaView edges={["top"]} style={styles.container}>
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#3CC06E" />
+            <ThemedText style={styles.loadingText}>공지사항을 불러오는 중...</ThemedText>
+          </View>
+        </SafeAreaView>
+      </TabEnterTransition>
     );
   }
 
   if (error) {
     return (
-      <SafeAreaView edges={["top"]} style={styles.container}>
-        <View style={styles.errorContainer}>
-          <ThemedText style={styles.errorText}>공지사항을 불러올 수 없습니다</ThemedText>
-          <ThemedText style={styles.errorSubtext}>잠시 후 다시 시도해주세요</ThemedText>
-        </View>
-      </SafeAreaView>
+      <TabEnterTransition>
+        <SafeAreaView edges={["top"]} style={styles.container}>
+          <View style={styles.errorContainer}>
+            <ThemedText style={styles.errorText}>공지사항을 불러올 수 없습니다</ThemedText>
+            <ThemedText style={styles.errorSubtext}>잠시 후 다시 시도해주세요</ThemedText>
+          </View>
+        </SafeAreaView>
+      </TabEnterTransition>
     );
   }
 
   if (!pinnedNotice && recentNotices.length === 0) {
     return (
-      <SafeAreaView edges={["top"]} style={styles.container}>
-        <View style={styles.emptyContainer}>
-          <ThemedText style={styles.emptyText}>공지사항이 없습니다</ThemedText>
-        </View>
-      </SafeAreaView>
+      <TabEnterTransition>
+        <SafeAreaView edges={["top"]} style={styles.container}>
+          <View style={styles.emptyContainer}>
+            <ThemedText style={styles.emptyText}>공지사항이 없습니다</ThemedText>
+          </View>
+        </SafeAreaView>
+      </TabEnterTransition>
     );
   }
 
   const latestNotice = recentNotices[0];
 
   return (
-    <SafeAreaView edges={["top"]} style={styles.container}>
+    <TabEnterTransition>
+      <SafeAreaView edges={["top"]} style={styles.container}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -532,7 +540,8 @@ export default function NoticeScreen() {
       {selected && (
         <NoticeDetailModal notice={selected} onClose={() => setSelected(null)} />
       )}
-    </SafeAreaView>
+      </SafeAreaView>
+    </TabEnterTransition>
   );
 }
 

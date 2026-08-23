@@ -2,6 +2,7 @@ import { ThemedText as Text } from "@/components/themed-text";
 import { FONT } from "@/constants/theme";
 import Feather from "@expo/vector-icons/Feather";
 import { CameraView, useCameraPermissions } from "expo-camera";
+import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React from "react";
@@ -31,8 +32,10 @@ export default function SwingCaptureScreen() {
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = React.useRef<CameraView>(null);
   const elapsedSecondsRef = React.useRef(0);
+  const [cameraFacing, setCameraFacing] = React.useState<"back" | "front">("back");
   const [isFlashOn, setIsFlashOn] = React.useState(false);
   const [isRecording, setIsRecording] = React.useState(false);
+  const [isPickingFromLibrary, setIsPickingFromLibrary] = React.useState(false);
   const [elapsedSeconds, setElapsedSeconds] = React.useState(0);
 
   React.useEffect(() => {
@@ -82,7 +85,7 @@ export default function SwingCaptureScreen() {
         return;
       }
 
-      const duration = Math.max(elapsedSecondsRef.current, 5);
+      const duration = Math.max(elapsedSecondsRef.current, 0.2);
       routeToTrim(duration, video.uri);
     } catch {
       Alert.alert("촬영 실패", "촬영 중 문제가 발생했어요. 다시 시도해주세요.");
@@ -105,87 +108,135 @@ export default function SwingCaptureScreen() {
     handleStopRecording();
   };
 
+  const handlePickVideoFromLibrary = async () => {
+    if (isRecording || isPickingFromLibrary) return;
+
+    const { granted } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!granted) {
+      Alert.alert("권한 필요", "갤러리에서 영상을 가져오려면 사진 보관함 권한이 필요합니다.");
+      return;
+    }
+
+    setIsPickingFromLibrary(true);
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+        allowsEditing: false,
+        quality: 1,
+      });
+
+      if (result.canceled || !result.assets?.length) return;
+      const selected = result.assets[0];
+      if (!selected?.uri) {
+        Alert.alert("선택 실패", "선택한 영상을 불러오지 못했어요. 다시 시도해주세요.");
+        return;
+      }
+
+      const pickedDurationSec = (selected.duration ?? 0) / 1000;
+      const durationSec = pickedDurationSec > 0 ? pickedDurationSec : 6;
+      routeToTrim(durationSec, selected.uri);
+    } catch {
+      Alert.alert("선택 실패", "영상 선택 중 문제가 발생했어요. 다시 시도해주세요.");
+    } finally {
+      setIsPickingFromLibrary(false);
+    }
+  };
+
+  const modeLabel = cameraFacing === "back" ? "후면" : "전면";
+
   return (
     <View style={styles.safeArea}>
       <LinearGradient
-        colors={["#03110F", "#020A09", "#010605"]}
-        style={[styles.container, { paddingTop: moderateScale(8) + insets.top }]}
+        colors={["#1C4F39", "#103626", "#061A13"]}
+        style={styles.container}
       >
-        <View style={styles.headerRow}>
-          <Pressable style={styles.iconButton} onPress={() => router.back()}>
-            <Feather name="arrow-left" size={moderateScale(20)} color="#DDE4E2" />
+        {permission?.granted && (
+          <CameraView
+            ref={cameraRef}
+            style={StyleSheet.absoluteFill}
+            facing={cameraFacing}
+            enableTorch={isFlashOn}
+            mode="video"
+            mute
+          />
+        )}
+
+        <View pointerEvents="none" style={styles.captureDarkOverlay} />
+
+        <View pointerEvents="none" style={styles.gridOverlay}>
+          <View style={[styles.gridLineVertical, styles.gridVerticalOne]} />
+          <View style={[styles.gridLineVertical, styles.gridVerticalTwo]} />
+          <View style={[styles.gridLineHorizontal, styles.gridHorizontalOne]} />
+          <View style={[styles.gridLineHorizontal, styles.gridHorizontalTwo]} />
+        </View>
+
+        <View style={[styles.headerRow, { paddingTop: insets.top + moderateScale(6) }]}>
+          <Pressable style={styles.topIconButton} onPress={() => router.back()}>
+            <Feather name="x" size={moderateScale(24)} color="#E7F0EC" />
           </Pressable>
 
-          <Text type="barlowHard" style={styles.headerTitle}>
-            스윙 촬영
-          </Text>
+          <View style={styles.modeChip}>
+            <Text type="barlowHard" style={styles.modeChipText}>
+              {isRecording
+                ? `${formatDuration(elapsedSeconds)} · 촬영 중`
+                : `${modeLabel} · 전신 모드`}
+            </Text>
+          </View>
 
-          <Pressable style={styles.iconButton} onPress={() => setIsFlashOn((prev) => !prev)}>
+          <Pressable style={styles.topIconButton} onPress={() => setIsFlashOn((prev) => !prev)}>
             <Feather
               name={isFlashOn ? "zap" : "zap-off"}
               size={moderateScale(18)}
-              color={isFlashOn ? "#12E5A1" : "#A8B4B0"}
+              color={isFlashOn ? "#F4FF6E" : "#D8E2DC"}
             />
           </Pressable>
         </View>
 
-        <View style={styles.captureCard}>
-          {permission?.granted && (
-            <CameraView
-              ref={cameraRef}
-              style={StyleSheet.absoluteFill}
-              facing="back"
-              enableTorch={isFlashOn}
-              mode="video"
-              mute
-            />
-          )}
-          <View pointerEvents="none" style={styles.captureDarkOverlay} />
-
-          <View style={styles.statusRow}>
-            <View style={[styles.statusDot, isRecording && styles.statusDotRecording]} />
-            <Text type="barlowHard" style={styles.statusLabel}>
-              {isRecording ? "촬영 중" : "준비"}
-            </Text>
+        <View style={styles.centerGuideWrap} pointerEvents="none">
+          <View style={styles.guideFrame}>
           </View>
 
-          <View pointerEvents="none" style={styles.guideFrame}>
-            <View style={[styles.guideCorner, styles.guideCornerTopLeft]} />
-            <View style={[styles.guideCorner, styles.guideCornerTopRight]} />
-            <View style={[styles.guideCorner, styles.guideCornerBottomLeft]} />
-            <View style={[styles.guideCorner, styles.guideCornerBottomRight]} />
-          </View>
-
-          <Text pointerEvents="none" type="barlowLight" style={styles.guideText}>
-            {isRecording
-              ? `${formatDuration(elapsedSeconds)} · 스윙 동작을 끝까지 촬영해주세요`
-              : "전신이 화면 안에 들어오도록 맞춰주세요"}
+          <Text type="barlowHard" style={styles.guideText}>
+            몸 전체가 가이드 안에 들어오게 해주세요
           </Text>
+        </View>
 
-          <View style={styles.captureButtonRow}>
+        <View style={styles.bottomControlsWrap}>
+          <View style={styles.bottomControlsRow}>
+            <Pressable style={styles.sideControlButton} onPress={() => void handlePickVideoFromLibrary()}>
+              <Feather name="image" size={moderateScale(18)} color="#AAB6B0" />
+            </Pressable>
+
             <Pressable
               onPress={handleCapturePress}
               style={[styles.captureButton, isRecording && styles.captureButtonActive]}
             >
               <View style={[styles.captureButtonInner, isRecording && styles.captureButtonInnerActive]} />
             </Pressable>
-          </View>
 
-          {!permission?.granted && (
-            <View style={styles.permissionFallbackWrap}>
-              <Text type="barlowLight" style={styles.permissionFallbackText}>
-                {permission ? "카메라 권한을 허용하면 실시간 촬영 화면이 보여요" : "카메라 권한을 확인 중입니다..."}
-              </Text>
-              {!!permission && !permission.granted && (
-                <Pressable style={styles.permissionButton} onPress={() => void requestPermission()}>
-                  <Text type="barlowHard" style={styles.permissionButtonText}>
-                    권한 허용하기
-                  </Text>
-                </Pressable>
-              )}
-            </View>
-          )}
+            <Pressable
+              style={styles.sideControlButton}
+              onPress={() => setCameraFacing((prev) => (prev === "back" ? "front" : "back"))}
+            >
+              <Feather name="refresh-cw" size={moderateScale(18)} color="#E7F0EC" />
+            </Pressable>
+          </View>
         </View>
+
+        {!permission?.granted && (
+          <View style={styles.permissionFallbackWrap}>
+            <Text type="barlowLight" style={styles.permissionFallbackText}>
+              {permission ? "카메라 권한을 허용하면 실시간 촬영 화면이 보여요" : "카메라 권한을 확인 중입니다..."}
+            </Text>
+            {!!permission && !permission.granted && (
+              <Pressable style={styles.permissionButton} onPress={() => void requestPermission()}>
+                <Text type="barlowHard" style={styles.permissionButtonText}>
+                  권한 허용하기
+                </Text>
+              </Pressable>
+            )}
+          </View>
+        )}
       </LinearGradient>
     </View>
   );
@@ -194,124 +245,156 @@ export default function SwingCaptureScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#010706",
+    backgroundColor: "#061A13",
   },
   container: {
     flex: 1,
-    paddingHorizontal: moderateScale(14),
-    paddingBottom: moderateScale(16),
+    paddingHorizontal: moderateScale(20),
   },
   headerRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: moderateScale(18),
+    zIndex: 5,
   },
-  iconButton: {
-    width: moderateScale(48),
-    height: moderateScale(48),
-    borderRadius: moderateScale(14),
-    borderWidth: 1,
-    borderColor: "#18312D",
-    backgroundColor: "rgba(8,18,16,0.9)",
+  topIconButton: {
+    width: moderateScale(54),
+    height: moderateScale(54),
+    borderRadius: moderateScale(27),
+    backgroundColor: "rgba(8, 26, 20, 0.58)",
     alignItems: "center",
     justifyContent: "center",
   },
-  headerTitle: {
-    fontSize: moderateScale(FONT.lg),
-    color: "#EFF4F1",
+  modeChip: {
+    minHeight: moderateScale(40),
+    borderRadius: moderateScale(20),
+    backgroundColor: "rgba(10, 39, 29, 0.66)",
+    paddingHorizontal: moderateScale(18),
+    alignItems: "center",
+    justifyContent: "center",
   },
-  captureCard: {
-    flex: 1,
-    borderRadius: moderateScale(28),
-    borderWidth: 1,
-    borderColor: "#14302B",
-    backgroundColor: "#0A1412",
-    paddingHorizontal: moderateScale(14),
-    paddingTop: moderateScale(14),
-    paddingBottom: moderateScale(20),
-    overflow: "hidden",
+  modeChipText: {
+    color: "#F5FAF7",
+    fontSize: moderateScale(FONT.xxs),
   },
   captureDarkOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(2, 10, 9, 0.35)",
+    backgroundColor: "rgba(3, 12, 9, 0.28)",
   },
-  statusRow: {
-    alignSelf: "center",
-    flexDirection: "row",
+  gridOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 1,
+  },
+  gridLineVertical: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    width: 1,
+    backgroundColor: "rgba(139, 180, 161, 0.08)",
+  },
+  gridVerticalOne: {
+    left: "33%",
+  },
+  gridVerticalTwo: {
+    left: "66%",
+  },
+  gridLineHorizontal: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    height: 1,
+    backgroundColor: "rgba(139, 180, 161, 0.08)",
+  },
+  gridHorizontalOne: {
+    top: "33%",
+  },
+  gridHorizontalTwo: {
+    top: "66%",
+  },
+  centerGuideWrap: {
+    flex: 1,
     alignItems: "center",
-    borderRadius: moderateScale(999),
-    borderWidth: 1,
-    borderColor: "rgba(45, 63, 58, 0.9)",
-    backgroundColor: "rgba(1, 12, 10, 0.75)",
-    paddingHorizontal: moderateScale(12),
-    paddingVertical: moderateScale(7),
-    zIndex: 2,
-  },
-  statusDot: {
-    width: moderateScale(9),
-    height: moderateScale(9),
-    borderRadius: moderateScale(10),
-    backgroundColor: "#FF5C5C",
-    marginRight: moderateScale(6),
-  },
-  statusDotRecording: {
-    backgroundColor: "#12E5A1",
-  },
-  statusLabel: {
-    fontSize: moderateScale(FONT.xxs),
-    color: "#EAF0ED",
+    justifyContent: "center",
+    paddingTop: moderateScale(42),
+    zIndex: 3,
   },
   guideFrame: {
-    flex: 1,
-    marginTop: moderateScale(14),
-    marginBottom: moderateScale(10),
-    justifyContent: "center",
+    width: moderateScale(244),
+    height: moderateScale(520),
+    borderRadius: moderateScale(120),
+    borderWidth: 2,
+    borderColor: "rgba(206, 219, 213, 0.74)",
+    borderStyle: "dashed",
     alignItems: "center",
-    zIndex: 2,
+    justifyContent: "center",
+    position: "relative",
   },
-  guideCorner: {
+  silhouetteHead: {
     position: "absolute",
+    top: moderateScale(138),
+    width: moderateScale(44),
+    height: moderateScale(44),
+    borderRadius: moderateScale(22),
+    backgroundColor: "rgba(203, 214, 208, 0.54)",
+  },
+  silhouetteBody: {
+    position: "absolute",
+    top: moderateScale(182),
+    width: moderateScale(68),
+    height: moderateScale(168),
+    borderRadius: moderateScale(34),
+    backgroundColor: "rgba(203, 214, 208, 0.54)",
+  },
+  silhouetteLeg: {
+    position: "absolute",
+    bottom: moderateScale(54),
     width: moderateScale(28),
-    height: moderateScale(28),
-    borderColor: "#0EE0B0",
+    height: moderateScale(200),
+    borderRadius: moderateScale(14),
+    backgroundColor: "rgba(203, 214, 208, 0.54)",
   },
-  guideCornerTopLeft: {
-    top: moderateScale(20),
-    left: moderateScale(16),
-    borderTopWidth: 3,
-    borderLeftWidth: 3,
-    borderTopLeftRadius: moderateScale(10),
+  silhouetteLegLeft: {
+    left: moderateScale(68),
+    transform: [{ rotate: "4deg" }],
   },
-  guideCornerTopRight: {
-    top: moderateScale(20),
-    right: moderateScale(16),
-    borderTopWidth: 3,
-    borderRightWidth: 3,
-    borderTopRightRadius: moderateScale(10),
+  silhouetteLegRight: {
+    left: moderateScale(114),
+    transform: [{ rotate: "-4deg" }],
   },
-  guideCornerBottomLeft: {
-    bottom: moderateScale(20),
-    left: moderateScale(16),
-    borderBottomWidth: 3,
-    borderLeftWidth: 3,
-    borderBottomLeftRadius: moderateScale(10),
-  },
-  guideCornerBottomRight: {
-    bottom: moderateScale(20),
-    right: moderateScale(16),
-    borderBottomWidth: 3,
-    borderRightWidth: 3,
-    borderBottomRightRadius: moderateScale(10),
+  silhouetteClub: {
+    position: "absolute",
+    left: moderateScale(-56),
+    bottom: moderateScale(60),
+    width: moderateScale(30),
+    height: moderateScale(228),
+    borderRadius: moderateScale(16),
+    backgroundColor: "rgba(203, 214, 208, 0.48)",
+    transform: [{ rotate: "-4deg" }],
   },
   guideText: {
-    color: "#C6D0CC",
-    fontSize: moderateScale(FONT.xxs),
+    color: "rgba(231, 240, 236, 0.9)",
+    fontSize: moderateScale(FONT.xxxs),
     textAlign: "center",
-    fontFamily: "Pretendard-Regular",
+    marginTop: moderateScale(20),
+    fontFamily: "Pretendard-SemiBold",
+  },
+  bottomControlsWrap: {
+    paddingBottom: moderateScale(15),
+    zIndex: 5,
+  },
+  bottomControlsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: moderateScale(12),
-    marginBottom: moderateScale(14),
-    zIndex: 2,
+  },
+  sideControlButton: {
+    width: moderateScale(50),
+    height: moderateScale(50),
+    borderRadius: moderateScale(20),
+    backgroundColor: "rgba(2, 16, 12, 0.66)",
+    alignItems: "center",
+    justifyContent: "center",
   },
   permissionFallbackWrap: {
     ...StyleSheet.absoluteFillObject,
@@ -319,8 +402,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: moderateScale(20),
     gap: moderateScale(12),
-    backgroundColor: "rgba(2,10,9,0.45)",
-    zIndex: 4,
+    backgroundColor: "rgba(2,10,9,0.58)",
+    zIndex: 8,
   },
   permissionFallbackText: {
     color: "#C6D0CC",
@@ -342,37 +425,29 @@ const styles = StyleSheet.create({
     color: "#D8EEE7",
     fontSize: moderateScale(FONT.xxs),
   },
-  captureButtonRow: {
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: moderateScale(2),
-    marginBottom: moderateScale(2),
-    zIndex: 2,
-  },
   captureButton: {
-    width: moderateScale(80),
-    height: moderateScale(80),
-    borderRadius: moderateScale(40),
-    backgroundColor: "#FFFFFF",
+    width: moderateScale(65),
+    height: moderateScale(65),
+    borderRadius: moderateScale(100),
+    borderWidth: 3,
+    borderColor: "#F1F4F2",
+    backgroundColor: "#0D1815",
     alignItems: "center",
     justifyContent: "center",
   },
   captureButtonActive: {
-    backgroundColor: "#F4FFF9",
+    backgroundColor: "#13241E",
   },
   captureButtonInner: {
-    width: moderateScale(54),
-    height: moderateScale(54),
-    borderRadius: moderateScale(27),
-    backgroundColor: "#FFFFFF",
-    borderWidth: 2,
-    borderColor: "#D5DAD8",
+    width: moderateScale(50),
+    height: moderateScale(50),
+    borderRadius: moderateScale(38),
+    backgroundColor: "#D5F85A",
   },
   captureButtonInnerActive: {
-    width: moderateScale(28),
-    height: moderateScale(28),
+    width: moderateScale(34),
+    height: moderateScale(34),
     borderRadius: moderateScale(8),
-    borderColor: "#0D1A17",
-    backgroundColor: "#0E1D19",
+    backgroundColor: "#D5F85A",
   },
 });

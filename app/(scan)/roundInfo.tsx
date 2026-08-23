@@ -241,6 +241,7 @@ export default function RoundInfoScreen() {
           courseName: courseName.trim(),
           fixedPars,
           startParEdit,
+          manual: "1",
           ...(effectiveScanDocId ? { scanDocId: effectiveScanDocId } : {}),
         },
       });
@@ -298,6 +299,7 @@ export default function RoundInfoScreen() {
         courseName: courseName.trim(),
         fixedPars,
         startParEdit,
+        manual: "1",
         ...(effectiveScanDocId ? { scanDocId: effectiveScanDocId } : {}),
       },
     });

@@ -71,14 +71,17 @@ const HoleScoreTemplate: HoleScore[] = [
 export default function ResultPreviewScreen() {
   const router = useRouter();
   const { user } = useAuth();
-  const { holes, scores, courseName, scanDocId, fixedPars, startParEdit } = useLocalSearchParams<{
+  const { holes, scores, courseName, scanDocId, fixedPars, startParEdit, manual } = useLocalSearchParams<{
     holes?: string;
     scores?: string;
     courseName?: string;
     scanDocId?: string;
     fixedPars?: string;
     startParEdit?: string;
+    manual?: string;
   }>();
+
+  const isManualEntry = manual === "1";
 
   const holesCount = holes === "18" ? 18 : 9;
   const standardCoursePar = holesCount === 18 ? 66 : 33;
@@ -688,12 +691,21 @@ export default function ResultPreviewScreen() {
           */}
 
           <View style={styles.bottomButtonsRow}>
-            <Pressable style={styles.secondaryButton} onPress={handleRetake}>
-              <Text type="barlowHard" style={styles.secondaryButtonText}>
-                다시 찍기
-              </Text>
-            </Pressable>
-            <Pressable style={[styles.primaryButton, isSubmitting && styles.primaryButtonDisabled]} onPress={handleSave}>
+            {!isManualEntry ? (
+              <Pressable style={styles.secondaryButton} onPress={handleRetake}>
+                <Text type="barlowHard" style={styles.secondaryButtonText}>
+                  다시 찍기
+                </Text>
+              </Pressable>
+            ) : null}
+            <Pressable
+              style={[
+                styles.primaryButton,
+                isManualEntry && styles.primaryButtonFull,
+                isSubmitting && styles.primaryButtonDisabled,
+              ]}
+              onPress={handleSave}
+            >
               <Text type="barlowHard" style={styles.primaryButtonText}>
                 {isSubmitting ? "저장 중..." : "저장하기"}
               </Text>
@@ -1117,6 +1129,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     minHeight: moderateScale(58),
+  },
+  primaryButtonFull: {
+    flex: 1,
   },
   primaryButtonDisabled: {
     opacity: 0.7,

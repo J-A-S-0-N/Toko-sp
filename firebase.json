@@ -48,6 +48,14 @@
           { "fieldPath": "city", "order": "ASCENDING" },
           { "fieldPath": "averageDelta", "order": "DESCENDING" }
         ]
+      },
+      {
+        "collectionGroup": "SwingVideos",
+        "queryScope": "COLLECTION",
+        "fields": [
+          { "fieldPath": "status", "order": "ASCENDING" },
+          { "fieldPath": "createdAt", "order": "DESCENDING" }
+        ]
       }
     ]
   },

@@ -3,7 +3,7 @@ import { FONT } from "@/constants/theme";
 import { useAuth } from "@/context/AuthContext";
 import { createSwingVideoRecord } from "@/services/swingVideoService";
 import Feather from "@expo/vector-icons/Feather";
-import { Video, type AVPlaybackStatus } from "expo-av";
+import { ResizeMode, Video, type AVPlaybackStatus } from "expo-av";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
@@ -13,8 +13,6 @@ import Animated, { runOnJS, useAnimatedReaction, useAnimatedStyle, useSharedValu
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
 
-const TIMELINE_BLOCKS = 7;
-
 function formatTime(seconds: number) {
   return `00:${seconds.toFixed(1).padStart(4, "0")}`;
 }
@@ -23,20 +21,21 @@ export default function SwingTrimScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const { duration, videoUri } = useLocalSearchParams<{ duration?: string; videoUri?: string }>();
-  const totalDuration = Math.max(Number(duration ?? 6), 6);
+  const parsedDuration = Number(duration);
+  const totalDuration = Number.isFinite(parsedDuration) && parsedDuration > 0 ? Math.max(parsedDuration, 0.2) : 6;
   const minRangeWidth = moderateScale(38);
+  const timelineInset = moderateScale(12);
   const videoRef = React.useRef<Video>(null);
   const previewLoopIntervalRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
   const lastPreviewSeekAtRef = React.useRef(0);
 
-  const minGap = 0.8;
+  const minGap = Math.min(0.8, Math.max(totalDuration - 0.05, 0.1));
   const minGapRatio = minGap / totalDuration;
-  const initialTrimStart = 1.5;
-  const initialTrimEnd = Math.max(totalDuration - 0.5, 3.8);
+  const initialTrimStart = Math.max(0, Math.min(1.5, totalDuration - minGap));
+  const initialTrimEnd = Math.min(totalDuration, Math.max(initialTrimStart + minGap, totalDuration - 0.5));
 
   const [trimStart, setTrimStart] = React.useState(initialTrimStart);
   const [trimEnd, setTrimEnd] = React.useState(initialTrimEnd);
-  const [livePreviewSec, setLivePreviewSec] = React.useState(initialTrimStart);
   const [isScrollEnabled, setIsScrollEnabled] = React.useState(true);
   const [isPreviewPlaying, setIsPreviewPlaying] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -99,7 +98,6 @@ export default function SwingTrimScreen() {
       lastPreviewSeekAtRef.current = now;
 
       const clampedSec = Math.max(0, Math.min(targetSec, totalDuration));
-      setLivePreviewSec(Number(clampedSec.toFixed(1)));
 
       void (async () => {
         try {
@@ -135,7 +133,7 @@ export default function SwingTrimScreen() {
       runOnJS(setIsScrollEnabled)(false);
     })
     .onUpdate((event) => {
-      const width = Math.max(timelineWidth.value, 1);
+      const width = Math.max(timelineWidth.value - timelineInset * 2, 1);
       const deltaRatio = event.translationX / width;
       const maxStart = endRatio.value - minGapRatio;
       const nextStart = Math.max(0, Math.min(startPanOrigin.value + deltaRatio, maxStart));
@@ -153,7 +151,7 @@ export default function SwingTrimScreen() {
       runOnJS(setIsScrollEnabled)(false);
     })
     .onUpdate((event) => {
-      const width = Math.max(timelineWidth.value, 1);
+      const width = Math.max(timelineWidth.value - timelineInset * 2, 1);
       const deltaRatio = event.translationX / width;
       const minEnd = startRatio.value + minGapRatio;
       const nextEnd = Math.min(1, Math.max(endPanOrigin.value + deltaRatio, minEnd));
@@ -166,13 +164,14 @@ export default function SwingTrimScreen() {
     });
 
   const activeRangeAnimatedStyle = useAnimatedStyle(() => {
-    const left = startRatio.value * timelineWidth.value;
-    const width = Math.max((endRatio.value - startRatio.value) * timelineWidth.value, minRangeWidth);
+    const usableWidth = Math.max(timelineWidth.value - timelineInset * 2, 1);
+    const left = timelineInset + startRatio.value * usableWidth;
+    const width = Math.max((endRatio.value - startRatio.value) * usableWidth, minRangeWidth);
     return {
       left,
       width,
     };
-  });
+  }, [timelineInset, minRangeWidth]);
 
   const handleTogglePreview = async () => {
     if (!videoUri || isSubmitting) return;
@@ -254,7 +253,10 @@ export default function SwingTrimScreen() {
         },
       });
     } catch {
-      Alert.alert("저장 실패", "영상 처리 중 문제가 발생했어요. 다시 시도해주세요.");
+      Alert.alert(
+        "저장 실패",
+        "영상 업로드를 자동으로 다시 시도했지만 완료하지 못했어요. 네트워크를 확인한 뒤 다시 시도해주세요."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -289,9 +291,6 @@ export default function SwingTrimScreen() {
             <View style={styles.progressOff} />
           </View>
 
-          <Text type="barlowHard" style={styles.stepLabel}>
-            VIDEO TRIM
-          </Text>
           <Text type="barlowHard" style={styles.titleText}>
             스윙의 시작과 끝을{"\n"}직접 맞춰주세요
           </Text>
@@ -305,7 +304,7 @@ export default function SwingTrimScreen() {
                 ref={videoRef}
                 source={{ uri: videoUri }}
                 style={StyleSheet.absoluteFill}
-                resizeMode="cover"
+                resizeMode={ResizeMode.COVER}
                 isLooping={false}
                 shouldPlay={false}
                 useNativeControls={false}
@@ -321,18 +320,6 @@ export default function SwingTrimScreen() {
             <Pressable style={styles.playButton} onPress={() => void handleTogglePreview()} disabled={!videoUri || isSubmitting}>
               <Feather name={isPreviewPlaying ? "pause" : "play"} size={moderateScale(24)} color="#EBF3F0" />
             </Pressable>
-
-            <View style={styles.durationBadge}>
-              <Text type="barlowHard" style={styles.durationBadgeText}>
-                {formatTime(totalDuration)}
-              </Text>
-            </View>
-
-            <View style={[styles.durationBadge, styles.liveDurationBadge]}>
-              <Text type="barlowHard" style={styles.durationBadgeText}>
-                {formatTime(livePreviewSec)}
-              </Text>
-            </View>
           </View>
 
           <View style={styles.trimCard}>
@@ -362,26 +349,23 @@ export default function SwingTrimScreen() {
                 timelineWidth.value = event.nativeEvent.layout.width;
               }}
             >
-              {Array.from({ length: TIMELINE_BLOCKS }).map((_, idx) => (
-                <View key={`block-${idx}`} style={styles.timelineBlock}>
-                  <Text type="barlowHard" style={styles.timelineBlockText}>
-                    {idx + 1}
-                  </Text>
-                </View>
-              ))}
+              <View style={styles.timelineTrack} />
               <Animated.View style={[styles.activeRange, activeRangeAnimatedStyle]}>
+                <View pointerEvents="none" style={styles.activeRangeLine} />
                 <GestureDetector gesture={startHandlePan}>
                   <Animated.View style={styles.rangeHandle}>
-                    <Text type="barlowLight" style={styles.rangeHandleText}>
-                      ⋮
-                    </Text>
+                    <View pointerEvents="none" style={styles.handleGrip}>
+                      <View style={styles.handleGripLine} />
+                      <View style={styles.handleGripLine} />
+                    </View>
                   </Animated.View>
                 </GestureDetector>
                 <GestureDetector gesture={endHandlePan}>
                   <Animated.View style={styles.rangeHandle}>
-                    <Text type="barlowLight" style={styles.rangeHandleText}>
-                      ⋮
-                    </Text>
+                    <View pointerEvents="none" style={styles.handleGrip}>
+                      <View style={styles.handleGripLine} />
+                      <View style={styles.handleGripLine} />
+                    </View>
                   </Animated.View>
                 </GestureDetector>
               </Animated.View>
@@ -390,15 +374,16 @@ export default function SwingTrimScreen() {
             <View style={styles.trimDivider} />
 
             <View style={styles.helperRow}>
-              <Feather name="refresh-cw" size={moderateScale(16)} color="#11E2A0" />
-              <Text type="barlowHard" style={styles.helperTitleText}>
-                양쪽 손잡이를 드래그
-              </Text>
+              <Feather name="code" size={moderateScale(16)} color="#11E2A0" />
+              <View style={styles.helperTextRow}>
+                <Text type="barlowHard" style={styles.helperTitleText}>
+                  양쪽 손잡이
+                </Text>
+                <Text type="barlowLight" style={styles.helperSubText}>
+                  를 드래그해 구간을 조정하세요
+                </Text>
+              </View>
             </View>
-
-            <Text type="barlowLight" style={styles.helperText}>
-              왼쪽은 스윙 시작, 오른쪽은 스윙 종료 지점입니다.
-            </Text>
           </View>
 
           <View style={styles.bottomButtonWrap}>
@@ -503,11 +488,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#1A3732",
     backgroundColor: "rgba(6,16,14,0.8)",
-    height: moderateScale(220),
+    height: moderateScale(300),
     alignItems: "center",
     justifyContent: "center",
     overflow: "hidden",
-    marginBottom: moderateScale(14),
+    marginBottom: moderateScale(16),
   },
   previewMissingWrap: {
     ...StyleSheet.absoluteFillObject,
@@ -529,36 +514,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  durationBadge: {
-    position: "absolute",
-    right: moderateScale(12),
-    bottom: moderateScale(12),
-    borderRadius: moderateScale(999),
-    backgroundColor: "rgba(0,0,0,0.6)",
-    paddingHorizontal: moderateScale(12),
-    paddingVertical: moderateScale(5),
-  },
-  durationBadgeText: {
-    color: "#F4F8F6",
-    fontSize: moderateScale(FONT.xxs),
-  },
-  liveDurationBadge: {
-    left: moderateScale(12),
-    right: undefined,
-  },
   trimCard: {
     borderRadius: moderateScale(22),
-    borderWidth: 1,
-    borderColor: "#1C3531",
-    backgroundColor: "rgba(6,16,14,0.86)",
-    //backgroundColor: "#121515"
-    padding: moderateScale(14),
+    borderWidth: 0,
+    borderColor: "transparent",
+    backgroundColor: "transparent",
+    paddingHorizontal: moderateScale(2),
+    paddingVertical: moderateScale(6),
     marginTop: moderateScale(4),
   },
   trimHeaderRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: moderateScale(14),
+    marginBottom: moderateScale(10),
   },
   trimLabel: {
     color: "#11E2A0",
@@ -570,51 +538,63 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(FONT.xl),
   },
   timelineRow: {
-    height: moderateScale(90),
+    height: moderateScale(64),
     borderRadius: moderateScale(16),
-    backgroundColor: "#111B19",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: moderateScale(4),
-    paddingHorizontal: moderateScale(6),
+    backgroundColor: "rgba(75,175,130,0.12)",
+    borderWidth: 1,
+    borderColor: "rgba(75,175,130,0.18)",
+    justifyContent: "center",
+    paddingHorizontal: moderateScale(4),
     marginBottom: moderateScale(14),
     overflow: "hidden",
   },
-  timelineBlock: {
-    flex: 1,
-    height: moderateScale(64),
-    borderRadius: moderateScale(12),
-    backgroundColor: "#263734",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  timelineBlockText: {
-    color: "#5F7570",
-    fontSize: moderateScale(FONT.sm),
+  timelineTrack: {
+    position: "absolute",
+    left: moderateScale(12),
+    right: moderateScale(12),
+    height: moderateScale(8),
+    borderRadius: moderateScale(999),
+    backgroundColor: "#1E2C29",
   },
   activeRange: {
     position: "absolute",
-    top: moderateScale(6),
-    bottom: moderateScale(6),
-    borderRadius: moderateScale(12),
-    borderWidth: 3,
-    borderColor: "#12E2A1",
-    backgroundColor: "rgba(18,226,161,0.18)",
+    top: "50%",
+    height: moderateScale(52),
+    marginTop: -moderateScale(26),
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    overflow: "visible",
+  },
+  activeRangeLine: {
+    position: "absolute",
+    left: moderateScale(17),
+    right: moderateScale(17),
+    top: "50%",
+    height: moderateScale(6),
+    marginTop: -moderateScale(3),
+    borderRadius: moderateScale(999),
+    backgroundColor: "#4BAF82",
   },
   rangeHandle: {
-    width: moderateScale(24),
-    borderRadius: moderateScale(8),
-    height: "100%",
+    width: moderateScale(34),
+    borderRadius: moderateScale(12),
+    height: moderateScale(52),
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#12E2A1",
+    backgroundColor: "#4BAF82",
   },
-  rangeHandleText: {
-    color: "#033226",
-    fontSize: moderateScale(FONT.sm),
+  handleGrip: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: moderateScale(4),
+  },
+  handleGripLine: {
+    width: moderateScale(3),
+    height: moderateScale(18),
+    borderRadius: moderateScale(3),
+    backgroundColor: "#0F6A4F",
   },
   trimDivider: {
     height: 1,
@@ -627,13 +607,17 @@ const styles = StyleSheet.create({
     gap: moderateScale(8),
     marginBottom: moderateScale(4),
   },
+  helperTextRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
   helperTitleText: {
     color: "#E9F0EE",
-    fontSize: moderateScale(FONT.md),
+    fontSize: moderateScale(FONT.xs),
   },
-  helperText: {
+  helperSubText: {
     color: "#8C9A97",
-    fontSize: moderateScale(FONT.xxs),
+    fontSize: moderateScale(FONT.xs),
     fontFamily: "Pretendard-Regular",
   },
   bottomButtonWrap: {
@@ -654,5 +638,6 @@ const styles = StyleSheet.create({
   confirmButtonText: {
     color: "#021C14",
     fontSize: moderateScale(FONT.md),
+    fontFamily: "Pretendard-SemiBold",
   },
 });

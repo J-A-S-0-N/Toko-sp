@@ -3,11 +3,13 @@ import PromoAdComponent from "@/components/ads/PromoAdComponent";
 import HomeFeedHeader from "@/components/HomeFeedComponents/homeFeedHeader";
 import HomeFeedSkeleton from "@/components/HomeFeedComponents/HomeFeedSkeleton";
 import UsernameHeader from "@/components/HomeFeedComponents/usernameHeader";
-import InitialAdModal from "@/components/InitialAdModal";
+// import InitialAdModal from "@/components/InitialAdModal";
 import {
+    LatestYoutubeVideoSection,
     RecentScansSection,
     ScanFrameSection
 } from "@/components/ScanPageComponent";
+import TabEnterTransition from "@/components/TabEnterTransition";
 import { useAuth } from "@/context/AuthContext";
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { router } from "expo-router";
@@ -22,7 +24,7 @@ export default function ScanScreen() {
   const { user } = useAuth();
   const tabBarHeight = useBottomTabBarHeight();
   const [showSkeleton, setShowSkeleton] = React.useState(true);
-  const [showInitialAdModal, setShowInitialAdModal] = React.useState(false);
+  // const [showInitialAdModal, setShowInitialAdModal] = React.useState(false);
   const scrollY = useSharedValue(0);
   const defaultHolesCount = 9;
   const defaultManualScores = React.useMemo(() => Array(defaultHolesCount).fill(3), [defaultHolesCount]);
@@ -40,6 +42,7 @@ export default function ScanScreen() {
           fixedPars: defaultFixedPars,
           startParEdit: "1",
           scanDocId: scanDocRef.id,
+          manual: "1",
         },
       });
     } catch (error) {
@@ -51,7 +54,7 @@ export default function ScanScreen() {
   React.useEffect(() => {
     const timer = setTimeout(() => {
       setShowSkeleton(false);
-      setShowInitialAdModal(true);
+      // setShowInitialAdModal(true);
     }, 2000);
 
     return () => clearTimeout(timer);
@@ -61,12 +64,13 @@ export default function ScanScreen() {
     scrollY.value = event.contentOffset.y;
   });
 
-  const handleCloseInitialAdModal = () => {
-    setShowInitialAdModal(false);
-  };
+  // const handleCloseInitialAdModal = () => {
+  //   setShowInitialAdModal(false);
+  // };
 
   return (
-    <SafeAreaView edges={["top"]} style={styles.safeArea}>
+    <TabEnterTransition>
+      <SafeAreaView edges={["top"]} style={styles.safeArea}>
       {showSkeleton ? (
         <Animated.View exiting={FadeOut.duration(400)} style={styles.skeletonContainer}>
           <HomeFeedSkeleton />
@@ -88,7 +92,6 @@ export default function ScanScreen() {
             </View>
           </View>
 
-          <RecentScansSection />
           <ScanFrameSection
             onSwingAnalysisPress={() => {
               router.push('/(swing)' as never);
@@ -132,19 +135,22 @@ export default function ScanScreen() {
               void handleDirectManualRoute();
             }}
           />
+          <RecentScansSection />
           <View style={styles.adContainer}>
             <ParkPromotionAdComponent />
           </View>
           <View style={styles.adContainer}>
             <PromoAdComponent />
           </View>
+          <LatestYoutubeVideoSection />
         </Animated.ScrollView>
       )}
 
-      {showInitialAdModal && (
+      {/* {showInitialAdModal && (
         <InitialAdModal onClose={handleCloseInitialAdModal} />
-      )}
-    </SafeAreaView>
+      )} */}
+      </SafeAreaView>
+    </TabEnterTransition>
   );
 }
 

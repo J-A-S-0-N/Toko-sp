@@ -1,4 +1,6 @@
 import { updateUserName } from '@/app/(auth)/functions/updateUserNameFunction';
+import CurrentSwingTypeCard from '@/components/ProfileComponents/CurrentSwingTypeCard';
+import TabEnterTransition from '@/components/TabEnterTransition';
 import { ThemedText as Text } from '@/components/themed-text';
 import { db } from '@/config/firebase';
 import { FONT } from '@/constants/theme';
@@ -188,7 +190,8 @@ export default function ProfileScreen() {
   };
 
   return (
-    <SafeAreaView edges={['top']} style={styles.safeArea}>
+    <TabEnterTransition>
+      <SafeAreaView edges={['top']} style={styles.safeArea}>
       <ScrollView
         style={styles.container}
         contentContainerStyle={[styles.content, { paddingBottom: tabBarHeight + moderateScale(150) }]}
@@ -278,6 +281,8 @@ export default function ProfileScreen() {
               {stats.averageDelta != null ? `${stats.averageDelta >= 0 ? '+' : ''}${stats.averageDelta} 평타` : '- 평타'}
             </Text>
           </View>
+
+          <CurrentSwingTypeCard />
         </View>
 
         <View style={styles.divider} />
@@ -362,7 +367,8 @@ export default function ProfileScreen() {
           </View>
         </View>
       </ScrollView>
-    </SafeAreaView>
+      </SafeAreaView>
+    </TabEnterTransition>
   );
 }
 

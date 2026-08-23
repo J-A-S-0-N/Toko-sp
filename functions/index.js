@@ -187,6 +187,8 @@ async function analyzeSwingScreenshots(screenshotUrls) {
   SCORING RULES:
   - All score fields must be integers from 60 to 100.
   - Never return a score lower than 60.
+  - backswingAngleScore must always be an integer from 87 to 100.
+  - Never return backswingAngleScore below 87.
   - Use the score range consistently:
 
     - 60 to 75:
@@ -229,11 +231,12 @@ async function analyzeSwingScreenshots(screenshotUrls) {
   - Whether the initial movement appears stable
 
   3. backswingAngleScore
-  Evaluate the visible size and shape of the backswing for park golf, including:
-  - Whether the backswing appears excessively large
-  - Whether body rotation appears controlled
-  - Whether the top position appears manageable
-  - Whether the backswing remains suitable for park golf
+  Evaluate the visible backswing club trajectory direction (forward/backward path), including:
+  - Whether the club path appears stable and repeatable during the backswing
+  - Whether the club avoids unnecessary forward drift during takeback into backswing
+  - Whether the club's backward travel appears controlled rather than rerouted abruptly
+  - Whether the backswing-to-downswing transition preserves a consistent path tendency
+  - Do not evaluate this category primarily by backswing height alone
 
   4. headUpScore
   Evaluate visible head and gaze stability around impact, including:
@@ -830,4 +833,3 @@ export const onNewSwingVideo = onDocumentCreated(
     }
   }
 );
-

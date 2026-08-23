@@ -3,49 +3,39 @@ import ParkPromotionAdComponent from '@/components/ads/ParkPromotionAdComponent'
 import PromoAdComponent from '@/components/ads/PromoAdComponent';
 import SponsoredAdComponent from '@/components/ads/SponsoredAdComponent';
 // import DailyScanEventCard from '@/components/HomeFeedComponents/dailyScanEventCard';
+import AiCoachCard from '@/components/HomeFeedComponents/aiCoachCard';
 import DailyTipComponent from '@/components/HomeFeedComponents/dailyTipComponent';
+import FirstRankingUserCard from '@/components/HomeFeedComponents/FirstRankingUserCard';
 import GoalSetupPromptComponent from '@/components/HomeFeedComponents/goalSetupPromptComponent';
 import HottestLocationsComponent from '@/components/HomeFeedComponents/hottestLocationsComponent';
 import LiveChatBannerComponent from '@/components/HomeFeedComponents/liveChatBannerComponent';
+import RankingLoadingPlaceholder from '@/components/HomeFeedComponents/RankingLoadingPlaceholder';
 import RecentRoundComponent from '@/components/HomeFeedComponents/recentRoundComponent';
+import RecentSwingSnapshotCard from '@/components/HomeFeedComponents/recentSwingSnapshotCard';
 import RegionalRankComponent from '@/components/HomeFeedComponents/regionalRankComponent';
 import SwingAnalyzerHero from '@/components/HomeFeedComponents/swingAnalyzerHero';
+import WeeklyRankingListCard from '@/components/HomeFeedComponents/WeeklyRankingListCard';
+import TabEnterTransition from '@/components/TabEnterTransition';
 import { ThemedText as Text } from '@/components/themed-text';
 import db from '@/config/firebase';
 import { FONT } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
+import {
+    fetchRecentSwingHistory,
+    fetchRecentSwingSnapshot,
+    fetchWeeklyRankings,
+    RankingSwingItem,
+    type RecentSwingHistoryRow,
+    type RecentSwingSnapshotData
+} from '@/services/swingVideoService';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useRouter } from 'expo-router';
 import { collection, doc, getCountFromServer, query, setDoc, where } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
-import { Alert, Linking, Pressable, StyleSheet, View } from 'react-native';
+import { Alert, Image, Linking, Pressable, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { moderateScale } from 'react-native-size-matters';
-
-const MOCK_SWING_HISTORY_ROWS = [
-  {
-    id: 'swing-1',
-    title: '7월 16일 스윙',
-    summary: '자세 77 · 템포 74 · 밸런스 82',
-    score: '78점',
-    delta: '+6',
-  },
-  {
-    id: 'swing-2',
-    title: '7월 10일 스윙',
-    summary: '자세 72 · 템포 70 · 밸런스 74',
-    score: '72점',
-    delta: '+3',
-  },
-  {
-    id: 'swing-3',
-    title: '7월 3일 스윙',
-    summary: '자세 68 · 템포 69 · 밸런스 70',
-    score: '69점',
-    delta: '첫 분석',
-  },
-];
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -55,6 +45,13 @@ export default function HomeScreen() {
   const [phoneModalVisible, setPhoneModalVisible] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isSavingPhone, setIsSavingPhone] = useState(false);
+
+  const [bestSwing, setBestSwing] = useState<RankingSwingItem | null>(null);
+  const [categorizedSwings, setCategorizedSwings] = useState<RankingSwingItem[]>([]);
+  const [isRankingLoading, setIsRankingLoading] = useState(true);
+  const [recentSwingSnapshot, setRecentSwingSnapshot] = useState<RecentSwingSnapshotData | null>(null);
+  const [swingHistoryRows, setSwingHistoryRows] = useState<RecentSwingHistoryRow[]>([]);
+  const [isSwingHistoryLoading, setIsSwingHistoryLoading] = useState(true);
 
   const formattedPhoneNumber = phoneNumber
     .replace(/\D/g, '')
@@ -80,6 +77,71 @@ export default function HomeScreen() {
     };
     fetchCount();
   }, [user?.uid]);
+
+  useEffect(() => {
+    const loadRankings = async () => {
+      try {
+        const { bestOverall, categorized } = await fetchWeeklyRankings();
+        setBestSwing(bestOverall);
+        setCategorizedSwings(categorized);
+      } catch (error) {
+        console.error("Failed to load rankings:", error);
+      } finally {
+        setIsRankingLoading(false);
+      }
+    };
+    loadRankings();
+  }, []);
+
+  useEffect(() => {
+    if (!user?.uid) {
+      setRecentSwingSnapshot(null);
+      return;
+    }
+
+    const loadRecentSwingSnapshot = async () => {
+      try {
+        const snapshot = await fetchRecentSwingSnapshot(user.uid);
+        setRecentSwingSnapshot(snapshot);
+      } catch (error) {
+        console.error('Failed to load recent swing snapshot:', error);
+        setRecentSwingSnapshot(null);
+      }
+    };
+
+    void loadRecentSwingSnapshot();
+  }, [user?.uid]);
+
+  useEffect(() => {
+    if (!user?.uid) {
+      setSwingHistoryRows([]);
+      setIsSwingHistoryLoading(false);
+      return;
+    }
+
+    let isActive = true;
+    setIsSwingHistoryLoading(true);
+
+    const loadSwingHistory = async () => {
+      const rows = await fetchRecentSwingHistory(user.uid);
+      if (!isActive) return;
+      setSwingHistoryRows(rows);
+      setIsSwingHistoryLoading(false);
+    };
+
+    void loadSwingHistory();
+
+    return () => {
+      isActive = false;
+    };
+  }, [user?.uid]);
+
+  const openSwingResult = (swingVideoId: string) => {
+    router.push({
+      pathname: '/(swing)/result',
+      params: { swingVideoId },
+    });
+  };
 
   // useEffect(() => {
   //   if (!user?.uid) {
@@ -172,22 +234,64 @@ export default function HomeScreen() {
   };
 
   return (
-    <SafeAreaView edges={['top']} style={styles.safeArea}>
+    <TabEnterTransition>
+      <SafeAreaView edges={['top']} style={styles.safeArea}>
       <Animated.ScrollView
         entering={FadeIn.duration(400)}
         style={styles.container}
         contentContainerStyle={{ paddingBottom: tabBarHeight + moderateScale(150) }}
       >
+        <View style={styles.feedSection}>
+          <View style={styles.pageHeader}>
+            <Text type="barlowHard" style={styles.pageTitle}>스윙 분석</Text>
+          </View>
+          {/* <HomeTopGreetingHeader /> */}
+        </View>
 
-        <View style={{marginBottom: moderateScale(15)}}>
+        <View style={styles.feedSection}>
           <SwingAnalyzerHero onPress={() => router.push('/(swing)' as never)} />
         </View>
 
-        <Pressable
-          style={styles.swingHistoryEntryButton}
-          onPress={() => router.push('/(swing)/history' as never)}
-        >
-          <View style={styles.swingHistoryHeaderRow}>
+        {isRankingLoading ? (
+          <View style={styles.feedSection}>
+            <RankingLoadingPlaceholder />
+          </View>
+        ) : (
+          <>
+            {bestSwing && (
+              <>
+                <View style={styles.feedSection}>
+                  <FirstRankingUserCard item={bestSwing} onPress={openSwingResult} />
+                </View>
+
+                {recentSwingSnapshot?.aiCoach ? (
+                  <View style={styles.feedSection}>
+                    <AiCoachCard coach={recentSwingSnapshot.aiCoach} />
+                  </View>
+                ) : null}
+              </>
+            )}
+
+            {categorizedSwings.length > 0 && (
+              <View style={styles.feedSection}>
+                <WeeklyRankingListCard items={categorizedSwings} onPressItem={openSwingResult} />
+              </View>
+            )}
+          </>
+        )}
+
+        <View style={styles.feedSection}>
+          <RecentSwingSnapshotCard
+            snapshot={recentSwingSnapshot}
+            onPressHistory={() => router.push('/(swing)/history' as never)}
+          />
+        </View>
+
+        <View style={styles.swingHistoryEntryButton}>
+          <Pressable
+            style={styles.swingHistoryHeaderRow}
+            onPress={() => router.push('/(swing)/history' as never)}
+          >
             <Text type="barlowHard" style={styles.swingHistoryHeaderTitle}>
               이전 분석 기록
             </Text>
@@ -199,39 +303,57 @@ export default function HomeScreen() {
                 →
               </Text>
             </View>
-          </View>
+          </Pressable>
 
-          {MOCK_SWING_HISTORY_ROWS.map((row, index) => {
-            const isLast = index === MOCK_SWING_HISTORY_ROWS.length - 1;
-            return (
-              <View key={row.id} style={[styles.swingHistoryRow, !isLast && styles.swingHistoryRowDivider]}>
-                <View style={styles.swingHistoryThumbBox}>
-                  <Text type="barlowHard" style={styles.swingHistoryThumbPlay}>
-                    ▶
-                  </Text>
-                </View>
+          {isSwingHistoryLoading ? (
+            <Text type="barlowLight" style={styles.swingHistoryEmptyText}>
+              기록을 불러오는 중입니다.
+            </Text>
+          ) : swingHistoryRows.length === 0 ? (
+            <Text type="barlowLight" style={styles.swingHistoryEmptyText}>
+              아직 분석 기록이 없습니다.
+            </Text>
+          ) : (
+            swingHistoryRows.map((row, index) => {
+              const isLast = index === swingHistoryRows.length - 1;
+              return (
+                <Pressable
+                  key={row.id}
+                  style={[styles.swingHistoryRow, !isLast && styles.swingHistoryRowDivider]}
+                  onPress={() => openSwingResult(row.id)}
+                >
+                  <View style={styles.swingHistoryThumbBox}>
+                    {row.thumbnailUrl ? (
+                      <Image source={{ uri: row.thumbnailUrl }} style={styles.swingHistoryThumbImage} />
+                    ) : (
+                      <Text type="barlowHard" style={styles.swingHistoryThumbPlay}>
+                        ▶
+                      </Text>
+                    )}
+                  </View>
 
-                <View style={styles.swingHistoryRowBody}>
-                  <Text type="barlowHard" style={styles.swingHistoryRowTitle}>
-                    {row.title}
-                  </Text>
-                  <Text type="barlowLight" style={styles.swingHistoryRowSummary}>
-                    {row.summary}
-                  </Text>
-                </View>
+                  <View style={styles.swingHistoryRowBody}>
+                    <Text type="barlowHard" style={styles.swingHistoryRowTitle}>
+                      {row.title}
+                    </Text>
+                    <Text type="barlowLight" style={styles.swingHistoryRowSummary}>
+                      {row.summary}
+                    </Text>
+                  </View>
 
-                <View style={styles.swingHistoryScoreColumn}>
-                  <Text type="barlowHard" style={styles.swingHistoryScoreText}>
-                    {row.score}
-                  </Text>
-                  <Text type="barlowHard" style={styles.swingHistoryDeltaText}>
-                    {row.delta}
-                  </Text>
-                </View>
-              </View>
-            );
-          })}
-        </Pressable>
+                  <View style={styles.swingHistoryScoreColumn}>
+                    <Text type="barlowHard" style={styles.swingHistoryScoreText}>
+                      {row.score}
+                    </Text>
+                    <Text type="barlowHard" style={styles.swingHistoryDeltaText}>
+                      {row.delta}
+                    </Text>
+                  </View>
+                </Pressable>
+              );
+            })
+          )}
+        </View>
 
 {/*         <View style={{marginBottom: moderateScale(15)}}>
           <UserStatComponent/>
@@ -245,11 +367,11 @@ export default function HomeScreen() {
           <DailyScanEventCard/>
         </View> */}
 
-        <View style={{marginBottom: moderateScale(15)}}>
+        <View style={styles.feedSection}>
           <RegionalRankComponent/>
         </View>
 
-        <View style={{marginBottom: moderateScale(15)}}>
+        <View style={styles.feedSection}>
           <LiveChatBannerComponent onPress={() => router.push('/chatRoom')} />
         </View>
 
@@ -257,33 +379,33 @@ export default function HomeScreen() {
           <WeatherSummaryComponent/>
         </View> */}
 
-        <View style={{marginBottom: moderateScale(25)}}>
+        <View style={styles.feedSection}>
           <ParkPromotionAdComponent/>
         </View>
 
-        <View style={{marginBottom: moderateScale(25)}}>
+        <View style={styles.feedSection}>
           <RecentRoundComponent/>
         </View>
 
-        <View style={{marginBottom: moderateScale(15)}}>
+        <View style={styles.feedSection}>
           <PromoAdComponent/>
         </View>
 
-        <View style={{marginBottom: moderateScale(15)}}>
+        <View style={styles.feedSection}>
           <DailyTipComponent/>
         </View>
 
-        <View style={{marginBottom: moderateScale(25)}}>
+        <View style={styles.feedSection}>
           <SponsoredAdComponent/>
         </View>
 
-        <View style={{marginBottom: moderateScale(25)}}>
+        <View style={styles.feedSection}>
           <HottestLocationsComponent
             onPressViewAll={() => Linking.openURL('https://www.kpga7330.com/park-golf/courses')}
           />
         </View>
 
-        <View style={{marginBottom: moderateScale(15)}}>
+        <View style={styles.feedSection}>
           <GoalSetupPromptComponent/>
         </View>
 
@@ -336,7 +458,8 @@ export default function HomeScreen() {
         </View>
       </Modal>
       */}
-    </SafeAreaView>
+      </SafeAreaView>
+    </TabEnterTransition>
   );
 }
 
@@ -361,6 +484,16 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom: 8,
   },
+  feedSection: {
+    marginBottom: moderateScale(25),
+  },
+  pageHeader: {
+    marginBottom: moderateScale(4),
+  },
+  pageTitle: {
+    fontSize: moderateScale(26),
+    color: "#F3F5F4",
+  },
   allRoundsButton: {
     backgroundColor: '#1F2222',
     borderRadius: moderateScale(14),
@@ -383,7 +516,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: moderateScale(14),
     paddingTop: moderateScale(16),
     paddingBottom: moderateScale(8),
-    marginBottom: moderateScale(15),
+    marginBottom: moderateScale(20),
   },
   swingHistoryHeaderRow: {
     flexDirection: 'row',
@@ -425,6 +558,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: moderateScale(12),
+    overflow: 'hidden',
+  },
+  swingHistoryThumbImage: {
+    width: '100%',
+    height: '100%',
   },
   swingHistoryThumbPlay: {
     color: '#08DFAF',
@@ -456,6 +594,12 @@ const styles = StyleSheet.create({
   swingHistoryDeltaText: {
     color: '#11E0AE',
     fontSize: moderateScale(FONT.xxxs),
+  },
+  swingHistoryEmptyText: {
+    color: '#86918E',
+    fontSize: moderateScale(FONT.xxs),
+    fontFamily: 'Pretendard-Regular',
+    paddingVertical: moderateScale(14),
   },
   phoneModalBackdrop: {
     flex: 1,

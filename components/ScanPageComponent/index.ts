@@ -1,3 +1,4 @@
+export { default as LatestYoutubeVideoSection } from "./LatestYoutubeVideoSection";
 export { default as RecentScansSection } from "./RecentScansSection";
 export { default as ScanFrameSection } from "./ScanFrameSection";
 export { default as ScanGuideSection } from "./ScanGuideSection";

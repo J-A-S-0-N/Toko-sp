@@ -1,7 +1,8 @@
 import { ThemedText as Text } from '@/components/themed-text';
 import { FONT } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
-import { router } from 'expo-router';
+import { CommonActions } from '@react-navigation/native';
+import { router, useNavigation } from 'expo-router';
 import type { UserCredential } from 'firebase/auth';
 import { useMemo, useRef, useState } from 'react';
 import { Alert, Animated, Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, TouchableWithoutFeedback, View } from 'react-native';
@@ -11,15 +12,9 @@ import { checkUserExistsByPhoneNumber } from './functions/loginFetchUserFunction
 import { saveUserInfo } from './functions/saveUserFunction';
 import { clearPendingUserCredential, getPendingUserCredential } from './functions/userCredentialStore';
 
-const SKILL_LEVELS = [
-  { id: 'beginner', icon: '🚀', label: '입문자', hint: '45+' },
-  { id: 'amateur', icon: '⛳', label: '아마추어', hint: '40-45' },
-  { id: 'intermediate', icon: '🥂', label: '중급자', hint: '33-40' },
-  { id: 'advanced', icon: '🏆', label: '프로', hint: '<33' },
-] as const;
-
 export default function ProfileSetupScreen() {
   const { setUsername } = useAuth();
+  const navigation = useNavigation();
   const pendingUserCredential = getPendingUserCredential() as UserCredential | null;
 
   // ===== GOOGLE AUTH (added) START — to revert, replace with: const [name, setName] = useState(''); =====
@@ -30,9 +25,7 @@ export default function ProfileSetupScreen() {
 
   // ===== GOOGLE AUTH (added) END =====
 
-  const [handicap, setHandicap] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [skillLevel, setSkillLevel] = useState<(typeof SKILL_LEVELS)[number]['id'] | null>(null);
   const avatarShake = useRef(new Animated.Value(0)).current;
 
   const isGoogleSignup = useMemo(() => {
@@ -57,10 +50,8 @@ export default function ProfileSetupScreen() {
   }, [phoneNumber]);
 
   const hasNameValue = name.trim().length > 0;
-  const hasHandicapValue = handicap.trim().length > 0;
   const hasPhoneValue = phoneNumber.replace(/\D/g, '').length > 0;
   const isPhoneValid = phoneNumber.replace(/\D/g, '').length >= 10;
-  const hasInvalidHandicapChars = /[^\d.]/.test(handicap);
   const hasInvalidNameChars = /[^가-힣a-zA-Z0-9\s]/.test(name);
   const hasNameTooLong = name.trim().length > 10;
 
@@ -70,14 +61,14 @@ export default function ProfileSetupScreen() {
   };
 
   const isNextEnabled = useMemo(() => {
-    const isBaseFormValid = hasNameValue && hasHandicapValue && !hasInvalidHandicapChars && !hasInvalidNameChars && !hasNameTooLong && skillLevel !== null;
+    const isBaseFormValid = hasNameValue && !hasInvalidNameChars && !hasNameTooLong;
 
     if (!isGoogleSignup) {
       return isBaseFormValid;
     }
 
     return isBaseFormValid && isPhoneValid;
-  }, [hasHandicapValue, hasInvalidHandicapChars, hasInvalidNameChars, hasNameTooLong, hasNameValue, isGoogleSignup, isPhoneValid, skillLevel]);
+  }, [hasInvalidNameChars, hasNameTooLong, hasNameValue, isGoogleSignup, isPhoneValid]);
 
   const handleNext = async () => {
     if (!isNextEnabled) {
@@ -108,8 +99,6 @@ export default function ProfileSetupScreen() {
     try {
       const result = await saveUserInfo(userCredential as UserCredential, {
         name,
-        handicap: parseFloat(handicap),
-        skillLevel,
         ...(googlePhoneNumberToSave ? { phoneNumber: googlePhoneNumberToSave } : {}),
 
         // ===== GOOGLE AUTH (added) START — remove this line to revert =====
@@ -131,7 +120,11 @@ export default function ProfileSetupScreen() {
 
       clearPendingUserCredential();
       setUsername(name);
-      router.push('/(auth)/locationSetup');
+      // router.push('/(auth)/locationSetup');
+      const root = navigation.getParent() ?? navigation;
+      root.dispatch(
+        CommonActions.reset({ index: 0, routes: [{ name: '(tabs)' }] })
+      );
     } catch (error) {
       Alert.alert('저장 실패', '프로필 저장 중 오류가 발생했어요. 다시 시도해주세요.');
     }
@@ -255,48 +248,6 @@ export default function ProfileSetupScreen() {
             </View>
           )}
 
-          <View style={styles.fieldGroup}>
-            <Text style={styles.fieldLabel}>본인 최저타수 (9홀 기준) *</Text>
-            <View
-              style={[
-                styles.handicapWrap,
-                hasHandicapValue && styles.handicapWrapActive,
-                hasInvalidHandicapChars && styles.handicapWrapInvalid,
-              ]}
-            >
-              <TextInput
-                value={handicap}
-                onChangeText={setHandicap}
-                keyboardType="decimal-pad"
-                placeholder="예: 12.4"
-                placeholderTextColor="#6A7278"
-                style={styles.handicapInput}
-                selectionColor="#4FB78A"
-              />
-              <Text style={styles.chevron}>▾</Text>
-            </View>
-          </View>
-
-          <View style={styles.fieldGroup}>
-            <Text style={styles.fieldLabel}>실력 수준 (9홀 기준)</Text>
-            <View style={styles.skillRow}>
-              {SKILL_LEVELS.map((item) => {
-                const isSelected = item.id === skillLevel;
-
-                return (
-                  <Pressable
-                    key={item.id}
-                    onPress={() => setSkillLevel(item.id)}
-                    style={[styles.skillChip, isSelected && styles.skillChipSelected]}
-                  >
-                    <Text style={styles.skillChipText}>
-                      {item.icon} {item.label} <Text style={styles.skillChipHint}>{item.hint}</Text>
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-          </View>
         </ScrollView>
       </View>
 

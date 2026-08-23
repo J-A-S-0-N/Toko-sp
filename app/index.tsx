@@ -257,5 +257,5 @@ export default function EntryScreen() {
     );
   }
 
-  return <Redirect href="/(onboarding)" />;
+  return <Redirect href="/(auth)" />;
 }

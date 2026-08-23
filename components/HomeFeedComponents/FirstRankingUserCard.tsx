@@ -1,325 +1,198 @@
 import { ThemedText as Text } from "@/components/themed-text";
 import { FONT } from "@/constants/theme";
+import { RankingSwingItem } from "@/services/swingVideoService";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
-import { StyleSheet, View } from "react-native";
+import { Image, Pressable, StyleSheet, View } from "react-native";
 import { moderateScale } from "react-native-size-matters";
 
 type FirstRankingUserCardProps = {
-  onPress?: () => void;
+  item: RankingSwingItem | null;
+  onPress?: (swingId: string) => void;
 };
 
-export default function FirstRankingUserCard({ onPress }: FirstRankingUserCardProps) {
+export default function FirstRankingUserCard({ item, onPress }: FirstRankingUserCardProps) {
+  if (!item) return null;
+
   return (
-    <LinearGradient
-      colors={["#242113", "#1C1D1A", "#161D1A"]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={styles.container}
-    >
-      <View style={styles.topRow}>
-        <View style={styles.rankSection}>
-          <View style={styles.crownBadge}>
-            <Text style={styles.crownText}>👑</Text>
-          </View>
-          <View>
-            <Text type="barlowHard" style={styles.rankLabel}>
-              현재 1위
-            </Text>
-            <Text type="barlowHard" style={styles.title}>
-              이번 주 최고 스윙
+    <Pressable onPress={() => onPress?.(item.id)} style={styles.pressable}>
+      <LinearGradient
+        colors={["#222114", "#1A1E1B", "#151A18"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.container}
+      >
+        <View style={styles.topRow}>
+          <View style={styles.mainBadge}>
+            <Text type="barlowLight" style={styles.mainBadgeText}>
+              👑 {item.periodLabel} 1위
             </Text>
           </View>
-        </View>
-
-        <View style={styles.scoreBadge}>
-          <Text type="barlowHard" style={styles.scoreBadgeText}>
-            92점
-          </Text>
-        </View>
-      </View>
-
-      <View style={styles.mediaPlaceholder}>
-        <View style={styles.mediaShine} />
-        <View style={styles.mediaLabel}>
-          <View style={styles.mediaLabelDot} />
-          <Text type="barlowHard" style={styles.mediaLabelText}>
-            AI 자세교정표시
-          </Text>
-        </View>
-      </View>
-
-      <View style={styles.profileRow}>
-        <View style={styles.avatarCircle}>
-          <Text type="barlowHard" style={styles.avatarText}>
-            김
+          <Text type="barlowHard" style={styles.weekText}>
+            {item.periodLabel}
           </Text>
         </View>
 
-        <View style={styles.profileTextWrap}>
-          <Text type="barlowHard" style={styles.nameText}>
-            김성호
-          </Text>
-          <Text type="barlowLight" style={styles.metaText}>
-            경기 평택 · 구력 5년
-          </Text>
-        </View>
-      </View>
+        <View style={styles.contentRow}>
+          <View style={styles.mediaCard}>
+            {item.thumbnailUrl ? (
+              <Image source={{ uri: item.thumbnailUrl }} style={styles.thumbnail} />
+            ) : (
+              <View style={styles.mediaShine} />
+            )}
+          </View>
 
-      <View style={styles.metricsRow}>
-        <View style={styles.metricCard}>
-          <Text type="barlowLight" style={styles.metricLabel}>
-            자세
-          </Text>
-          <Text type="barlowHard" style={styles.metricValue}>
-            94
-          </Text>
-        </View>
-
-        <View style={styles.metricCard}>
-          <Text type="barlowLight" style={styles.metricLabel}>
-            템포
-          </Text>
-          <Text type="barlowHard" style={styles.metricValue}>
-            91
-          </Text>
-        </View>
-
-        <View style={styles.metricCard}>
-          <Text type="barlowLight" style={styles.metricLabel}>
-            밸런스
-          </Text>
-          <Text type="barlowHard" style={styles.metricValue}>
-            93
-          </Text>
+          <View style={styles.infoBlock}>
+            <Text type="barlowHard" style={styles.titleText}>
+              {item.title}
+            </Text>
+            <Text type="barlowHard" style={styles.nameText}>
+              {item.userName} 님
+            </Text>
+            <Text type="barlowLight" style={styles.metaText}>
+              {item.userLocation} · {item.metricLabel} 최고점
+            </Text>
+            <View style={styles.scoreWrap}>
+              <Text type="barlowLight" style={styles.scoreLabel}>
+                {item.metricLabel} 점수
+              </Text>
+              <Text type="barlowHard" style={styles.scoreValue}>
+                {item.metricScore}점
+              </Text>
+            </View>
+          </View>
         </View>
 
-        <View style={styles.metricCard}>
-          <Text type="barlowLight" style={styles.metricLabel}>
-            피니시
-          </Text>
-          <Text type="barlowHard" style={styles.metricValue}>
-            90
-          </Text>
-        </View>
-      </View>
-
-      <View style={styles.summaryBox}>
-        <Text type="barlowHard" style={styles.summaryLabel}>
-          AI 분석 요약
-        </Text>
-        <Text type="barlowLight" style={styles.summaryText}>
-          백스윙과 다운스윙의 속도 차이가 안정적이며, 임팩트 이후 피니시 자세까지 중심이 잘 유지됩니다.
-        </Text>
-      </View>
-
-    </LinearGradient>
+      </LinearGradient>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
+  pressable: {
+    width: "100%",
+  },
   container: {
-    borderRadius: moderateScale(34),
+    borderRadius: moderateScale(30),
     borderWidth: 1,
-    borderColor: "#6D642A",
-    paddingHorizontal: moderateScale(14),
-    paddingTop: moderateScale(14),
-    paddingBottom: moderateScale(12),
+    borderColor: "#6B602B",
+    paddingHorizontal: moderateScale(10),
+    paddingTop: moderateScale(11),
+    paddingBottom: moderateScale(11),
     overflow: "hidden",
-    backgroundColor: "#1E1F1C",
+    backgroundColor: "#1A1F1C",
   },
   topRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "flex-start",
+    alignItems: "center",
     marginBottom: moderateScale(10),
   },
-  rankSection: {
+  mainBadge: {
+    borderWidth: 1,
+    borderColor: "#8A7834",
+    backgroundColor: "rgba(74, 62, 24, 0.45)",
+    borderRadius: moderateScale(999),
+    paddingHorizontal: moderateScale(14),
+    paddingVertical: moderateScale(8),
+  },
+  mainBadgeText: {
+    color: "#F1C84F",
+    fontSize: moderateScale(FONT.xxxs),
+  },
+  weekText: {
+    color: "#8F9892",
+    fontSize: moderateScale(FONT.xs),
+  },
+  contentRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: moderateScale(8),
-    flexShrink: 1,
+    gap: moderateScale(12),
   },
-  crownBadge: {
-    width: moderateScale(50),
-    height: moderateScale(50),
-    borderRadius: moderateScale(14),
-    backgroundColor: "#3D3518",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  crownText: {
-    fontSize: moderateScale(20),
-  },
-  rankLabel: {
-    color: "#F2C33D",
-    fontSize: moderateScale(FONT.xxxs),
-    marginBottom: moderateScale(2),
-  },
-  title: {
-    color: "#F4F4F1",
-    fontSize: moderateScale(FONT.xs),
-  },
-  scoreBadge: {
-    minWidth: moderateScale(66),
-    height: moderateScale(48),
-    borderRadius: moderateScale(24),
+  mediaCard: {
+    width: moderateScale(116),
+    height: moderateScale(116),
+    borderRadius: moderateScale(22),
     borderWidth: 1,
-    borderColor: "#7B6D2B",
-    backgroundColor: "rgba(43, 40, 23, 0.92)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  scoreBadgeText: {
-    color: "#FFD247",
-    fontSize: moderateScale(FONT.xs),
-  },
-  mediaPlaceholder: {
-    height: moderateScale(155),
-    borderRadius: moderateScale(26),
-    borderWidth: 1,
-    borderColor: "rgba(94, 109, 96, 0.72)",
-    backgroundColor: "#1D2622",
-    marginBottom: moderateScale(14),
+    borderColor: "rgba(121, 145, 134, 0.48)",
+    backgroundColor: "#264137",
     overflow: "hidden",
+  },
+  thumbnail: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
   },
   mediaShine: {
     position: "absolute",
-    top: moderateScale(-30),
-    left: moderateScale(-40),
-    width: "120%",
-    height: moderateScale(90),
-    backgroundColor: "rgba(255,255,255,0.08)",
-    transform: [{ rotate: "-22deg" }],
+    top: moderateScale(-8),
+    left: moderateScale(-18),
+    width: moderateScale(150),
+    height: moderateScale(48),
+    backgroundColor: "rgba(255,255,255,0.13)",
+    transform: [{ rotate: "-32deg" }],
   },
-  mediaLabel: {
+  playButton: {
     position: "absolute",
-    top: moderateScale(12),
-    left: moderateScale(12),
-    flexDirection: "row",
-    alignItems: "center",
+    left: "50%",
+    top: "50%",
+    transform: [
+      { translateX: -moderateScale(22) },
+      { translateY: -moderateScale(22) },
+    ],
+    width: moderateScale(44),
+    height: moderateScale(44),
     borderRadius: moderateScale(999),
-    borderWidth: 1,
-    borderColor: "rgba(223, 231, 226, 0.24)",
-    backgroundColor: "rgba(30, 33, 31, 0.7)",
-    paddingHorizontal: moderateScale(9),
-    paddingVertical: moderateScale(6),
-    gap: moderateScale(5),
-  },
-  mediaLabelDot: {
-    width: moderateScale(12),
-    height: moderateScale(12),
-    borderRadius: moderateScale(10),
-    backgroundColor: "#E9EEEC",
-  },
-  mediaLabelText: {
-    color: "#EBF0EE",
-    fontSize: moderateScale(FONT.xxs),
-  },
-  profileRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: moderateScale(12),
-  },
-  avatarCircle: {
-    width: moderateScale(50),
-    height: moderateScale(50),
-    borderRadius: moderateScale(32),
-    borderWidth: 2,
-    borderColor: "#F2C339",
-    backgroundColor: "#86A9AD",
+    backgroundColor: "#00DFA6",
     alignItems: "center",
     justifyContent: "center",
-    marginRight: moderateScale(10),
   },
-  avatarText: {
-    color: "#163437",
-    fontSize: moderateScale(20),
-    //lineHeight: moderateScale(26),
+  playIcon: {
+    color: "#053529",
+    fontSize: moderateScale(18),
+    marginLeft: moderateScale(2),
   },
-  profileTextWrap: {
+  durationBadge: {
+    position: "absolute",
+    right: moderateScale(8),
+    bottom: moderateScale(8),
+    borderRadius: moderateScale(10),
+    backgroundColor: "rgba(8, 11, 10, 0.82)",
+    paddingHorizontal: moderateScale(9),
+    paddingVertical: moderateScale(4),
+  },
+  durationText: {
+    color: "#F4F6F5",
+    fontSize: moderateScale(FONT.xxs),
+  },
+  infoBlock: {
     flex: 1,
+    justifyContent: "space-between",
+    minHeight: moderateScale(116),
+  },
+  titleText: {
+    color: "#F2F3F0",
+    fontSize: moderateScale(FONT.md),
   },
   nameText: {
-    color: "#F5F6F4",
+    color: "#ECEEEB",
     fontSize: moderateScale(FONT.sm),
-    lineHeight: moderateScale(28),
-    marginBottom: moderateScale(2),
   },
   metaText: {
-    color: "#A1AAA7",
+    color: "#8F9892",
     fontSize: moderateScale(FONT.xxxs),
   },
-  followButton: {
-    height: moderateScale(42),
-    minWidth: moderateScale(86),
-    borderRadius: moderateScale(21),
-    borderWidth: 1,
-    borderColor: "#00E3A8",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: moderateScale(14),
+  scoreLabel: {
+    color: "#8F9892",
+    fontSize: moderateScale(FONT.xxs),
   },
-  followButtonText: {
-    color: "#00E3A8",
-    fontSize: moderateScale(FONT.xs),
-  },
-  metricsRow: {
+  scoreWrap: {
     flexDirection: "row",
     justifyContent: "space-between",
-    gap: moderateScale(7),
-    marginBottom: moderateScale(12),
+    marginTop: moderateScale(8),
   },
-  metricCard: {
-    flex: 1,
-    borderRadius: moderateScale(16),
-    borderWidth: 1,
-    borderColor: "rgba(100, 112, 106, 0.4)",
-    backgroundColor: "rgba(34, 38, 35, 0.62)",
-    alignItems: "center",
-    paddingVertical: moderateScale(10),
-    minHeight: moderateScale(72),
-    justifyContent: "space-between",
-  },
-  metricLabel: {
-    color: "#858F8B",
-    fontSize: moderateScale(FONT.xxxs),
-  },
-  metricValue: {
-    color: "#F1F4F2",
-    fontSize: moderateScale(24),
-    lineHeight: moderateScale(28),
-  },
-  summaryBox: {
-    borderRadius: moderateScale(18),
-    borderWidth: 1,
-    borderColor: "rgba(68, 98, 84, 0.65)",
-    backgroundColor: "#12271F",
-    paddingHorizontal: moderateScale(12),
-    paddingVertical: moderateScale(10),
-    marginBottom: moderateScale(12),
-  },
-  summaryLabel: {
-    color: "#00D79C",
-    fontSize: moderateScale(FONT.xs),
-    marginBottom: moderateScale(8),
-  },
-  summaryText: {
-    color: "#DCE5E2",
-    fontSize: moderateScale(FONT.xxs),
-    lineHeight: moderateScale(21),
-  },
-  ctaButton: {
-    minHeight: moderateScale(46),
-    borderRadius: moderateScale(14),
-    backgroundColor: "#12E2A0",
-    alignItems: "center",
-    justifyContent: "center",
-    flexDirection: "row",
-    gap: moderateScale(7),
-  },
-  ctaText: {
-    color: "#02130F",
-    fontSize: moderateScale(FONT.xxs),
+  scoreValue: {
+    color: "#FFD247",
+    fontSize: moderateScale(FONT.xl),
   },
 });

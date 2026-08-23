@@ -1,3 +1,4 @@
+import TabEnterTransition from "@/components/TabEnterTransition";
 import { ThemedText as Text } from "@/components/themed-text";
 import Feather from "@expo/vector-icons/Feather";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
@@ -150,7 +151,8 @@ export default function StatsScreen() {
   };
 
   return (
-    <SafeAreaView edges={["top"]} style={styles.safeArea}>
+    <TabEnterTransition>
+      <SafeAreaView edges={["top"]} style={styles.safeArea}>
       <ScrollView
         style={styles.container}
         showsVerticalScrollIndicator={false}
@@ -158,33 +160,34 @@ export default function StatsScreen() {
       >
         <View>
           <Text type="barlowHard" style={styles.pageTitle}>경품 이벤트</Text>
-          <Text type="barlowLight" style={styles.pageSubtitle}>스코어를 기록하고 경품 이벤트에 참여해보세요.</Text>
+          {/* <Text type="barlowLight" style={styles.pageSubtitle}>스코어를 기록하고 경품 이벤트에 참여해보세요.</Text> */}
         </View>
 
-        <View style={styles.eventPushCard}>
-          <View style={styles.eventPushIconWrap}>
-            <Feather name="bell" size={moderateScale(22)} color="#06E78A" />
-          </View>
+        {!isEventPushAccepted ? (
+          <View style={styles.eventPushCard}>
+            <View style={styles.eventPushIconWrap}>
+              <Feather name="bell" size={moderateScale(22)} color="#06E78A" />
+            </View>
 
-          <View style={styles.eventPushTextWrap}>
-            <Text type="barlowHard" style={styles.eventPushTitle}>이벤트 소식을 놓치지 마세요</Text>
-            <Text type="barlowLight" style={styles.eventPushDescription}>새로운 이벤트와 당첨 결과를 알림으로 받아보세요.</Text>
-          </View>
+            <View style={styles.eventPushTextWrap}>
+              <Text type="barlowHard" style={styles.eventPushTitle}>이벤트 소식을 놓치지 마세요</Text>
+              <Text type="barlowLight" style={styles.eventPushDescription}>새로운 이벤트와 당첨 결과를 알림으로 받아보세요.</Text>
+            </View>
 
-          <Pressable
-            style={[
-              styles.eventPushActionButton,
-              isEventPushAccepted ? styles.eventPushActionButtonAccepted : null,
-              isEventPushLoading ? styles.eventPushActionButtonLoading : null,
-            ]}
-            onPress={handlePressEventPushButton}
-            disabled={isEventPushLoading}
-          >
-            <Text type="barlowHard" style={styles.eventPushActionButtonText}>
-              {isEventPushAccepted ? "수신 중" : "알림 받기"}
-            </Text>
-          </Pressable>
-        </View>
+            <Pressable
+              style={[
+                styles.eventPushActionButton,
+                isEventPushLoading ? styles.eventPushActionButtonLoading : null,
+              ]}
+              onPress={handlePressEventPushButton}
+              disabled={isEventPushLoading}
+            >
+              <Text type="barlowHard" style={styles.eventPushActionButtonText}>
+                {isEventPushAccepted ? "수신 중" : "알림 받기"}
+              </Text>
+            </Pressable>
+          </View>
+        ) : null}
 
         <View style={styles.mainCard}>
           <Pressable style={styles.bannerPressable} onPress={openOngoingEventUrl}>
@@ -211,9 +214,6 @@ export default function StatsScreen() {
           ) : (
             <>
               <Text type="barlowHard" style={styles.cardTitle}>{ongoingEvent?.title || "진행중인 이벤트를 확인해보세요!"}</Text>
-              <Text type="barlowLight" style={styles.cardDescription}>
-                {ongoingEvent?.description || "토코기록기 공식 유튜브 커뮤니티에서 현재 진행 중인 이벤트, 참여 안내, 추첨 결과를 확인할 수 있습니다."}
-              </Text>
             </>
           )}
 
@@ -265,7 +265,8 @@ export default function StatsScreen() {
           )}
         </View>
       </ScrollView>
-    </SafeAreaView>
+      </SafeAreaView>
+    </TabEnterTransition>
   );
 }
 

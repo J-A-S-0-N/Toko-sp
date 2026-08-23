@@ -1,3 +1,4 @@
+import SwingImageViewerModal from "@/components/SwingComponents/SwingImageViewerModal";
 import { ThemedText as Text } from "@/components/themed-text";
 import { db } from "@/config/firebase";
 import { FONT } from "@/constants/theme";
@@ -5,27 +6,29 @@ import { useAuth } from "@/context/AuthContext";
 import Feather from "@expo/vector-icons/Feather";
 import { useRouter } from "expo-router";
 import {
-    collection,
-    onSnapshot,
-    query,
-    where,
-    type QueryDocumentSnapshot,
-    type Timestamp
+  collection,
+  onSnapshot,
+  query,
+  where,
+  type QueryDocumentSnapshot,
+  type Timestamp
 } from "firebase/firestore";
 import React from "react";
 import {
-    Image,
-    Modal,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    View,
+  Image,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
 
 type SwingHistoryItem = {
   id: string;
+  ownerId: string;
+  analysisDocument: Record<string, unknown>;
   createdAt: Timestamp | null;
   analysisCompletedAt: Timestamp | null;
   overallScore: number | null;
@@ -33,9 +36,14 @@ type SwingHistoryItem = {
   headUpScore: number | null;
   backswingAngleScore: number | null;
   takebackScore: number | null;
+  takebackFeedback: string;
   status: string;
   summary: string;
-  screenshots: { url?: string }[];
+  playbackReady: boolean;
+  trimmedVideoUrl: string;
+  trimStartSec: number;
+  trimEndSec: number;
+  screenshots: { url?: string; sec?: number }[];
 };
 
 function toScore(value: unknown) {
@@ -53,8 +61,19 @@ function toTimestamp(value: unknown) {
 
 function toHistoryItem(snapshot: QueryDocumentSnapshot): SwingHistoryItem {
   const data = snapshot.data();
+  const trimStartSec = typeof data?.trimStartSec === "number" ? data.trimStartSec : 0;
+  const trimEndSec = typeof data?.trimEndSec === "number" ? data.trimEndSec : 0;
+  const ownerIdCandidates = [data?.userId, data?.uid, data?.ownerUid];
+  const ownerId =
+    ownerIdCandidates.find(
+      (candidate): candidate is string =>
+        typeof candidate === "string" && candidate.trim().length > 0
+    ) ?? "";
+
   return {
     id: snapshot.id,
+    ownerId,
+    analysisDocument: data as Record<string, unknown>,
     createdAt: toTimestamp(data?.createdAt),
     analysisCompletedAt: toTimestamp(data?.analysisCompletedAt),
     overallScore: toScore(data?.overallScore),
@@ -62,8 +81,13 @@ function toHistoryItem(snapshot: QueryDocumentSnapshot): SwingHistoryItem {
     headUpScore: toScore(data?.headUpScore),
     backswingAngleScore: toScore(data?.backswingAngleScore),
     takebackScore: toScore(data?.takebackScore),
+    takebackFeedback: typeof data?.takebackFeedback === "string" ? data.takebackFeedback : "",
     status: typeof data?.status === "string" ? data.status : "uploaded",
     summary: typeof data?.summary === "string" ? data.summary : "",
+    playbackReady: Boolean(data?.playbackReady),
+    trimmedVideoUrl: typeof data?.trimmedVideoUrl === "string" ? data.trimmedVideoUrl : "",
+    trimStartSec,
+    trimEndSec,
     screenshots: Array.isArray(data?.screenshots) ? data.screenshots : [],
   };
 }
@@ -116,6 +140,7 @@ export default function SwingHistoryScreen() {
   const [historyItems, setHistoryItems] = React.useState<SwingHistoryItem[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [selectedItem, setSelectedItem] = React.useState<SwingHistoryItem | null>(null);
+  const [isViewerVisible, setIsViewerVisible] = React.useState(false);
   const [selectedImageUrl, setSelectedImageUrl] = React.useState<string | null>(null);
 
   React.useEffect(() => {
@@ -136,6 +161,7 @@ export default function SwingHistoryScreen() {
       (snapshot) => {
         const items = snapshot.docs
           .map((docSnapshot) => toHistoryItem(docSnapshot))
+          .filter((item) => item.ownerId === user.uid)
           .sort((a, b) => getPreferredMillis(b) - getPreferredMillis(a));
         setHistoryItems(items);
         setIsLoading(false);
@@ -225,6 +251,7 @@ export default function SwingHistoryScreen() {
         animationType="slide"
         onRequestClose={() => {
           setSelectedItem(null);
+          setIsViewerVisible(false);
           setSelectedImageUrl(null);
         }}
       >
@@ -233,6 +260,7 @@ export default function SwingHistoryScreen() {
             style={StyleSheet.absoluteFill}
             onPress={() => {
               setSelectedItem(null);
+              setIsViewerVisible(false);
               setSelectedImageUrl(null);
             }}
           />
@@ -248,6 +276,7 @@ export default function SwingHistoryScreen() {
                   <Pressable
                     onPress={() => {
                       setSelectedItem(null);
+                      setIsViewerVisible(false);
                       setSelectedImageUrl(null);
                     }}
                   >
@@ -271,8 +300,9 @@ export default function SwingHistoryScreen() {
                         key={`${selectedItem.id}-${idx}`}
                         style={styles.modalPhotoItem}
                         onPress={() => {
-                          if (!shot?.url) return;
-                          setSelectedImageUrl(shot.url);
+                          if (!selectedItem.playbackReady || !selectedItem.trimmedVideoUrl) return;
+                          setSelectedImageUrl(shot?.url ?? null);
+                          setIsViewerVisible(true);
                         }}
                       >
                         {shot?.url ? (
@@ -295,8 +325,8 @@ export default function SwingHistoryScreen() {
 
                 <View style={styles.modalScoreCard}>
                   <View style={styles.modalOverallRow}>
-                    <Text type="barlowLight" style={styles.modalOverallLabel}>
-                      OVERALL
+                    <Text type="barlowHard" style={styles.modalOverallLabel}>
+                      전체점수
                     </Text>
                     <Text type="barlowHard" style={styles.modalOverallValue}>
                       {typeof selectedItem.overallScore === "number" ? selectedItem.overallScore : "--"}
@@ -326,48 +356,66 @@ export default function SwingHistoryScreen() {
                   </View>
                 </View>
 
-                <Pressable
-                  style={styles.modalResultButton}
-                  onPress={() => {
-                    const targetId = selectedItem.id;
-                    setSelectedItem(null);
-                    router.push({
-                      pathname: "./result",
-                      params: { swingVideoId: targetId },
-                    });
-                  }}
-                >
-                  <Text type="barlowHard" style={styles.modalResultButtonText}>
-                    전체 결과 보기
-                  </Text>
-                </Pressable>
+                <View style={styles.modalButtonGroup}>
+                  <Pressable
+                    style={[
+                      styles.modalSwingViewButton,
+                      (!selectedItem.playbackReady || !selectedItem.trimmedVideoUrl) &&
+                        styles.modalSwingViewButtonDisabled,
+                    ]}
+                    onPress={() => {
+                      if (!selectedItem.playbackReady || !selectedItem.trimmedVideoUrl) return;
+                      setSelectedImageUrl(selectedItem.screenshots[0]?.url ?? null);
+                      setIsViewerVisible(true);
+                    }}
+                    disabled={!selectedItem.playbackReady || !selectedItem.trimmedVideoUrl}
+                  >
+                    <Feather name="play-circle" size={moderateScale(18)} color="#182100" />
+                    <Text type="barlowHard" style={styles.modalSwingViewButtonText}>
+                      스윙 보기
+                    </Text>
+                  </Pressable>
+
+                  <Pressable
+                    style={styles.modalResultButton}
+                    onPress={() => {
+                      const targetId = selectedItem.id;
+                      setSelectedItem(null);
+                      router.push({
+                        pathname: "./result",
+                        params: { swingVideoId: targetId },
+                      });
+                    }}
+                  >
+                    <Text type="barlowHard" style={styles.modalResultButtonText}>
+                      전체 결과 보기
+                    </Text>
+                  </Pressable>
+                </View>
               </>
             )}
           </View>
         </View>
       </Modal>
 
-      <Modal
-        visible={!!selectedImageUrl}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setSelectedImageUrl(null)}
-      >
-        <View style={styles.imageViewerOverlay}>
-          <Pressable style={StyleSheet.absoluteFill} onPress={() => setSelectedImageUrl(null)} />
-          <Pressable style={styles.imageViewerCloseButton} onPress={() => setSelectedImageUrl(null)}>
-            <Feather name="x" size={moderateScale(24)} color="#EAF2EF" />
-          </Pressable>
-
-          {selectedImageUrl ? (
-            <Image
-              source={{ uri: selectedImageUrl }}
-              style={styles.imageViewerImage}
-              resizeMode="contain"
-            />
-          ) : null}
-        </View>
-      </Modal>
+      <SwingImageViewerModal
+        visible={isViewerVisible}
+        swingVideoId={selectedItem?.id ?? ""}
+        analysisDocument={selectedItem?.analysisDocument ?? null}
+        selectedImageUrl={selectedImageUrl}
+        screenshots={selectedItem?.screenshots ?? []}
+        summary={selectedItem?.summary ?? ""}
+        takebackFeedback={selectedItem?.takebackFeedback ?? ""}
+        trimmedVideoUrl={selectedItem?.trimmedVideoUrl ?? ""}
+        trimStartSec={selectedItem?.trimStartSec ?? 0}
+        trimEndSec={selectedItem?.trimEndSec ?? 0}
+        playbackReady={Boolean(selectedItem?.playbackReady)}
+        onRequestClose={() => {
+          setIsViewerVisible(false);
+          setSelectedImageUrl(null);
+        }}
+        onSelectImage={(url) => setSelectedImageUrl(url)}
+      />
     </SafeAreaView>
   );
 }
@@ -572,17 +620,17 @@ const styles = StyleSheet.create({
     marginBottom: moderateScale(8),
   },
   modalOverallLabel: {
-    color: "#AFC2BC",
-    fontSize: moderateScale(FONT.xxxs),
+    color: "white",
+    fontSize: moderateScale(FONT.xs),
     letterSpacing: moderateScale(1.4),
   },
   modalOverallValue: {
     color: "#11E2A0",
-    fontSize: moderateScale(FONT.xxl),
+    fontSize: moderateScale(FONT.h2),
   },
   modalSummaryText: {
     color: "#A1B2AE",
-    fontSize: moderateScale(FONT.xxs),
+    fontSize: moderateScale(FONT.sm),
     fontFamily: "Pretendard-Regular",
     marginBottom: moderateScale(12),
     lineHeight: moderateScale(18),
@@ -617,38 +665,36 @@ const styles = StyleSheet.create({
     backgroundColor: "#11E2A0",
     alignItems: "center",
     justifyContent: "center",
-    marginTop: "auto",
+  },
+  modalButtonGroup: {
+    marginTop: moderateScale(12),
+    gap: moderateScale(8),
+  },
+  modalSwingViewButton: {
+    minHeight: moderateScale(52),
+    borderRadius: moderateScale(16),
+    borderWidth: 1,
+    borderColor: "#D9F46A",
+    backgroundColor: "#D9F46A",
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    gap: moderateScale(4),
+    shadowColor: "#D9F46A",
+    shadowOpacity: 0.2,
+    shadowRadius: moderateScale(10),
+    shadowOffset: { width: 0, height: moderateScale(3) },
+    elevation: 3,
+  },
+  modalSwingViewButtonDisabled: {
+    opacity: 0.45,
+  },
+  modalSwingViewButtonText: {
+    color: "#182100",
+    fontSize: moderateScale(FONT.sm),
   },
   modalResultButtonText: {
     color: "#031B14",
     fontSize: moderateScale(FONT.md),
-  },
-  imageViewerOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.94)",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: moderateScale(12),
-    paddingVertical: moderateScale(24),
-  },
-  imageViewerCloseButton: {
-    position: "absolute",
-    top: moderateScale(52),
-    right: moderateScale(18),
-    zIndex: 3,
-    width: moderateScale(44),
-    height: moderateScale(44),
-    borderRadius: moderateScale(22),
-    borderWidth: 1,
-    borderColor: "#2A3A36",
-    backgroundColor: "rgba(6,19,16,0.85)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  imageViewerImage: {
-    width: "100%",
-    height: "100%",
-    maxWidth: moderateScale(420),
-    maxHeight: "92%",
   },
 });

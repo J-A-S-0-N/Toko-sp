@@ -1,7 +1,6 @@
 import { ThemedText as Text } from '@/components/themed-text';
 import Feather from '@expo/vector-icons/Feather';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import Octicons from '@expo/vector-icons/Octicons';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { Tabs } from 'expo-router';
 import React from 'react';
@@ -31,26 +30,28 @@ type TabItem = {
 const ITEMS: TabItem[] = [
   {
     key: 'index',
-    label: '피드',
-    renderIcon: (color) => <Octicons name="home" size={moderateScale(23)} color={color} />,
+    label: '내 스윙',
+    renderIcon: (color) => (
+      <MaterialCommunityIcons name="golf" size={moderateScale(25)} color={color} />
+    ),
   },
   {
     key: 'stats',
     label: '이벤트',
     renderIcon: (color) => (
-      <MaterialCommunityIcons name="waves" size={moderateScale(25)} color={color} />
+      <MaterialCommunityIcons name="calendar-star" size={moderateScale(24)} color={color} />
     ),
   },
-  { key: 'scan', label: '스캔', isCenter: true },
+  { key: 'scan', label: '스코어지', isCenter: true },
   {
     key: 'notice',
     label: '채팅',
-    renderIcon: (color) => <Feather name="menu" size={moderateScale(23)} color={color} />,
+    renderIcon: (color) => <Feather name="message-circle" size={moderateScale(22)} color={color} />,
   },
   {
     key: 'profile',
     label: '내 정보',
-    renderIcon: (color) => <Feather name="disc" size={moderateScale(23)} color={color} />,
+    renderIcon: (color) => <Feather name="user" size={moderateScale(22)} color={color} />,
   },
 ];
 
