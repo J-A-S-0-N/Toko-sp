@@ -2,17 +2,17 @@ import { db } from "@/config/firebase";
 import * as FileSystem from "expo-file-system";
 import * as VideoThumbnails from "expo-video-thumbnails";
 import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  limit,
-  orderBy,
-  query,
-  serverTimestamp,
-  setDoc,
-  where,
-  type QueryConstraint,
+    collection,
+    doc,
+    getDoc,
+    getDocs,
+    limit,
+    orderBy,
+    query,
+    serverTimestamp,
+    setDoc,
+    where,
+    type QueryConstraint,
 } from "firebase/firestore";
 import { deleteObject, getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 
@@ -257,6 +257,9 @@ async function fetchDoneSwingsBetween(
 
   return snapshot.docs.map((swingDoc) => {
     const data = swingDoc.data();
+    if (data.isInappropriate === true) {
+      return null;
+    }
     return {
       id: swingDoc.id,
       userId: typeof data.userId === "string" ? data.userId : "",
@@ -268,7 +271,7 @@ async function fetchDoneSwingsBetween(
       videoUrl: data.trimmedVideoUrl || "",
       createdAt: data.createdAt,
     } satisfies RankingCandidate;
-  });
+  }).filter((candidate): candidate is RankingCandidate => candidate !== null);
 }
 
 // Greedy assignment so one swing never wins more than one card. Ties resolve to

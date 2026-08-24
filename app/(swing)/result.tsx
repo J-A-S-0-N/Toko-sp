@@ -1,3 +1,4 @@
+import SwingAngleAnalysisPanel from "@/components/SwingComponents/SwingAngleAnalysisPanel";
 import SwingImageViewerModal from "@/components/SwingComponents/SwingImageViewerModal";
 import { ThemedText as Text } from "@/components/themed-text";
 import { db } from "@/config/firebase";
@@ -8,29 +9,29 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as MediaLibrary from "expo-media-library";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
-  addDoc,
-  collection,
-  doc,
-  onSnapshot,
-  orderBy,
-  query,
-  serverTimestamp,
+    addDoc,
+    collection,
+    doc,
+    onSnapshot,
+    orderBy,
+    query,
+    serverTimestamp,
 } from "firebase/firestore";
 import React from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  Keyboard,
-  KeyboardAvoidingView,
-  Modal,
-  PixelRatio,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  TextInput,
-  View
+    ActivityIndicator,
+    Alert,
+    Image,
+    Keyboard,
+    KeyboardAvoidingView,
+    Modal,
+    PixelRatio,
+    Platform,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    TextInput,
+    View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
@@ -424,6 +425,8 @@ export default function SwingResultScreen() {
               </Text>
             </View>
           ))}
+
+          <SwingAngleAnalysisPanel analysisDocument={rawAnalysisDocument} mode="full" />
 
           <View style={styles.fixCard}>
             <Text type="barlowHard" style={styles.fixLabel}>

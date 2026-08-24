@@ -1,3 +1,4 @@
+import SwingAngleAnalysisPanel from "@/components/SwingComponents/SwingAngleAnalysisPanel";
 import { ThemedText as Text } from "@/components/themed-text";
 import { db } from "@/config/firebase";
 import { FONT } from "@/constants/theme";
@@ -9,18 +10,18 @@ import { doc, onSnapshot, serverTimestamp, updateDoc } from "firebase/firestore"
 import { getDownloadURL, getStorage, ref } from "firebase/storage";
 import React from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  AppState,
-  Image,
-  Modal,
-  Pressable,
-  ScrollView,
-  Share,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    AppState,
+    Image,
+    Modal,
+    Pressable,
+    ScrollView,
+    Share,
+    StyleSheet,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
@@ -1361,6 +1362,12 @@ export default function SwingImageViewerModal({
                     ) : null}
                   </View>
                 ) : null}
+
+                <SwingAngleAnalysisPanel
+                  analysisDocument={analysisDocument}
+                  mode="statsOnly"
+                  showImage
+                />
 
                 <View style={styles.metricHeaderCard}>
                   <View style={styles.metricHeaderTextWrap}>

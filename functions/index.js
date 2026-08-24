@@ -1,10 +1,12 @@
 import { GoogleGenAI } from "@google/genai";
 import { Buffer } from "buffer";
-import { onDocumentCreated } from "firebase-functions/v2/firestore";
+import { randomUUID } from "crypto";
+import { onDocumentCreated, onDocumentUpdated } from "firebase-functions/v2/firestore";
 import fetch from "node-fetch";
 
 import { getApps, initializeApp } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
+import { getStorage as getAdminStorage } from "firebase-admin/storage";
 
 import { defineSecret } from "firebase-functions/params";
 
@@ -17,6 +19,7 @@ const db = getFirestore();
 
 const GEMINI_API_KEY = defineSecret("GEMINI_API_KEY")
 const SWING_ANALYSIS_MODEL = "gemini-3-flash-preview";
+const SWING_ANGLE_OVERLAY_MODEL = "gemini-2.5-flash-image";
 
 const SWING_SCORE_FIELDS = [
   "overallScore",
@@ -53,6 +56,85 @@ function applyUnusableCaptureScoreOverride(analysis) {
     headUpScore: 0,
     backswingAngleScore: 0,
     takebackScore: 0,
+  };
+}
+
+function normalizeDescriptionLines(value, fallbackA, fallbackB) {
+  const lines = Array.isArray(value) ? value.map((v) => normalizeText(v, "")).filter(Boolean) : [];
+  const first = lines[0] || fallbackA;
+  const second = lines[1] || fallbackB;
+  return [first, second];
+}
+
+function evaluateAngleTag(key, valueDeg) {
+  if (!Number.isFinite(valueDeg)) {
+    return { tag: "주의", tagColor: "#EF4444" };
+  }
+
+  const target = key === "spineAngle" ? 40 : 57;
+  const deviation = Math.abs(Math.round(valueDeg) - target);
+
+  if (deviation <= (key === "spineAngle" ? 3 : 4)) return { tag: "완벽", tagColor: "#3B82F6" };
+  if (deviation <= (key === "spineAngle" ? 6 : 8)) return { tag: "우수", tagColor: "#14B8A6" };
+  if (deviation <= (key === "spineAngle" ? 10 : 12)) return { tag: "양호", tagColor: "#22C55E" };
+  if (deviation <= (key === "spineAngle" ? 15 : 16)) return { tag: "경미", tagColor: "#F59E0B" };
+  return { tag: "주의", tagColor: "#EF4444" };
+}
+
+function normalizeAngleMetric({ key, label, valueDeg, detectable, descriptionLines }) {
+  const hasValue = Number.isFinite(Number(valueDeg));
+  const normalizedValueDeg = hasValue ? Math.max(0, Math.min(180, Math.round(Number(valueDeg)))) : null;
+  const normalizedDetectable = Boolean(detectable) && normalizedValueDeg !== null;
+  const fallbackA = normalizedDetectable
+    ? `${label}이 현재 스윙에서 관찰되었습니다.`
+    : `${label}을 현재 장면에서 정확히 확인하기 어려웠습니다.`;
+  const fallbackB = normalizedDetectable
+    ? "다음 촬영에서도 같은 자세 흐름을 유지해 보세요."
+    : "전신과 클럽이 더 잘 보이게 촬영해 보세요.";
+
+  const metric = {
+    key,
+    label,
+    valueDeg: normalizedValueDeg,
+    unit: "deg",
+    descriptionLines: normalizeDescriptionLines(descriptionLines, fallbackA, fallbackB),
+    detectable: normalizedDetectable,
+  };
+  const rating = evaluateAngleTag(key, metric.valueDeg);
+  return {
+    ...metric,
+    tag: rating.tag,
+    tagColor: rating.tagColor,
+  };
+}
+
+function normalizeAngleAnalysis(parsed) {
+  const frameIndexRaw = Number(parsed?.angleSnapshot?.frameIndex);
+  const frameIndex = Number.isFinite(frameIndexRaw)
+    ? Math.max(0, Math.min(4, Math.round(frameIndexRaw)))
+    : null;
+
+  const spineMetric = normalizeAngleMetric({
+    key: "spineAngle",
+    label: "Spine Angle",
+    valueDeg: parsed?.angleSnapshot?.spineAngle,
+    detectable: parsed?.angleSnapshot?.spineAngleDetectable,
+    descriptionLines: parsed?.angleSnapshot?.spineAngleDescriptionLines,
+  });
+
+  const shaftMetric = normalizeAngleMetric({
+    key: "shaftAngle",
+    label: "Shaft Angle",
+    valueDeg: parsed?.angleSnapshot?.shaftAngle,
+    detectable: parsed?.angleSnapshot?.shaftAngleDetectable,
+    descriptionLines: parsed?.angleSnapshot?.shaftAngleDescriptionLines,
+  });
+
+  return {
+    version: 1,
+    frameIndex,
+    detectable: spineMetric.detectable || shaftMetric.detectable,
+    angles: [spineMetric, shaftMetric],
   };
 }
 
@@ -109,6 +191,7 @@ async function analyzeSwingScreenshots(screenshotUrls) {
     "summary": string,
 
     "analysisTitle": string,
+    "isInappropriate": boolean,
 
     "strongestPoint": {
       "metricKey": string,
@@ -165,6 +248,22 @@ async function analyzeSwingScreenshots(screenshotUrls) {
         string
       ],
       "confidence": number
+    },
+
+    "angleSnapshot": {
+      "frameIndex": number,
+      "spineAngle": number,
+      "shaftAngle": number,
+      "spineAngleDetectable": boolean,
+      "shaftAngleDetectable": boolean,
+      "spineAngleDescriptionLines": [
+        string,
+        string
+      ],
+      "shaftAngleDescriptionLines": [
+        string,
+        string
+      ]
     }
   }
 
@@ -270,6 +369,11 @@ async function analyzeSwingScreenshots(screenshotUrls) {
     - "안정적으로 시작한 스윙"
     - "피니시까지 중심을 지킨 스윙"
   - Do not copy these examples unless they accurately match the screenshots.
+
+  CONTENT SAFETY RULES:
+  - isInappropriate must be true only when the screenshots include exposed nudity or sexual content that should not appear on a public leaderboard.
+  - Sportswear such as sleeveless shirts, fitted tops, or normal golf outfits are not inappropriate by themselves.
+  - If uncertain, default isInappropriate to false.
 
   METRIC KEY RULES:
   The following are the only valid metricKey and relatedMetric values:
@@ -440,9 +544,18 @@ async function analyzeSwingScreenshots(screenshotUrls) {
   Do not provide a diagnosis or injury-related statement.
   Do not claim that one correction will guarantee better performance.
 
+  ANGLE SNAPSHOT RULES:
+  - angleSnapshot.frameIndex must be an integer from 0 to 4.
+  - spineAngle and shaftAngle are measured in degrees.
+  - If an angle cannot be reliably observed, set the corresponding Detectable field to false.
+  - If an angle Detectable field is false, still provide two concise Korean description lines.
+  - spineAngleDescriptionLines and shaftAngleDescriptionLines must contain exactly two concise Korean lines each.
+  - Avoid medical wording.
+
   Before returning the JSON, internally verify:
   - Every original score and feedback field is present.
   - analysisTitle is present.
+  - isInappropriate is present.
   - strongestPoint is present.
   - primaryFocus is present.
   - keyMoments contains exactly 5 objects.
@@ -451,6 +564,7 @@ async function analyzeSwingScreenshots(screenshotUrls) {
   - primaryFocus.metricKey and practicePlan.relatedMetric are identical.
   - All screenshotIndex values are between 0 and 4.
   - All confidence values are between 0 and 1.
+  - angleSnapshot exists with all required fields.
   - The final output is valid JSON.
   `;
 
@@ -566,6 +680,7 @@ Rules:
   });
 
   const primaryFocus = normalizePoint(parsed.primaryFocus, "headUp");
+  const angleAnalysis = normalizeAngleAnalysis(parsed);
 
   const rawSteps = Array.isArray(parsed?.practicePlan?.steps) ? parsed.practicePlan.steps : [];
   const steps = [0, 1, 2].map((i) => normalizeText(rawSteps[i], `연습 단계 ${i + 1}`));
@@ -590,6 +705,7 @@ Rules:
     summary: normalizeText(parsed.summary, "스윙 요약을 생성하지 못했습니다."),
 
     analysisTitle: normalizeText(parsed.analysisTitle, "이번 스윙 분석"),
+    isInappropriate: asBoolean(parsed.isInappropriate, false),
 
     strongestPoint: normalizePoint(parsed.strongestPoint, "addressAngle"),
     primaryFocus,
@@ -632,7 +748,110 @@ Rules:
         : [],
       confidence: clamp01(parsed?.captureQuality?.confidence, 0.6),
     },
+
+    angleAnalysis,
   };
+}
+
+function pickOverlayFrameUrl(data) {
+  const screenshots = Array.isArray(data?.screenshots)
+    ? data.screenshots
+        .filter((item) => item && typeof item.url === "string" && item.url.trim() !== "")
+        .sort((a, b) => Number(a.index ?? 0) - Number(b.index ?? 0))
+    : [];
+  const frameIndexRaw = Number(data?.angleAnalysis?.frameIndex);
+  const frameIndex = Number.isFinite(frameIndexRaw) ? Math.max(0, Math.min(4, Math.round(frameIndexRaw))) : 0;
+  const fromIndex = screenshots[frameIndex]?.url;
+  if (typeof fromIndex === "string" && fromIndex.trim() !== "") return fromIndex;
+  const fallback = screenshots[0]?.url;
+  return typeof fallback === "string" ? fallback : "";
+}
+
+function extractGeneratedImageFromGeminiResponse(response) {
+  const candidates = Array.isArray(response?.candidates) ? response.candidates : [];
+  for (const candidate of candidates) {
+    const parts = Array.isArray(candidate?.content?.parts) ? candidate.content.parts : [];
+    for (const part of parts) {
+      const inlineData = part?.inlineData;
+      if (inlineData?.data && typeof inlineData.data === "string") {
+        return {
+          data: inlineData.data,
+          mimeType: inlineData.mimeType || "image/png",
+        };
+      }
+    }
+  }
+  return null;
+}
+
+async function generateAngleOverlayImage({ screenshotUrl, angleAnalysis }) {
+  const imageBase64 = await fetchImageAsBase64(screenshotUrl);
+  const spine = Array.isArray(angleAnalysis?.angles)
+    ? angleAnalysis.angles.find((angle) => angle?.key === "spineAngle")
+    : null;
+  const shaft = Array.isArray(angleAnalysis?.angles)
+    ? angleAnalysis.angles.find((angle) => angle?.key === "shaftAngle")
+    : null;
+
+  const prompt = `Draw a clean coaching overlay on this park golf swing frame.
+Return only an annotated image.
+
+Overlay requirements:
+- Mark visible major joints with small dots.
+- Draw a spine guideline and label it as "척추 각도 ${Number.isFinite(Number(spine?.valueDeg)) ? Math.round(Number(spine.valueDeg)) : "--"}°".
+- Draw a shaft guideline and label it as "샤프트 각도 ${Number.isFinite(Number(shaft?.valueDeg)) ? Math.round(Number(shaft.valueDeg)) : "--"}°".
+- Keep the golfer and club clearly visible.
+- Keep labels readable with high contrast.
+- Do not add extra charts or watermarks.
+- Preserve original frame composition.`;
+
+  const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY.value(), apiVersion: "v1" });
+  const response = await ai.models.generateContent({
+    model: SWING_ANGLE_OVERLAY_MODEL,
+    contents: [
+      {
+        inlineData: {
+          mimeType: "image/jpeg",
+          data: imageBase64,
+        },
+      },
+      { text: prompt },
+    ],
+    config: {
+      responseModalities: ["IMAGE", "TEXT"],
+    },
+  });
+
+  const generatedImage = extractGeneratedImageFromGeminiResponse(response);
+  if (!generatedImage?.data) {
+    throw new Error("Angle overlay image generation returned no image payload");
+  }
+  return generatedImage;
+}
+
+async function uploadAngleOverlayImage({ userId, docId, imageBase64, mimeType }) {
+  const ext = mimeType === "image/png" ? "png" : "jpg";
+  const storagePath = `swing-angle-overlays/${userId || "unknown-user"}/${docId}/overlay.${ext}`;
+  const bucket = getAdminStorage().bucket();
+  const file = bucket.file(storagePath);
+  const buffer = Buffer.from(imageBase64, "base64");
+  const downloadToken = randomUUID();
+
+  await file.save(buffer, {
+    resumable: false,
+    metadata: {
+      contentType: mimeType,
+      cacheControl: "public,max-age=31536000",
+      metadata: {
+        firebaseStorageDownloadTokens: downloadToken,
+      },
+    },
+  });
+
+  const encodedPath = encodeURIComponent(storagePath);
+  const publicUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodedPath}?alt=media&token=${downloadToken}`;
+
+  return { storagePath, signedUrl: publicUrl };
 }
 
 async function main(imageBase64) {
@@ -813,9 +1032,25 @@ export const onNewSwingVideo = onDocumentCreated(
       const screenshotUrls = screenshots.map((item) => item.url).slice(0, 5);
       const analysis = await analyzeSwingScreenshots(screenshotUrls);
       const finalAnalysis = applyUnusableCaptureScoreOverride(analysis);
+      const angleOverlay = finalAnalysis?.angleAnalysis?.detectable
+        ? {
+            status: "pending",
+            imageUrl: "",
+            storagePath: "",
+            errorMessage: "",
+            updatedAt: new Date(),
+          }
+        : {
+            status: "error",
+            imageUrl: "",
+            storagePath: "",
+            errorMessage: "angle_not_detectable",
+            updatedAt: new Date(),
+          };
 
       await docRef.update({
         ...finalAnalysis,
+        angleOverlay,
         analysisModel: SWING_ANALYSIS_MODEL,
         analysisCompletedAt: new Date(),
         analysisErrorMessage: "",
@@ -828,6 +1063,87 @@ export const onNewSwingVideo = onDocumentCreated(
       await docRef.update({
         status: "error",
         analysisErrorMessage: message,
+        updatedAt: new Date(),
+      });
+    }
+  }
+);
+
+export const onSwingAngleOverlayPending = onDocumentUpdated(
+  {
+    document: "SwingVideos/{docId}",
+    secrets: [GEMINI_API_KEY],
+    memory: "2GiB",
+    timeoutSeconds: 120,
+  },
+  async (event) => {
+    const afterData = event.data?.after?.data() ?? null;
+    if (!afterData) return;
+    if (afterData?.status !== "done") return;
+    if (afterData?.angleOverlay?.status !== "pending") return;
+    if (!afterData?.angleAnalysis?.detectable) return;
+
+    const docId = event.params.docId;
+    const docRef = db.collection("SwingVideos").doc(docId);
+
+    const lockAcquired = await db.runTransaction(async (tx) => {
+      const snap = await tx.get(docRef);
+      if (!snap.exists) return false;
+      const latest = snap.data() ?? {};
+      if (latest?.angleOverlay?.status !== "pending") return false;
+      tx.update(docRef, {
+        angleOverlay: {
+          ...latest.angleOverlay,
+          status: "rendering",
+          errorMessage: "",
+          updatedAt: new Date(),
+        },
+        updatedAt: new Date(),
+      });
+      return true;
+    });
+
+    if (!lockAcquired) return;
+
+    try {
+      const snap = await docRef.get();
+      const data = snap.data() ?? {};
+      const screenshotUrl = pickOverlayFrameUrl(data);
+      if (!screenshotUrl) {
+        throw new Error("No screenshot URL available for angle overlay");
+      }
+
+      const generated = await generateAngleOverlayImage({
+        screenshotUrl,
+        angleAnalysis: data.angleAnalysis,
+      });
+      const { storagePath, signedUrl } = await uploadAngleOverlayImage({
+        userId: typeof data.userId === "string" ? data.userId : "",
+        docId,
+        imageBase64: generated.data,
+        mimeType: generated.mimeType || "image/png",
+      });
+
+      await docRef.update({
+        angleOverlay: {
+          ...(data.angleOverlay ?? {}),
+          status: "done",
+          imageUrl: signedUrl,
+          storagePath,
+          errorMessage: "",
+          updatedAt: new Date(),
+        },
+        updatedAt: new Date(),
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "angle_overlay_failed";
+      await docRef.update({
+        angleOverlay: {
+          ...(afterData.angleOverlay ?? {}),
+          status: "error",
+          errorMessage: message,
+          updatedAt: new Date(),
+        },
         updatedAt: new Date(),
       });
     }
